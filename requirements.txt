@@ -1,0 +1,64 @@
+# Flask核心框架
+Flask==2.3.3
+
+# 模板引擎
+Jinja2==3.1.2
+
+# WSGI服务器
+Werkzeug==2.3.7
+
+# 安全相关
+itsdangerous==2.1.2
+
+# 点击命令行工具
+click==8.1.7
+
+# 数据库ORM
+Flask-SQLAlchemy==3.0.5
+SQLAlchemy==1.4.53
+
+# MySQL数据库连接器
+PyMySQL==1.1.0
+cryptography==41.0.4
+
+# 数据库迁移（可选）
+# Flask-Migrate==4.0.5
+
+# 表单处理（可选）
+# Flask-WTF==1.1.1
+# WTForms==3.0.1
+
+# 用户认证（可选）
+# Flask-Login==0.6.3
+
+# 邮件发送（可选）
+# Flask-Mail==0.9.1
+
+# 缓存（可选）
+# Flask-Caching==2.1.0
+
+# RESTful API（可选）
+# Flask-RESTful==0.3.10
+
+# 跨域资源共享
+Flask-CORS==4.0.0
+
+# HTTP请求库
+requests==2.31.0
+
+# 环境变量管理
+python-dotenv==1.0.0
+
+# 单元测试
+pytest==7.4.2
+pytest-flask==1.2.0
+
+# 代码质量检查
+flake8==6.0.0
+black==23.7.0
+
+# 类型检查
+mypy==1.5.1
+
+# 开发工具
+watchdog==3.0.0
