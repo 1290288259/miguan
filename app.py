@@ -31,6 +31,12 @@ from route.log_route import log_bp
 # 导入匹配规则路由蓝图
 from route.match_rule_route import match_rule_bp
 
+# 导入蜜罐路由蓝图
+from route.honeypot_route import honeypot_bp
+
+# 导入恶意IP路由蓝图
+from route.malicious_ip_route import malicious_ip_bp
+
 # 导入API响应封装
 from utils.api_response import ApiResponse
 
@@ -149,6 +155,12 @@ app.register_blueprint(log_bp)
 
 # 注册匹配规则路由蓝图
 app.register_blueprint(match_rule_bp)
+
+# 注册蜜罐路由蓝图
+app.register_blueprint(honeypot_bp)
+
+# 注册恶意IP路由蓝图
+app.register_blueprint(malicious_ip_bp)
 
 # 如果直接运行此文件，则启动开发服务器
 if __name__ == '__main__':

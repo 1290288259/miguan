@@ -204,3 +204,43 @@ def get_log_statistics():
         
     except Exception as e:
         return ApiResponse.error(f"服务器错误: {str(e)}", 500)
+
+@log_bp.route('/logs/internal/upload', methods=['POST'])
+def upload_log():
+    """
+    内部日志上传接口（供蜜罐脚本使用）
+    不需要JWT认证
+    
+    请求参数:
+    - honeypot_port: 蜜罐端口
+    - attacker_ip: 攻击者IP
+    - attacker_port: 攻击者端口
+    - raw_log: 原始日志
+    - payload: 攻击载荷
+    - protocol: 协议
+    - attack_type: 攻击类型
+    
+    返回:
+    - 成功: 创建结果
+    - 失败: 错误信息
+    """
+    try:
+        # 获取请求数据
+        data = request.get_json()
+        
+        # 参数验证
+        if not data:
+            return ApiResponse.error("请求数据不能为空")
+        
+        # 调用服务层创建日志
+        result = LogService.create_log(data)
+        
+        # 检查是否有错误
+        if 'error' in result:
+            return ApiResponse.error(f"日志上传失败: {result['error']}")
+        
+        # 返回成功响应
+        return ApiResponse.success(result, "日志上传成功")
+        
+    except Exception as e:
+        return ApiResponse.error(f"服务器错误: {str(e)}", 500)

@@ -45,6 +45,9 @@ instance.interceptors.response.use(
         case 401:
           // 未授权，可以跳转到登录页
           console.error('未授权，请重新登录')
+          // 这里可以添加跳转逻辑，例如：
+          // window.location.href = '/login'
+          // 或者抛出特定错误让组件处理
           break
         case 404:
           console.error('请求的资源不存在')

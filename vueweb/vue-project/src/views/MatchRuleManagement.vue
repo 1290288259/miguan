@@ -19,7 +19,7 @@
         </el-form-item>
         
         <el-form-item label="攻击类型">
-          <el-select v-model="queryForm.attack_type" placeholder="请选择攻击类型" clearable>
+          <el-select v-model="queryForm.attack_type" placeholder="请选择攻击类型" clearable style="width: 160px">
             <el-option label="全部" value=""></el-option>
             <el-option label="SQL注入" value="SQL注入"></el-option>
             <el-option label="XSS" value="XSS"></el-option>
@@ -37,7 +37,7 @@
         </el-form-item>
         
         <el-form-item label="威胁等级">
-          <el-select v-model="queryForm.threat_level" placeholder="请选择威胁等级" clearable>
+          <el-select v-model="queryForm.threat_level" placeholder="请选择威胁等级" clearable style="width: 160px">
             <el-option label="全部" value=""></el-option>
             <el-option label="低" value="low"></el-option>
             <el-option label="中" value="medium"></el-option>
@@ -47,7 +47,7 @@
         </el-form-item>
         
         <el-form-item label="状态">
-          <el-select v-model="queryForm.is_enabled" placeholder="请选择状态" clearable>
+          <el-select v-model="queryForm.is_enabled" placeholder="请选择状态" clearable style="width: 160px">
             <el-option label="全部" value=""></el-option>
             <el-option label="启用" :value="true"></el-option>
             <el-option label="禁用" :value="false"></el-option>

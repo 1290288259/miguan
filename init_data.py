@@ -101,9 +101,9 @@ def init_data():
                     {
                         'name': 'SSH蜜罐',
                         'type': 'SSH',
-                        'port': 22,
+                        'port': 2222,
                         'ip_address': '0.0.0.0',
-                        'status': 'running',
+                        'status': 'stopped',
                         'description': '模拟SSH服务的蜜罐，用于捕获SSH攻击'
                     },
                     {

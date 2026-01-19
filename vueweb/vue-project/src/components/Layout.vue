@@ -1,9 +1,10 @@
 <template>
   <el-container class="layout-container">
     <!-- 侧边栏 -->
-    <el-aside width="250px" class="sidebar">
+    <el-aside :width="isCollapse ? '64px' : '250px'" class="sidebar">
       <div class="logo-container">
-        <h2 class="logo-title">安全管理系统</h2>
+        <h2 class="logo-title" v-show="!isCollapse">安全管理系统</h2>
+        <h2 class="logo-title" v-show="isCollapse">安</h2>
       </div>
       
       <el-menu
@@ -13,6 +14,8 @@
         text-color="#bfcbd9"
         active-text-color="#409EFF"
         router
+        :collapse="isCollapse"
+        :collapse-transition="false"
       >
         <el-menu-item index="/">
           <el-icon><House /></el-icon>
@@ -40,12 +43,14 @@
           </template>
           <el-menu-item index="/log-query">日志查询</el-menu-item>
           <el-menu-item index="/match-rule-management">匹配规则管理</el-menu-item>
+          <el-menu-item index="/honeypot-management">蜜罐管理</el-menu-item>
+          <el-menu-item index="/malicious-ip-management">恶意IP管理</el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-aside>
     
     <!-- 主内容区 -->
-    <el-container>
+    <el-container class="main-layout">
       <!-- 顶部导航栏 -->
       <el-header class="header">
         <div class="header-left">
@@ -169,7 +174,7 @@ const handleCommand = async (command: string) => {
 <style scoped>
 .layout-container {
   height: calc(100vh - 60px); /* 减去顶部导航栏的高度 */
-  width: 100vw;
+  width: 100%;
   display: flex;
   flex-direction: row;
   margin: 0;
@@ -181,16 +186,13 @@ const handleCommand = async (command: string) => {
   background-color: #304156;
   box-shadow: 2px 0 6px rgba(0, 21, 41, 0.08);
   transition: width 0.3s;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   flex-shrink: 0;
   margin: 0 !important;
   padding: 0 !important;
   border: none !important;
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 1000;
+  /* 移除绝对定位 */
 }
 
 .logo-container {
@@ -212,10 +214,18 @@ const handleCommand = async (command: string) => {
 
 .sidebar-menu {
   border-right: none;
-  height: calc(100vh - 60px);
+  height: calc(100% - 60px); /* 减去 logo 高度 */
   overflow-y: auto;
   margin: 0;
   padding: 0;
+}
+
+.main-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 .header {
@@ -226,7 +236,8 @@ const handleCommand = async (command: string) => {
   justify-content: space-between;
   padding: 0 20px;
   height: 60px;
-  margin-left: 250px;
+  width: 100%;
+  /* 移除 margin-left */
 }
 
 .header-left {
@@ -260,8 +271,9 @@ const handleCommand = async (command: string) => {
 .main-content {
   background-color: #f0f2f5;
   padding: 20px;
-  height: calc(100vh - 120px); /* 减去顶部导航栏和header的高度 */
+  flex: 1; /* 自动填充剩余高度 */
   overflow-y: auto;
-  margin-left: 250px;
+  width: 100%;
+  /* 移除 margin-left */
 }
 </style>

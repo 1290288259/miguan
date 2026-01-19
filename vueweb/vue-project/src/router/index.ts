@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, RouterView } from 'vue-router'
 import useUserStore from '../stores/user'
 
 const router = createRouter({
@@ -6,6 +6,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      component: RouterView, // 添加这一行，让父路由渲染一个 router-view
       meta: { requiresAuth: true },
       children: [
         {
@@ -31,6 +32,18 @@ const router = createRouter({
           name: 'match-rule-management',
           // 匹配规则管理页面
           component: () => import('../views/MatchRuleManagement.vue'),
+        },
+        {
+          path: 'honeypot-management',
+          name: 'honeypot-management',
+          // 蜜罐管理页面
+          component: () => import('../views/HoneypotManagement.vue'),
+        },
+        {
+          path: 'malicious-ip-management',
+          name: 'malicious-ip-management',
+          // 恶意IP管理页面
+          component: () => import('../views/MaliciousIPManagement.vue'),
         },
       ]
     },

@@ -5,9 +5,12 @@
 """
 
 from model.log_model import Log
+from model.honeypot_model import Honeypot
+from model.match_rule_model import MatchRule
 from database import db
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
+import re
 
 
 class LogService:
@@ -108,7 +111,7 @@ class LogService:
             # 记录错误日志
             print(f"查询日志时发生错误: {str(e)}")
             return [], {'error': str(e)}
-    
+
     @staticmethod
     def get_log_by_id(log_id: int) -> Optional[Dict]:
         """
@@ -128,7 +131,7 @@ class LogService:
         except Exception as e:
             print(f"根据ID查询日志时发生错误: {str(e)}")
             return None
-    
+
     @staticmethod
     def get_attack_types() -> List[str]:
         """
@@ -138,14 +141,13 @@ class LogService:
             List[str]: 攻击类型列表
         """
         try:
-            # 使用distinct获取不重复的攻击类型
-            attack_types = db.session.query(Log.attack_type).filter(Log.attack_type.isnot(None)).distinct().all()
-            # 提取值并过滤掉空值
-            return [at[0] for at in attack_types if at[0]]
+            # 查询所有不重复的攻击类型
+            attack_types = db.session.query(Log.attack_type).distinct().filter(Log.attack_type.isnot(None)).all()
+            return [at[0] for at in attack_types]
         except Exception as e:
             print(f"获取攻击类型时发生错误: {str(e)}")
             return []
-    
+
     @staticmethod
     def get_threat_levels() -> List[str]:
         """
@@ -155,14 +157,13 @@ class LogService:
             List[str]: 威胁等级列表
         """
         try:
-            # 使用distinct获取不重复的威胁等级
-            threat_levels = db.session.query(Log.threat_level).filter(Log.threat_level.isnot(None)).distinct().all()
-            # 提取值并过滤掉空值
-            return [tl[0] for tl in threat_levels if tl[0]]
+            # 查询所有不重复的威胁等级
+            threat_levels = db.session.query(Log.threat_level).distinct().filter(Log.threat_level.isnot(None)).all()
+            return [tl[0] for tl in threat_levels]
         except Exception as e:
             print(f"获取威胁等级时发生错误: {str(e)}")
             return []
-    
+
     @staticmethod
     def get_log_statistics() -> Dict:
         """
@@ -211,4 +212,121 @@ class LogService:
             }
         except Exception as e:
             print(f"获取日志统计信息时发生错误: {str(e)}")
+            return {'error': str(e)}
+
+    @staticmethod
+    def create_log(log_data: Dict) -> Dict:
+        """
+        创建日志记录
+        
+        参数:
+            log_data: 日志数据字典
+            
+        返回:
+            Dict: 创建结果
+        """
+        try:
+            # 查找对应的蜜罐
+            honeypot_port = log_data.get('honeypot_port')
+            honeypot = Honeypot.query.filter_by(port=honeypot_port).first()
+            
+            if not honeypot:
+                return {'error': f'未找到端口为 {honeypot_port} 的蜜罐'}
+            
+            # 初始化字段
+            attack_type = log_data.get('attack_type')
+            threat_level = log_data.get('threat_level', 'low')
+            attack_description = log_data.get('attack_description')
+            is_malicious = True  # 蜜罐捕获的默认标记为恶意
+            
+            # 规则匹配逻辑
+            try:
+                # 获取所有启用的规则，按优先级排序
+                rules = MatchRule.query.filter_by(is_enabled=True).order_by(MatchRule.priority.asc()).all()
+                
+                for rule in rules:
+                    # 获取待匹配的内容
+                    match_content = log_data.get(rule.match_field)
+                    
+                    # 如果指定字段为空，尝试匹配raw_log
+                    if match_content is None and rule.match_field != 'raw_log':
+                         # 如果指定字段不存在但有raw_log，也可以尝试匹配raw_log(视需求而定，这里暂且严格匹配)
+                         pass
+                    
+                    # 确保内容为字符串
+                    if match_content is not None:
+                        content_str = str(match_content)
+                        # 执行正则匹配
+                        if re.search(rule.regex_pattern, content_str, re.IGNORECASE):
+                            # 匹配成功，更新攻击信息
+                            attack_type = rule.attack_type
+                            threat_level = rule.threat_level
+                            
+                            # 更新描述
+                            rule_msg = f"触发规则: {rule.name}"
+                            if not attack_description:
+                                attack_description = rule_msg
+                            else:
+                                if rule_msg not in attack_description:
+                                    attack_description += f" | {rule_msg}"
+                            
+                            # 更新规则统计信息
+                            rule.match_count += 1
+                            rule.last_matched = datetime.utcnow()
+                            
+                            # 匹配到一个规则后停止（优先级高的先生效）
+                            break
+                            
+            except Exception as e:
+                print(f"规则匹配过程出错: {str(e)}")
+                # 继续执行，确保日志能保存
+            
+            # 创建新的日志对象
+            log = Log(
+                honeypot_id=honeypot.id,
+                attacker_ip=log_data.get('attacker_ip'),
+                attack_time=datetime.utcnow(),
+                raw_log=log_data.get('raw_log'),
+                source_ip=log_data.get('attacker_ip'),
+                target_ip=log_data.get('target_ip', '127.0.0.1'),
+                source_port=log_data.get('attacker_port'),
+                target_port=log_data.get('honeypot_port'),
+                protocol=log_data.get('protocol'),
+                user_agent=log_data.get('user_agent'),
+                request_path=log_data.get('request_path'),
+                attack_type=attack_type,
+                attack_description=attack_description,
+                payload=log_data.get('payload'),
+                threat_level=threat_level,
+                is_malicious=is_malicious,
+                notes=log_data.get('notes')
+            )
+            
+            # 保存到数据库
+            db.session.add(log)
+            db.session.commit()
+            
+            # 如果是恶意流量，记录到恶意IP表
+            if is_malicious:
+                try:
+                    from service.malicious_ip_service import MaliciousIPService
+                    MaliciousIPService.record_malicious_ip(
+                        ip_address=log.attacker_ip,
+                        attack_type=log.attack_type,
+                        threat_level=log.threat_level,
+                        source_honeypot_id=log.honeypot_id,
+                        notes=f"触发日志ID: {log.id}"
+                    )
+                except Exception as e:
+                    print(f"自动记录恶意IP失败: {str(e)}")
+            
+            return {
+                'log_id': log.id,
+                'status': 'created',
+                'message': '日志创建成功'
+            }
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"创建日志时发生错误: {str(e)}")
             return {'error': str(e)}
