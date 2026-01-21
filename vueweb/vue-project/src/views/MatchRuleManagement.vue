@@ -339,13 +339,13 @@ const getRuleList = async () => {
       params.is_enabled = queryForm.is_enabled
     }
     
-    const response = await axios.get('/match-rules', { params })
+    const response: any = await axios.get('/match-rules', { params })
     
-    if (response.success) {
+    if (response.code === 200) {
       ruleList.value = response.data.rules
       pagination.total = response.data.pagination.total
     } else {
-      ElMessage.error(response.message || '获取规则列表失败')
+      ElMessage.error(response.msg || '获取规则列表失败')
     }
   } catch (error) {
     console.error('获取规则列表出错:', error)
@@ -430,7 +430,7 @@ const submitRuleForm = async () => {
     
     submitting.value = true
     
-    let response
+    let response: any
     if (ruleForm.id) {
       // 更新规则
       response = await axios.put(`/match-rules/${ruleForm.id}`, ruleForm)
@@ -439,13 +439,13 @@ const submitRuleForm = async () => {
       response = await axios.post('/match-rules', ruleForm)
     }
     
-    if (response.success) {
+    if (response.code === 200) {
       ElMessage.success(ruleForm.id ? '规则更新成功' : '规则创建成功')
       ruleDialogVisible.value = false
       // 刷新规则列表
       getRuleList()
     } else {
-      ElMessage.error(response.message || '操作失败')
+      ElMessage.error(response.msg || '操作失败')
     }
   } catch (error) {
     console.error('提交规则表单出错:', error)
@@ -469,14 +469,14 @@ const deleteRule = async (row: any) => {
     )
     
     // 调用删除规则接口
-    const response = await axios.delete(`/match-rules/${row.id}`)
+    const response: any = await axios.delete(`/match-rules/${row.id}`)
     
-    if (response.success) {
+    if (response.code === 200) {
       ElMessage.success('规则删除成功')
       // 刷新规则列表
       getRuleList()
     } else {
-      ElMessage.error(response.message || '规则删除失败')
+      ElMessage.error(response.msg || '规则删除失败')
     }
   } catch (error) {
     if (error !== 'cancel') {
@@ -490,14 +490,14 @@ const deleteRule = async (row: any) => {
 const toggleRuleStatus = async (row: any) => {
   try {
     // 调用切换规则状态接口
-    const response = await axios.put(`/match-rules/${row.id}/toggle`)
+    const response: any = await axios.put(`/match-rules/${row.id}/status`, { is_enabled: row.is_enabled })
     
-    if (response.success) {
+    if (response.code === 200) {
       ElMessage.success(`规则已${row.is_enabled ? '启用' : '禁用'}`)
       // 刷新规则列表
       getRuleList()
     } else {
-      ElMessage.error(response.message || '状态切换失败')
+      ElMessage.error(response.msg || '状态切换失败')
       // 恢复状态
       row.is_enabled = !row.is_enabled
     }

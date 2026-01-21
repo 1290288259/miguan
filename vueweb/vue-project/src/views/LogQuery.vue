@@ -11,7 +11,13 @@
       <!-- 查询条件表单 -->
       <el-form :model="queryForm" :inline="true" class="query-form">
         <el-form-item label="关键字">
-          <el-input v-model="queryForm.keyword" placeholder="请输入关键字" clearable style="width: 200px"></el-input>
+          <el-input 
+            v-model="queryForm.keyword" 
+            placeholder="请输入关键字" 
+            clearable 
+            style="width: 200px"
+            @keyup.enter="handleQuery"
+          ></el-input>
         </el-form-item>
         
         <el-form-item label="攻击类型">
@@ -237,7 +243,7 @@ const loading = ref(false)
 
 // 详情对话框
 const detailDialogVisible = ref(false)
-const currentLog = ref({})
+const currentLog = ref<any>({})
 
 // 获取日志列表
 const getLogList = async () => {
@@ -271,13 +277,13 @@ const getLogList = async () => {
       params.end_time = queryForm.dateRange[1]
     }
     
-    const response = await axios.get('/logs', { params })
+    const response: any = await axios.get('/logs', { params })
     
-    if (response.success) {
+    if (response.code === 200) {
       logList.value = response.data.logs
       pagination.total = response.data.pagination.total
     } else {
-      ElMessage.error(response.message || '获取日志列表失败')
+      ElMessage.error(response.msg || '获取日志列表失败')
     }
   } catch (error) {
     console.error('获取日志列表出错:', error)

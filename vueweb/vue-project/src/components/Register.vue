@@ -14,6 +14,7 @@
             placeholder="请输入用户名（至少6位）"
             :class="{ 'error': errors.username }"
             @blur="validateUsername"
+            @keyup.enter="handleRegister"
           />
           <span v-if="errors.username" class="error-message">{{ errors.username }}</span>
         </div>
@@ -28,6 +29,7 @@
             placeholder="请输入密码（至少6位）"
             :class="{ 'error': errors.password }"
             @blur="validatePassword"
+            @keyup.enter="handleRegister"
           />
           <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
         </div>
@@ -42,6 +44,7 @@
             placeholder="请再次输入密码"
             :class="{ 'error': errors.confirmPassword }"
             @blur="validateConfirmPassword"
+            @keyup.enter="handleRegister"
           />
           <span v-if="errors.confirmPassword" class="error-message">{{ errors.confirmPassword }}</span>
         </div>
@@ -156,10 +159,10 @@ const handleRegister = async () => {
   
   try {
     // 调用后端注册接口
-    const response = await registerUser(registerForm.value.username, registerForm.value.password)
+    const response: any = await registerUser(registerForm.value.username, registerForm.value.password)
     
     // 注册成功处理
-    if (response.success) {
+    if (response.code === 200) {
       // 显示成功消息
       alert('注册成功！请登录')
       
@@ -167,7 +170,7 @@ const handleRegister = async () => {
       router.push('/login')
     } else {
       // 显示错误消息
-      registerError.value = response.message || '注册失败，请稍后重试'
+      registerError.value = response.msg || '注册失败，请稍后重试'
     }
   } catch (error: any) {
     // 处理错误
@@ -194,7 +197,7 @@ const goToLogin = () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f7fa;
+  /* background-color: #f5f7fa; 移除原有背景 */
   padding: 20px;
 }
 
@@ -202,16 +205,21 @@ const goToLogin = () => {
   width: 100%;
   max-width: 400px;
   padding: 30px;
-  background-color: white;
+  background-color: var(--scifi-card-bg);
+  backdrop-filter: var(--scifi-glass);
+  border: 1px solid var(--scifi-border-color);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--scifi-shadow);
+  color: var(--scifi-text-color);
 }
 
 .register-title {
   text-align: center;
   margin-bottom: 30px;
-  color: #333;
+  color: var(--scifi-primary-color);
   font-size: 24px;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
 }
 
 .register-form {
@@ -228,20 +236,23 @@ const goToLogin = () => {
 
 .form-group label {
   font-weight: 500;
-  color: #555;
+  color: var(--scifi-text-color);
 }
 
 .form-group input {
   padding: 12px;
-  border: 1px solid #ddd;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--scifi-border-color);
   border-radius: 4px;
   font-size: 16px;
-  transition: border-color 0.3s;
+  color: var(--scifi-text-color);
+  transition: all 0.3s;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #409eff;
+  border-color: var(--scifi-primary-color);
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
 }
 
 .form-group input.error {
@@ -255,31 +266,37 @@ const goToLogin = () => {
 
 .register-button {
   padding: 12px;
-  background-color: #67c23a;
-  color: white;
-  border: none;
+  background-color: rgba(0, 243, 255, 0.1);
+  color: var(--scifi-primary-color);
+  border: 1px solid var(--scifi-primary-color);
   border-radius: 4px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
   margin-top: 10px;
+  box-shadow: 0 0 5px rgba(0, 243, 255, 0.2);
 }
 
 .register-button:hover:not(:disabled) {
-  background-color: #85ce61;
+  background-color: var(--scifi-primary-color);
+  color: #000;
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.6);
 }
 
 .register-button:disabled {
-  background-color: #b3e19d;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #666;
+  color: #666;
   cursor: not-allowed;
 }
 
 .register-error {
   margin-top: 15px;
   padding: 10px;
-  background-color: #fef0f0;
+  background-color: rgba(245, 108, 108, 0.1);
   color: #f56c6c;
+  border: 1px solid #f56c6c;
   border-radius: 4px;
   text-align: center;
 }
@@ -287,16 +304,17 @@ const goToLogin = () => {
 .login-link {
   margin-top: 20px;
   text-align: center;
-  color: #666;
+  color: var(--scifi-text-muted);
 }
 
 .login-link a {
-  color: #409eff;
+  color: var(--scifi-primary-color);
   text-decoration: none;
   cursor: pointer;
 }
 
 .login-link a:hover {
   text-decoration: underline;
+  text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
 }
 </style>

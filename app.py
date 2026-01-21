@@ -37,6 +37,12 @@ from route.honeypot_route import honeypot_bp
 # 导入恶意IP路由蓝图
 from route.malicious_ip_route import malicious_ip_bp
 
+# 导入仪表盘路由蓝图
+from routes.dashboard_routes import dashboard_bp
+
+# 导入蜜罐服务用于初始化
+from service.honeypot_service import HoneypotService
+
 # 导入API响应封装
 from utils.api_response import ApiResponse
 
@@ -162,8 +168,16 @@ app.register_blueprint(honeypot_bp)
 # 注册恶意IP路由蓝图
 app.register_blueprint(malicious_ip_bp)
 
+# 注册仪表盘路由蓝图
+app.register_blueprint(dashboard_bp)
+
 # 如果直接运行此文件，则启动开发服务器
 if __name__ == '__main__':
+    # 初始化蜜罐服务（自动启动状态为running的蜜罐）
+    with app.app_context():
+        print("正在初始化蜜罐服务...")
+        HoneypotService.init_honeypots()
+
     # 启动Flask开发服务器
     # debug=False表示关闭调试模式，避免watchdog兼容性问题
     # use_reloader=False表示关闭自动重新加载功能

@@ -19,9 +19,10 @@ const navKey = ref(0)
 
 // 监听用户状态变化
 watch(
-  () => userStore.isAuthenticated,
-  () => {
+  () => userStore.isAuthenticated.value,
+  (newVal) => {
     // 用户状态变化时更新key
+    console.log('App: User authentication state changed:', newVal)
     navKey.value++
   }
 )

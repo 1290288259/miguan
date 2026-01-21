@@ -158,6 +158,10 @@ class HoneypotService:
             script_path = None
             if hp.type.upper() == 'SSH':
                 script_path = os.path.join(os.getcwd(), 'honeypots', 'ssh_server.py')
+            elif hp.type.upper() == 'HTTP':
+                script_path = os.path.join(os.getcwd(), 'honeypots', 'hikvision_http_server.py')
+            elif hp.type.upper() == 'FTP':
+                script_path = os.path.join(os.getcwd(), 'honeypots', 'ftp_server.py')
             else:
                 return {'error': f'暂不支持 {hp.type} 类型的蜜罐自动启动'}
             
@@ -213,3 +217,38 @@ class HoneypotService:
             
         except Exception as e:
             return {'error': str(e)}
+
+    @staticmethod
+    def init_honeypots():
+        """
+        初始化蜜罐服务
+        系统启动时调用，恢复所有状态为running的蜜罐
+        """
+        try:
+            # 查询所有状态为running的蜜罐
+            honeypots = Honeypot.query.filter_by(status='running').all()
+            print(f"正在恢复 {len(honeypots)} 个蜜罐服务...")
+            
+            for hp in honeypots:
+                # 尝试启动
+                print(f"正在启动蜜罐: {hp.name} (Port: {hp.port})...")
+                # 临时将状态设为stopped以便start_honeypot能通过检查
+                # 因为start_honeypot会检查hp.status == 'running'
+                # 但这里的hp是从数据库拿出来的，已经是running了
+                # 然而start_honeypot还会检查hp.id in running_honeypots
+                # 在初始化时，running_honeypots是空的，所以 (hp.status == 'running' and hp.id in running_honeypots) 为 False
+                # 所以可以直接调用 start_honeypot
+                
+                # 但为了安全起见，先重置内存中的状态（其实不需要，running_honeypots本来就是空的）
+                
+                result = HoneypotService.start_honeypot(hp.id)
+                if 'error' in result:
+                    print(f"启动蜜罐 {hp.name} 失败: {result['error']}")
+                    # 如果启动失败，将状态更新为stopped
+                    hp.status = 'stopped'
+                    db.session.commit()
+                else:
+                    print(f"蜜罐 {hp.name} 启动成功 (PID: {result['pid']})")
+                    
+        except Exception as e:
+            print(f"初始化蜜罐服务出错: {e}")

@@ -11,6 +11,12 @@ const router = createRouter({
       children: [
         {
           path: '',
+          name: 'dashboard',
+          // 可视化大屏页面
+          component: () => import('../views/Dashboard.vue'),
+        },
+        {
+          path: 'test-auth',
           name: 'test-auth',
           // 用户认证测试页面
           component: () => import('../components/TestAuth.vue'),

@@ -10,9 +10,6 @@
       <el-menu
         :default-active="activeMenu"
         class="sidebar-menu"
-        background-color="#304156"
-        text-color="#bfcbd9"
-        active-text-color="#409EFF"
         router
         :collapse="isCollapse"
         :collapse-transition="false"
@@ -22,30 +19,25 @@
           <span>系统首页</span>
         </el-menu-item>
         
-        <el-sub-menu index="user">
-          <template #title>
-            <el-icon><User /></el-icon>
-            <span>用户管理</span>
-          </template>
-          <el-menu-item index="/login">用户登录</el-menu-item>
-          <el-menu-item index="/register">用户注册</el-menu-item>
-        </el-sub-menu>
-        
-        <el-menu-item index="/backend-test">
-          <el-icon><Connection /></el-icon>
-          <span>后端测试</span>
+        <el-menu-item index="/log-query">
+          <el-icon><Document /></el-icon>
+          <span>日志查询</span>
         </el-menu-item>
-        
-        <el-sub-menu index="security">
-          <template #title>
-            <el-icon><Shield /></el-icon>
-            <span>安全管理</span>
-          </template>
-          <el-menu-item index="/log-query">日志查询</el-menu-item>
-          <el-menu-item index="/match-rule-management">匹配规则管理</el-menu-item>
-          <el-menu-item index="/honeypot-management">蜜罐管理</el-menu-item>
-          <el-menu-item index="/malicious-ip-management">恶意IP管理</el-menu-item>
-        </el-sub-menu>
+
+        <el-menu-item index="/match-rule-management">
+          <el-icon><Operation /></el-icon>
+          <span>匹配规则管理</span>
+        </el-menu-item>
+
+        <el-menu-item index="/honeypot-management">
+          <el-icon><Monitor /></el-icon>
+          <span>蜜罐管理</span>
+        </el-menu-item>
+
+        <el-menu-item index="/malicious-ip-management">
+          <el-icon><Warning /></el-icon>
+          <span>恶意IP管理</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     
@@ -71,7 +63,7 @@
           <el-dropdown @command="handleCommand">
             <span class="user-info">
               <el-icon><Avatar /></el-icon>
-              <span>{{ userStore.user?.username || '用户' }}</span>
+              <span>{{ userStore.user.value?.username || '用户' }}</span>
               <el-icon class="el-icon--right"><arrow-down /></el-icon>
             </span>
             <template #dropdown>
@@ -95,6 +87,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { House, Fold, Expand, ArrowDown, Avatar, Document, Operation, Monitor, Warning } from '@element-plus/icons-vue'
 import useUserStore from '../stores/user'
 
 // 路由实例
@@ -167,6 +160,11 @@ const handleCommand = async (command: string) => {
       // 跳转到系统设置
       router.push('/settings')
       break
+    case 'logout':
+      // 退出登录
+      await userStore.logout()
+      router.push('/login')
+      break
   }
 }
 </script>
@@ -183,15 +181,15 @@ const handleCommand = async (command: string) => {
 }
 
 .sidebar {
-  background-color: #304156;
-  box-shadow: 2px 0 6px rgba(0, 21, 41, 0.08);
+  background-color: rgba(16, 33, 65, 0.5); /* 半透明背景 */
+  backdrop-filter: blur(10px);
+  border-right: 1px solid var(--scifi-border-color);
   transition: width 0.3s;
   height: 100%;
   overflow: hidden;
   flex-shrink: 0;
   margin: 0 !important;
   padding: 0 !important;
-  border: none !important;
   /* 移除绝对定位 */
 }
 
@@ -200,14 +198,17 @@ const handleCommand = async (command: string) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #2b2f3a;
+  background-color: transparent;
+  border-bottom: 1px solid var(--scifi-border-color);
   margin: 0;
   padding: 0;
 }
 
 .logo-title {
-  color: #fff;
+  color: var(--scifi-primary-color);
   font-size: 18px;
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
   margin: 0;
   padding: 0;
 }
@@ -218,6 +219,7 @@ const handleCommand = async (command: string) => {
   overflow-y: auto;
   margin: 0;
   padding: 0;
+  background-color: transparent !important;
 }
 
 .main-layout {
@@ -229,8 +231,10 @@ const handleCommand = async (command: string) => {
 }
 
 .header {
-  background-color: #fff;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  background-color: rgba(16, 33, 65, 0.5);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--scifi-border-color);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -243,12 +247,14 @@ const handleCommand = async (command: string) => {
 .header-left {
   display: flex;
   align-items: center;
+  color: var(--scifi-text-color);
 }
 
 .toggle-sidebar {
   font-size: 20px;
   cursor: pointer;
   margin-right: 20px;
+  color: var(--scifi-primary-color);
 }
 
 .header-right {
@@ -261,7 +267,7 @@ const handleCommand = async (command: string) => {
   display: flex;
   align-items: center;
   cursor: pointer;
-  color: #606266;
+  color: var(--scifi-text-color);
 }
 
 .user-info .el-icon {
@@ -269,7 +275,7 @@ const handleCommand = async (command: string) => {
 }
 
 .main-content {
-  background-color: #f0f2f5;
+  background-color: transparent; /* 让body的背景透出来 */
   padding: 20px;
   flex: 1; /* 自动填充剩余高度 */
   overflow-y: auto;

@@ -2,7 +2,7 @@
   <nav class="app-nav">
     <div class="nav-container">
       <div class="nav-brand">
-        <h1>安全系统</h1>
+        <h1>基于低交互蜜罐的恶意流量识别和防御系统</h1>
       </div>
       
       <div class="nav-links">
@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, inject } from 'vue'
+import { computed, ref, inject, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { SwitchButton } from '@element-plus/icons-vue'
@@ -34,15 +34,21 @@ import useUserStore from '../stores/user'
 // 路由实例
 const router = useRouter()
 
-// 使用inject获取用户状态，如果没有则使用useUserStore
-const userStore = inject('userStore', useUserStore())
+// 直接使用 useUserStore，确保获取到的是全局单例状态
+// inject 可能会因为类型或提供方式导致困惑，且此处直接使用并无不妥
+const userStore = useUserStore()
 
 // 创建一个立即响应的状态变量
 const isLoggingOut = ref(false)
 
+// Debug
+watchEffect(() => {
+  console.log('AppNav: isAuthenticated =', userStore.isAuthenticated.value)
+})
+
 // 判断用户是否已登录
 const isLoggedIn = computed(() => {
-  return userStore.isAuthenticated && !isLoggingOut.value
+  return userStore.isAuthenticated.value && !isLoggingOut.value
 })
 
 // 处理退出登录
@@ -65,10 +71,12 @@ const handleLogout = async () => {
 
 <style scoped>
 .app-nav {
-  background-color: #409eff;
-  color: white;
+  background-color: rgba(5, 11, 20, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--scifi-border-color);
+  color: var(--scifi-text-color);
   padding: 0 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 243, 255, 0.1);
   position: fixed;
   top: 0;
   left: 0;
@@ -88,7 +96,10 @@ const handleLogout = async () => {
 .nav-brand h1 {
   margin: 0;
   font-size: 24px;
-  font-weight: 500;
+  font-weight: bold;
+  color: var(--scifi-primary-color);
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+  letter-spacing: 2px;
 }
 
 .nav-links {

@@ -11,6 +11,7 @@
             placeholder="请输入用户名（至少6位）"
             prefix-icon="User"
             @blur="validateUsername"
+            @keyup.enter="handleLogin"
           />
         </el-form-item>
         
@@ -23,6 +24,7 @@
             prefix-icon="Lock"
             show-password
             @blur="validatePassword"
+            @keyup.enter="handleLogin"
           />
         </el-form-item>
         
@@ -170,7 +172,7 @@ const goToRegister = () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f7fa;
+  /* background-color: #f5f7fa; 移除原有背景 */
   padding: 20px;
 }
 
@@ -178,17 +180,21 @@ const goToRegister = () => {
   width: 100%;
   max-width: 400px;
   padding: 20px;
+  /* 依赖全局科幻卡片样式 */
 }
 
 .login-title {
   text-align: center;
   margin-bottom: 30px;
-  color: #333;
+  color: var(--scifi-primary-color);
   font-size: 24px;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
 }
 
 .login-button {
   width: 100%;
+  font-weight: bold;
 }
 
 .login-error {
@@ -198,6 +204,7 @@ const goToRegister = () => {
 .register-link {
   margin-top: 20px;
   text-align: center;
-  color: #666;
+  font-size: 14px;
+  color: var(--scifi-text-muted);
 }
 </style>

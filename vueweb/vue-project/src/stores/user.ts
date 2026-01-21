@@ -51,17 +51,17 @@ const setUserState = (userData: any, accessToken: string, refreshTokenValue: str
 // 登录操作
 const login = async (username: string, password: string) => {
   try {
-    const response = await loginUser(username, password)
+    const response: any = await loginUser(username, password)
     
-    if (response.success && response.data) {
+    if (response.code === 200 && response.data) {
       setUserState(
         response.data.user,
         response.data.access_token,
         response.data.refresh_token
       )
-      return { success: true, message: response.message }
+      return { success: true, message: response.msg }
     } else {
-      return { success: false, message: response.message || '登录失败' }
+      return { success: false, message: response.msg || '登录失败' }
     }
   } catch (error: any) {
     console.error('登录失败:', error)
@@ -86,15 +86,15 @@ const logout = async () => {
 // 获取当前用户信息
 const fetchCurrentUser = async () => {
   try {
-    const response = await getCurrentUser()
+    const response: any = await getCurrentUser()
     
-    if (response.success && response.data) {
+    if (response.code === 200 && response.data) {
       user.value = response.data
       localStorage.setItem('user', JSON.stringify(response.data))
       return { success: true }
     } else {
       clearUserState()
-      return { success: false, message: response.message || '获取用户信息失败' }
+      return { success: false, message: response.msg || '获取用户信息失败' }
     }
   } catch (error: any) {
     console.error('获取用户信息失败:', error)

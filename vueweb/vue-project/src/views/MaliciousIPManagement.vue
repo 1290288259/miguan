@@ -260,11 +260,15 @@ const handleUnblock = (row: any) => {
   )
     .then(async () => {
       try {
-        await axios.post('/malicious-ips/unblock', {
+        const res: any = await axios.post('/malicious-ips/unblock', {
           ip_address: row.ip_address
         })
-        ElMessage.success('解封成功')
-        fetchData()
+        if (res.code === 200) {
+          ElMessage.success('解封成功')
+          fetchData()
+        } else {
+          ElMessage.error(res.msg || '解封失败')
+        }
       } catch (error) {
         console.error('解封失败', error)
       }

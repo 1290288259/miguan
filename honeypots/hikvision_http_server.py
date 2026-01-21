@@ -2,6 +2,7 @@ from flask import Flask, request, render_template_string, jsonify
 import requests
 import datetime
 import logging
+import sys
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')

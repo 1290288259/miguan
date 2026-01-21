@@ -1,0 +1,358 @@
+/* 科幻主题样式表 */
+
+:root {
+  /* 核心配色 */
+  --scifi-bg-color: #050b14;
+  --scifi-bg-image: radial-gradient(circle at 50% 50%, #111927 0%, #050b14 100%);
+  --scifi-primary-color: #00f3ff;
+  --scifi-secondary-color: #bc13fe;
+  --scifi-text-color: #ffffff; /* 调亮为主白色 */
+  --scifi-text-muted: #cceeff; /* 调亮次级文字 */
+  --scifi-card-bg: rgba(16, 33, 65, 0.85); /* 增加不透明度以提高对比度 */
+  --scifi-border-color: rgba(0, 243, 255, 0.3);
+  --scifi-border-glow: 0 0 10px rgba(0, 243, 255, 0.3);
+  --scifi-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  --scifi-glass: blur(10px);
+  
+  /* 覆盖 Element Plus 变量 */
+  --el-color-primary: var(--scifi-primary-color);
+  --el-color-primary-light-3: #4df7ff;
+  --el-color-primary-light-5: #80fbff;
+  --el-color-primary-light-7: #b3fdff;
+  --el-color-primary-light-8: #ccfeff;
+  --el-color-primary-light-9: #e6ffff;
+  --el-color-primary-dark-2: #00c2cc;
+  
+  --el-bg-color: var(--scifi-bg-color);
+  --el-bg-color-overlay: #0b1525;
+  --el-text-color-primary: var(--scifi-text-color);
+  --el-text-color-regular: var(--scifi-text-muted);
+  --el-text-color-secondary: #a0c0e0;
+  --el-text-color-placeholder: rgba(255, 255, 255, 0.4);
+  --el-border-color: var(--scifi-border-color);
+  --el-border-color-light: rgba(0, 243, 255, 0.1);
+  --el-fill-color-blank: transparent;
+}
+
+body {
+  background-color: var(--scifi-bg-color);
+  background-image: 
+    linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+  color: var(--scifi-text-color);
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b1120;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e3a5f;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scifi-primary-color);
+}
+
+/* Element Plus 组件覆盖 - 增强版 */
+
+/* 卡片 */
+.el-card {
+  background-color: var(--scifi-card-bg) !important;
+  border: 1px solid var(--scifi-border-color) !important;
+  color: var(--scifi-text-color) !important;
+  backdrop-filter: var(--scifi-glass);
+  box-shadow: var(--scifi-shadow) !important;
+  transition: all 0.3s ease;
+}
+
+.el-card:hover {
+  box-shadow: var(--scifi-border-glow) !important;
+  border-color: var(--scifi-primary-color) !important;
+}
+
+.el-card__header {
+  border-bottom: 1px solid var(--scifi-border-color) !important;
+  color: var(--scifi-primary-color) !important;
+  font-weight: bold;
+}
+
+/* 表单标签 */
+.el-form-item__label {
+  color: var(--scifi-text-color) !important;
+  font-weight: bold;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+/* 表格 */
+.el-table {
+  --el-table-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
+  --el-table-header-bg-color: rgba(0, 243, 255, 0.1) !important;
+  --el-table-row-hover-bg-color: rgba(0, 243, 255, 0.15) !important;
+  --el-table-border-color: var(--scifi-border-color) !important;
+  --el-table-text-color: var(--scifi-text-color) !important;
+  --el-table-header-text-color: var(--scifi-primary-color) !important;
+  background-color: transparent !important;
+  color: var(--scifi-text-color) !important;
+}
+
+.el-table th, .el-table tr, .el-table td {
+  background-color: transparent !important;
+  border-bottom: 1px solid var(--scifi-border-color) !important;
+  color: var(--scifi-text-color) !important;
+}
+
+.el-table th.el-table__cell {
+  color: var(--scifi-primary-color) !important;
+  font-weight: bold;
+  font-size: 1.05em;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover > td {
+  background-color: rgba(0, 243, 255, 0.15) !important;
+}
+
+/* 菜单 */
+.el-menu {
+  background-color: transparent !important;
+  border-right: none !important;
+}
+
+.el-menu-item {
+  color: var(--scifi-text-muted) !important;
+}
+
+.el-menu-item:hover, .el-sub-menu__title:hover {
+  background-color: rgba(0, 243, 255, 0.1) !important;
+  color: var(--scifi-primary-color) !important;
+}
+
+.el-menu-item.is-active {
+  color: var(--scifi-primary-color) !important;
+  background-color: rgba(0, 243, 255, 0.15) !important;
+  border-right: 2px solid var(--scifi-primary-color);
+  text-shadow: 0 0 8px rgba(0, 243, 255, 0.6);
+  font-weight: bold;
+}
+
+/* 面包屑 */
+.el-breadcrumb__inner, .el-breadcrumb__inner a {
+  color: var(--scifi-text-muted) !important;
+}
+.el-breadcrumb__inner.is-link:hover {
+  color: var(--scifi-primary-color) !important;
+}
+.el-breadcrumb__item:last-child .el-breadcrumb__inner {
+  color: var(--scifi-text-color) !important;
+  font-weight: bold;
+}
+
+/* 输入框 */
+.el-input__wrapper {
+  background-color: rgba(5, 11, 20, 0.6) !important;
+  box-shadow: 0 0 0 1px var(--scifi-border-color) inset !important;
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--scifi-primary-color) inset, 0 0 5px rgba(0, 243, 255, 0.5) !important;
+}
+
+.el-input__inner {
+  color: var(--scifi-text-color) !important;
+  font-weight: 500;
+}
+
+.el-input__inner::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 按钮 */
+.el-button--primary {
+  background-color: rgba(0, 243, 255, 0.1) !important;
+  border-color: var(--scifi-primary-color) !important;
+  color: var(--scifi-primary-color) !important;
+  box-shadow: 0 0 5px rgba(0, 243, 255, 0.2);
+}
+
+.el-button--primary:hover {
+  background-color: var(--scifi-primary-color) !important;
+  color: #050b14 !important;
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.6);
+}
+
+/* 默认按钮 (Reset等) */
+.el-button:not(.el-button--primary):not(.el-button--danger):not(.el-button--success) {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--scifi-text-muted) !important;
+  color: var(--scifi-text-color) !important;
+}
+
+.el-button:not(.el-button--primary):not(.el-button--danger):not(.el-button--success):hover {
+  border-color: var(--scifi-primary-color) !important;
+  color: var(--scifi-primary-color) !important;
+}
+
+/* 对话框 */
+.el-dialog {
+  background-color: #0b1525 !important;
+  border: 1px solid var(--scifi-primary-color) !important;
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.2) !important;
+}
+
+.el-dialog__title {
+  color: var(--scifi-primary-color) !important;
+  font-weight: bold;
+}
+
+.el-dialog__body {
+  color: var(--scifi-text-color) !important;
+}
+
+/* 分页 */
+.el-pagination {
+  --el-pagination-bg-color: transparent !important;
+  --el-pagination-button-disabled-bg-color: transparent !important;
+  --el-pagination-hover-color: var(--scifi-primary-color) !important;
+  color: var(--scifi-text-muted) !important;
+}
+
+.el-pagination__total, .el-pagination__jump {
+  color: var(--scifi-text-muted) !important;
+}
+
+.el-pagination button {
+  background-color: transparent !important;
+  color: var(--scifi-text-color) !important;
+  border: 1px solid rgba(0, 243, 255, 0.1);
+  margin: 0 2px;
+}
+
+.el-pager li {
+  background-color: transparent !important;
+  color: var(--scifi-text-color) !important;
+  border: 1px solid rgba(0, 243, 255, 0.1);
+  margin: 0 2px;
+}
+
+.el-pager li.is-active {
+  color: var(--scifi-primary-color) !important;
+  border-color: var(--scifi-primary-color) !important;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
+}
+
+/* 下拉菜单 */
+.el-select-dropdown {
+  background-color: #0b1525 !important;
+  border: 1px solid var(--scifi-border-color) !important;
+}
+
+.el-select-dropdown__item {
+  color: var(--scifi-text-muted) !important;
+}
+
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
+  background-color: rgba(0, 243, 255, 0.15) !important;
+  color: var(--scifi-text-color) !important;
+}
+
+.el-select-dropdown__item.selected {
+  color: var(--scifi-primary-color) !important;
+  font-weight: bold;
+}
+
+/* 标签 Tag */
+.el-tag {
+  background-color: rgba(0, 243, 255, 0.1) !important;
+  border-color: rgba(0, 243, 255, 0.3) !important;
+  color: var(--scifi-primary-color) !important;
+}
+
+.el-tag--success {
+  background-color: rgba(103, 194, 58, 0.1) !important;
+  border-color: rgba(103, 194, 58, 0.3) !important;
+  color: #67c23a !important;
+}
+
+.el-tag--danger {
+  background-color: rgba(245, 108, 108, 0.1) !important;
+  border-color: rgba(245, 108, 108, 0.3) !important;
+  color: #f56c6c !important;
+}
+
+.el-tag--warning {
+  background-color: rgba(230, 162, 60, 0.1) !important;
+  border-color: rgba(230, 162, 60, 0.3) !important;
+  color: #e6a23c !important;
+}
+
+/* 覆盖 Dashboard 统计卡片可能存在的独立样式 */
+.statistic-card .label {
+  color: var(--scifi-text-muted) !important;
+}
+
+.statistic-card .value, .stat-value {
+  color: var(--scifi-primary-color) !important;
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+  font-weight: bold;
+}
+
+/* 描述列表 (el-descriptions) */
+.el-descriptions {
+  --el-descriptions-table-border-color: var(--scifi-border-color) !important;
+  --el-descriptions-item-bordered-label-background: rgba(0, 243, 255, 0.1) !important;
+}
+
+.el-descriptions__body {
+  background-color: transparent !important;
+  color: var(--scifi-text-color) !important;
+}
+
+.el-descriptions__table {
+  background-color: transparent !important;
+}
+
+.el-descriptions__cell {
+  background-color: transparent !important;
+}
+
+.el-descriptions__label {
+  background-color: rgba(0, 243, 255, 0.1) !important;
+  color: var(--scifi-primary-color) !important;
+  font-weight: bold !important;
+}
+
+.el-descriptions__label.is-bordered-label {
+  background-color: rgba(0, 243, 255, 0.1) !important;
+}
+
+.el-descriptions__content {
+  background-color: rgba(5, 11, 20, 0.3) !important;
+  color: var(--scifi-text-color) !important;
+}
+
+.el-descriptions__content.is-bordered-content {
+  background-color: rgba(5, 11, 20, 0.3) !important;
+}
+
+/* 代码块 (pre) */
+pre {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  color: #a0c0e0 !important;
+  border: 1px solid var(--scifi-border-color) !important;
+  border-radius: 4px;
+  padding: 10px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
