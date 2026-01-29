@@ -198,6 +198,28 @@
         <el-descriptions-item label="原始日志" :span="2">
           <pre>{{ currentLog.raw_log }}</pre>
         </el-descriptions-item>
+        
+        <!-- AI 分析结果部分 -->
+        <el-descriptions-item label="AI分析结果" :span="2" class-name="ai-analysis-section">
+          <div v-if="currentLog.ai_attack_type" class="ai-analysis-content">
+            <div class="ai-header">
+              <el-tag :type="currentLog.ai_attack_type === 'Normal' ? 'success' : 'danger'" effect="dark">
+                AI判定: {{ currentLog.ai_attack_type }}
+              </el-tag>
+              <el-tag type="info" effect="plain" class="ml-2">
+                置信度: {{ (currentLog.ai_confidence * 100).toFixed(1) }}%
+              </el-tag>
+            </div>
+            <div class="ai-detail">
+              <p><strong>分析详情：</strong></p>
+              <p>{{ currentLog.ai_analysis_result }}</p>
+            </div>
+          </div>
+          <div v-else>
+            <el-tag type="info">AI分析中或未进行分析</el-tag>
+          </div>
+        </el-descriptions-item>
+        
         <el-descriptions-item label="备注" :span="2">{{ currentLog.notes }}</el-descriptions-item>
         <el-descriptions-item label="是否恶意IP">
           <el-tag :type="currentLog.is_malicious ? 'danger' : 'success'">
@@ -417,5 +439,28 @@ pre {
   background-color: #f5f5f5;
   padding: 10px;
   border-radius: 4px;
+}
+
+.ai-analysis-content {
+  background: rgba(0, 243, 255, 0.05);
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 243, 255, 0.2);
+}
+
+.ai-header {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.ml-2 {
+  margin-left: 10px;
+}
+
+.ai-detail p {
+  margin: 5px 0;
+  line-height: 1.5;
+  color: var(--scifi-text-color);
 }
 </style>

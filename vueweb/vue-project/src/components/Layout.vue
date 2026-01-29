@@ -38,6 +38,11 @@
           <el-icon><Warning /></el-icon>
           <span>恶意IP管理</span>
         </el-menu-item>
+
+        <el-menu-item index="/ai-config-management">
+          <el-icon><Cpu /></el-icon>
+          <span>AI模型配置</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     
@@ -87,7 +92,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { House, Fold, Expand, ArrowDown, Avatar, Document, Operation, Monitor, Warning } from '@element-plus/icons-vue'
+import { House, Fold, Expand, ArrowDown, Avatar, Document, Operation, Monitor, Warning, Cpu } from '@element-plus/icons-vue'
 import useUserStore from '../stores/user'
 
 // 路由实例

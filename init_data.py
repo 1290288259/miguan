@@ -147,24 +147,24 @@ def init_data():
                     {
                         'name': 'SQL注入检测',
                         'attack_type': 'SQL注入',
-                        'regex_pattern': r'(?i)(union|select|insert|update|delete|drop|exec|script)',
+                        'regex_pattern': r'(?i)(union|select|insert|update|delete|drop|exec)',
                         'threat_level': 'high',
                         'description': '检测常见的SQL注入攻击',
                         'match_field': 'raw_log',
                         'is_enabled': True,
-                        'priority': 1,
+                        'priority': 2,
                         'auto_block': True,
                         'block_duration': 24
                     },
                     {
                         'name': 'XSS攻击检测',
                         'attack_type': 'XSS',
-                        'regex_pattern': r'(?i)(<script|javascript:|onload=|onerror=)',
+                        'regex_pattern': r'(?i)(<script|javascript:|onload=|onerror=|alert\(|prompt\()|onclick=|onmouseover=',
                         'threat_level': 'medium',
                         'description': '检测跨站脚本攻击',
                         'match_field': 'raw_log',
                         'is_enabled': True,
-                        'priority': 2,
+                        'priority': 1,
                         'auto_block': False,
                         'block_duration': 0
                     },

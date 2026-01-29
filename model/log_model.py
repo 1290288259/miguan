@@ -73,6 +73,11 @@ class Log(db.Model):
     
     # 备注
     notes = db.Column(db.Text, nullable=True, comment='备注')
+
+    # AI分析相关字段
+    ai_attack_type = db.Column(db.String(50), nullable=True, comment='AI识别的攻击类型')
+    ai_confidence = db.Column(db.Float, nullable=True, comment='AI识别置信度')
+    ai_analysis_result = db.Column(db.Text, nullable=True, comment='AI完整分析结果')
     
     def __repr__(self):
         """
@@ -108,5 +113,8 @@ class Log(db.Model):
             'is_malicious': self.is_malicious,
             'is_blocked': self.is_blocked,
             'blocked_time': self.blocked_time.isoformat() if self.blocked_time else None,
-            'notes': self.notes
+            'notes': self.notes,
+            'ai_attack_type': self.ai_attack_type,
+            'ai_confidence': self.ai_confidence,
+            'ai_analysis_result': self.ai_analysis_result
         }

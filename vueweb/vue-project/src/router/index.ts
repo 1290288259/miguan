@@ -51,6 +51,12 @@ const router = createRouter({
           // 恶意IP管理页面
           component: () => import('../views/MaliciousIPManagement.vue'),
         },
+        {
+          path: 'ai-config-management',
+          name: 'ai-config-management',
+          // AI配置管理页面
+          component: () => import('../views/AIConfigManagement.vue'),
+        },
       ]
     },
     {

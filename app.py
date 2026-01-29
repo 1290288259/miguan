@@ -43,6 +43,12 @@ from routes.dashboard_routes import dashboard_bp
 # 导入蜜罐服务用于初始化
 from service.honeypot_service import HoneypotService
 
+# 导入AI分析服务用于初始化
+from service.ai_analysis_service import AIAnalysisService
+
+# 导入AI配置路由蓝图
+from route.ai_config_route import ai_config_bp
+
 # 导入API响应封装
 from utils.api_response import ApiResponse
 
@@ -171,12 +177,18 @@ app.register_blueprint(malicious_ip_bp)
 # 注册仪表盘路由蓝图
 app.register_blueprint(dashboard_bp)
 
+# 注册AI配置路由蓝图
+app.register_blueprint(ai_config_bp)
+
 # 如果直接运行此文件，则启动开发服务器
 if __name__ == '__main__':
     # 初始化蜜罐服务（自动启动状态为running的蜜罐）
     with app.app_context():
         print("正在初始化蜜罐服务...")
         HoneypotService.init_honeypots()
+        
+    # 初始化AI模型 (传入app实例以便在线程中使用上下文)
+    AIAnalysisService.init_model(app)
 
     # 启动Flask开发服务器
     # debug=False表示关闭调试模式，避免watchdog兼容性问题

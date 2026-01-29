@@ -7,10 +7,12 @@
 from model.log_model import Log
 from model.honeypot_model import Honeypot
 from model.match_rule_model import MatchRule
+from service.ai_analysis_service import AIAnalysisService
 from database import db
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 import re
+import threading
 
 
 class LogService:
@@ -305,6 +307,54 @@ class LogService:
             # 保存到数据库
             db.session.add(log)
             db.session.commit()
+            
+            # 异步执行AI分析（避免阻塞主流程）
+            try:
+                def run_ai_analysis(app, log_id, log_data_dict):
+                    with app.app_context():
+                        try:
+                            # 重新获取日志对象
+                            log_entry = Log.query.get(log_id)
+                            if not log_entry:
+                                return
+                            
+                            # 执行分析
+                            ai_result = AIAnalysisService.analyze_log(log_data_dict)
+                            
+                            # 更新日志字段
+                            log_entry.ai_attack_type = ai_result.get('ai_attack_type')
+                            log_entry.ai_confidence = ai_result.get('ai_confidence')
+                            log_entry.ai_analysis_result = ai_result.get('ai_analysis_result')
+                            
+                            db.session.commit()
+                            print(f"日志 ID {log_id} AI分析完成: {ai_result.get('ai_attack_type')}")
+                            
+                        except Exception as e:
+                            print(f"异步AI分析出错: {str(e)}")
+                            
+                # 获取当前app实例以便在线程中使用上下文
+                from flask import current_app
+                # 需要使用app的真实代理，因为current_app是线程局部的
+                # 注意：在某些部署方式下，这种传递app的方式可能需要调整
+                # 这里假设是简单的单进程部署
+                app = current_app._get_current_object()
+                
+                # 准备传给线程的数据（避免直接传ORM对象）
+                log_data_dict = log.to_dict()
+                # 补充可能缺少的原始字段
+                log_data_dict['payload'] = log.payload
+                log_data_dict['protocol'] = log.protocol
+                log_data_dict['request_path'] = log.request_path
+                
+                thread = threading.Thread(
+                    target=run_ai_analysis,
+                    args=(app, log.id, log_data_dict)
+                )
+                thread.daemon = True
+                thread.start()
+                
+            except Exception as e:
+                print(f"启动AI分析线程失败: {str(e)}")
             
             # 如果是恶意流量，记录到恶意IP表
             if is_malicious:

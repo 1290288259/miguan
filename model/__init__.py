@@ -13,6 +13,7 @@ from .match_rule_model import MatchRule
 from .attack_stats_model import AttackStats
 from .block_history_model import BlockHistory
 from .permission_model import Permission
+from .ai_config_model import AIConfig
 
 # 导出所有模型
 __all__ = [
@@ -23,5 +24,6 @@ __all__ = [
     'MatchRule',
     'AttackStats',
     'BlockHistory',
-    'Permission'
+    'Permission',
+    'AIConfig'
 ]
