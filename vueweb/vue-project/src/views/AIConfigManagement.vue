@@ -32,7 +32,16 @@
               class="sci-fi-button is-text"
               @click="handleActivate(scope.row)"
             >
-              激活
+              启用
+            </el-button>
+            <el-button 
+              v-else
+              size="small" 
+              type="warning" 
+              class="sci-fi-button is-text"
+              @click="handleDeactivate(scope.row)"
+            >
+              关闭
             </el-button>
             <el-button 
               size="small" 
@@ -41,6 +50,14 @@
               @click="handleEdit(scope.row)"
             >
               编辑
+            </el-button>
+            <el-button 
+              size="small" 
+              type="info" 
+              class="sci-fi-button is-text"
+              @click="handleTest(scope.row)"
+            >
+              测试
             </el-button>
             <el-popconfirm 
               title="确定要删除这个配置吗？" 
@@ -78,7 +95,7 @@
         <el-form-item label="提供商" prop="provider">
           <el-select v-model="form.provider" placeholder="选择提供商">
             <el-option label="Ollama (本地/远程)" value="ollama" />
-            <el-option label="OpenAI (兼容)" value="openai" disabled />
+            <el-option label="OpenAI (兼容)" value="openai" />
           </el-select>
         </el-form-item>
         <el-form-item label="模型名称" prop="model_name">
@@ -107,14 +124,16 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElLoading } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { 
   getAIConfigs, 
   createAIConfig, 
   updateAIConfig, 
   deleteAIConfig, 
-  activateAIConfig 
+  activateAIConfig,
+  deactivateAIConfig,
+  testAIConfig
 } from '../services/aiConfig'
 import type { AIConfig } from '../services/aiConfig'
 
@@ -198,13 +217,58 @@ const handleActivate = async (row: AIConfig) => {
   try {
     const res: any = await activateAIConfig(row.id)
     if (res.code === 200) {
-      ElMessage.success('激活成功')
+      ElMessage.success('启用成功')
       fetchConfigs()
     } else {
-      ElMessage.error(res.message || '激活失败')
+      ElMessage.error(res.message || '启用失败')
     }
   } catch (error) {
-    ElMessage.error('激活失败')
+    ElMessage.error('启用失败')
+  }
+}
+
+const handleDeactivate = async (row: AIConfig) => {
+  try {
+    const res: any = await deactivateAIConfig(row.id)
+    if (res.code === 200) {
+      ElMessage.success('关闭成功')
+      fetchConfigs()
+    } else {
+      ElMessage.error(res.message || '关闭失败')
+    }
+  } catch (error: any) {
+    console.error(error)
+    ElMessage.error('关闭失败: ' + (error.message || '未知错误'))
+  }
+}
+
+const handleTest = async (row: AIConfig) => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '正在测试连接...',
+    background: 'rgba(0, 0, 0, 0.7)',
+  })
+  
+  try {
+    const res: any = await testAIConfig(row.id)
+    loading.close()
+    
+    if (res.code === 200) {
+      const { latency, response } = res.data
+      ElMessage.success({
+        message: `连接成功! 延迟: ${latency}ms`,
+        duration: 5000
+      })
+      
+      // 可以选择显示响应内容
+      console.log('Test response:', response)
+    } else {
+      ElMessage.error(res.message || '连接测试失败')
+    }
+  } catch (error: any) {
+    loading.close()
+    console.error(error)
+    ElMessage.error('测试失败: ' + (error.message || '未知错误'))
   }
 }
 

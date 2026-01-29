@@ -269,6 +269,29 @@ body {
 .el-select-dropdown__item.selected {
   color: var(--scifi-primary-color) !important;
   font-weight: bold;
+  background-color: rgba(0, 243, 255, 0.1) !important;
+}
+
+/* 修复所有弹出层 (Popper) 的背景色，包括 Select, Tooltip, Popconfirm 等 */
+.el-popper,
+.el-popper.is-light,
+.el-popper.is-dark {
+  background-color: #0b1525 !important;
+  border: 1px solid var(--scifi-primary-color) !important;
+  color: var(--scifi-text-color) !important;
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.2) !important;
+}
+
+/* 修复弹出层箭头颜色 */
+.el-popper__arrow::before {
+  background-color: #0b1525 !important;
+  border-color: var(--scifi-primary-color) !important;
+}
+
+/* 针对 Select 的特殊处理 */
+.el-select__popper {
+  background-color: #0b1525 !important;
+  border-color: var(--scifi-primary-color) !important;
 }
 
 /* 标签 Tag */

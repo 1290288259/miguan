@@ -70,3 +70,25 @@ export const activateAIConfig = async (id: number) => {
     throw error
   }
 }
+
+// 禁用配置
+export const deactivateAIConfig = async (id: number) => {
+  try {
+    const response = await axios.post(`/ai-config/${id}/deactivate`)
+    return response
+  } catch (error) {
+    console.error('禁用AI配置失败:', error)
+    throw error
+  }
+}
+
+// 测试配置
+export const testAIConfig = async (id: number) => {
+  try {
+    const response = await axios.post(`/ai-config/${id}/test`)
+    return response
+  } catch (error) {
+    console.error('测试AI配置失败:', error)
+    throw error
+  }
+}
