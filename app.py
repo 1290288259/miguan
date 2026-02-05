@@ -23,7 +23,7 @@ from flask_migrate import Migrate
 from route.test_route import hello, hello_with_name
 
 # 导入用户路由函数
-from route.user_route import register, create_admin, login, get_current_user
+from route.user_route import register, create_admin, login, get_current_user, update_current_user
 
 # 导入日志路由蓝图
 from route.log_route import log_bp
@@ -161,6 +161,7 @@ app.route('/api/user/register', methods=['POST'])(register)
 app.route('/api/user/create_admin', methods=['POST'])(create_admin)
 app.route('/api/user/login', methods=['POST'])(login)
 app.route('/api/user/me', methods=['GET'])(get_current_user)
+app.route('/api/user/me', methods=['PUT'])(update_current_user)
 
 # 注册日志路由蓝图
 app.register_blueprint(log_bp)

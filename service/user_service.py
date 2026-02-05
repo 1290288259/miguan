@@ -9,9 +9,12 @@ import jwt
 import datetime
 from flask import current_app
 from database import db
+from sqlalchemy.exc import IntegrityError
 from model.user_model import User
+from model.user_info_model import UserInfo
+from model.permission_model import Permission
 
-def create_user(username, password, role=2):
+def create_user(username, password, role=2, phone=None, email=None):
     """
     创建新用户
     
@@ -19,6 +22,8 @@ def create_user(username, password, role=2):
         username: 用户名
         password: 密码
         role: 用户角色权限，默认为2（普通用户），1为管理员
+        phone: 手机号
+        email: 邮箱
         
     返回:
         dict: 包含操作结果的字典
@@ -38,6 +43,17 @@ def create_user(username, password, role=2):
         
         # 将用户添加到数据库会话
         db.session.add(new_user)
+        # 刷新以获取ID
+        db.session.flush()
+        
+        # 创建用户信息
+        if phone or email:
+            user_info = UserInfo(
+                user_id=new_user.id,
+                phone=phone,
+                email=email
+            )
+            db.session.add(user_info)
         
         # 提交事务
         db.session.commit()
@@ -47,6 +63,13 @@ def create_user(username, password, role=2):
             'success': True,
             'message': '用户注册成功',
             'user_id': new_user.id
+        }
+    except IntegrityError:
+        # 发生完整性错误（如用户名已存在）时回滚事务
+        db.session.rollback()
+        return {
+            'success': False,
+            'message': '用户注册失败: 该用户名已被注册'
         }
     except Exception as e:
         # 发生异常时回滚事务
@@ -70,6 +93,85 @@ def create_admin_user(username, password):
         dict: 包含操作结果的字典
     """
     return create_user(username, password, role=1)
+
+def get_user_detail(user_id):
+    """
+    获取用户详细信息（包含基础信息和扩展信息）
+    
+    参数:
+        user_id: 用户ID
+        
+    返回:
+        dict: 包含操作结果的字典
+    """
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return {'success': False, 'message': '用户不存在'}
+            
+        # 获取扩展信息
+        user_info = UserInfo.query.filter_by(user_id=user_id).first()
+        
+        # 基础信息
+        data = user.to_dict()
+        
+        # 添加扩展信息
+        if user_info:
+            data['phone'] = user_info.phone
+            data['email'] = user_info.email
+        else:
+            data['phone'] = None
+            data['email'] = None
+            
+        # 获取权限列表
+        permissions = Permission.query.filter_by(role=user.role).all()
+        data['permissions'] = [p.to_dict() for p in permissions]
+            
+        return {
+            'success': True,
+            'data': data
+        }
+    except Exception as e:
+        return {'success': False, 'message': str(e)}
+
+def update_user_detail(user_id, phone=None, email=None):
+    """
+    更新用户详细信息
+    
+    参数:
+        user_id: 用户ID
+        phone: 手机号
+        email: 邮箱
+        
+    返回:
+        dict: 包含操作结果的字典
+    """
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return {'success': False, 'message': '用户不存在'}
+            
+        # 查找或创建扩展信息
+        user_info = UserInfo.query.filter_by(user_id=user_id).first()
+        if not user_info:
+            user_info = UserInfo(user_id=user_id)
+            db.session.add(user_info)
+            
+        # 更新字段
+        if phone is not None:
+            user_info.phone = phone
+        if email is not None:
+            user_info.email = email
+            
+        db.session.commit()
+        
+        return {
+            'success': True,
+            'message': '用户信息更新成功'
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {'success': False, 'message': f'更新失败: {str(e)}'}
 
 def login_user(username, password):
     """

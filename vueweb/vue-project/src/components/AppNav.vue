@@ -14,6 +14,10 @@
         
         <!-- 已登录状态显示退出登录按钮 -->
         <template v-else>
+          <el-button type="primary" size="small" @click="router.push('/profile')" style="margin-right: 10px;">
+            <el-icon><User /></el-icon>
+            个人中心
+          </el-button>
           <el-button type="danger" size="small" @click="handleLogout">
             <el-icon><SwitchButton /></el-icon>
             退出登录
@@ -28,7 +32,7 @@
 import { computed, ref, inject, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { SwitchButton } from '@element-plus/icons-vue'
+import { SwitchButton, User } from '@element-plus/icons-vue'
 import useUserStore from '../stores/user'
 
 // 路由实例

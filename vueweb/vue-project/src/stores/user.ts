@@ -59,9 +59,9 @@ const login = async (username: string, password: string) => {
         response.data.access_token,
         response.data.refresh_token
       )
-      return { success: true, message: response.msg }
+      return { success: true, message: response.message }
     } else {
-      return { success: false, message: response.msg || '登录失败' }
+      return { success: false, message: response.message || '登录失败' }
     }
   } catch (error: any) {
     console.error('登录失败:', error)

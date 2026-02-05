@@ -57,6 +57,12 @@ const router = createRouter({
           // AI配置管理页面
           component: () => import('../views/AIConfigManagement.vue'),
         },
+        {
+          path: 'profile',
+          name: 'profile',
+          // 个人信息页面
+          component: () => import('../views/UserProfile.vue'),
+        },
       ]
     },
     {

@@ -43,6 +43,10 @@ instance.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
+          // 如果是登录接口本身的401，不进行跳转，直接返回错误让前端处理
+          if (error.config && error.config.url && error.config.url.includes('/user/login')) {
+            break
+          }
           // 未授权，可以跳转到登录页
           console.error('未授权，请重新登录')
           localStorage.removeItem('token')

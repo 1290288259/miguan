@@ -19,6 +19,36 @@
           <span v-if="errors.username" class="error-message">{{ errors.username }}</span>
         </div>
         
+        <!-- 手机号输入框 -->
+        <div class="form-group">
+          <label for="phone">手机号</label>
+          <input
+            id="phone"
+            v-model="registerForm.phone"
+            type="tel"
+            placeholder="请输入手机号"
+            :class="{ 'error': errors.phone }"
+            @blur="validatePhone"
+            @keyup.enter="handleRegister"
+          />
+          <span v-if="errors.phone" class="error-message">{{ errors.phone }}</span>
+        </div>
+        
+        <!-- 邮箱输入框 -->
+        <div class="form-group">
+          <label for="email">邮箱</label>
+          <input
+            id="email"
+            v-model="registerForm.email"
+            type="email"
+            placeholder="请输入邮箱地址"
+            :class="{ 'error': errors.email }"
+            @blur="validateEmail"
+            @keyup.enter="handleRegister"
+          />
+          <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
+        </div>
+        
         <!-- 密码输入框 -->
         <div class="form-group">
           <label for="password">密码</label>
@@ -83,6 +113,8 @@ const router = useRouter()
 // 注册表单数据
 const registerForm = ref({
   username: '',
+  phone: '',
+  email: '',
   password: '',
   confirmPassword: ''
 })
@@ -90,6 +122,8 @@ const registerForm = ref({
 // 表单验证错误
 const errors = ref({
   username: '',
+  phone: '',
+  email: '',
   password: '',
   confirmPassword: ''
 })
@@ -102,9 +136,13 @@ const registerError = ref('')
 const isFormValid = computed(() => {
   return (
     registerForm.value.username.length >= 6 &&
+    (!registerForm.value.phone || registerForm.value.phone.length >= 11) &&
+    (!registerForm.value.email || registerForm.value.email.includes('@')) &&
     registerForm.value.password.length >= 6 &&
     registerForm.value.confirmPassword === registerForm.value.password &&
     !errors.value.username &&
+    !errors.value.phone &&
+    !errors.value.email &&
     !errors.value.password &&
     !errors.value.confirmPassword
   )
@@ -116,6 +154,24 @@ const validateUsername = () => {
     errors.value.username = '用户名不能少于6位'
   } else {
     errors.value.username = ''
+  }
+}
+
+// 验证手机号
+const validatePhone = () => {
+  if (registerForm.value.phone && registerForm.value.phone.length < 11) {
+    errors.value.phone = '请输入正确的手机号'
+  } else {
+    errors.value.phone = ''
+  }
+}
+
+// 验证邮箱
+const validateEmail = () => {
+  if (registerForm.value.email && !registerForm.value.email.includes('@')) {
+    errors.value.email = '请输入正确的邮箱地址'
+  } else {
+    errors.value.email = ''
   }
 }
 
@@ -146,6 +202,8 @@ const validateConfirmPassword = () => {
 const handleRegister = async () => {
   // 先进行表单验证
   validateUsername()
+  validatePhone()
+  validateEmail()
   validatePassword()
   validateConfirmPassword()
   
@@ -159,10 +217,16 @@ const handleRegister = async () => {
   
   try {
     // 调用后端注册接口
-    const response: any = await registerUser(registerForm.value.username, registerForm.value.password)
+    const response: any = await registerUser(
+      registerForm.value.username, 
+      registerForm.value.password,
+      2, // 默认角色
+      registerForm.value.phone,
+      registerForm.value.email
+    )
     
     // 注册成功处理
-    if (response.code === 200) {
+    if (response.code === 200 || response.code === 201) {
       // 显示成功消息
       alert('注册成功！请登录')
       
@@ -170,7 +234,7 @@ const handleRegister = async () => {
       router.push('/login')
     } else {
       // 显示错误消息
-      registerError.value = response.msg || '注册失败，请稍后重试'
+      registerError.value = response.message || '注册失败，请稍后重试'
     }
   } catch (error: any) {
     // 处理错误

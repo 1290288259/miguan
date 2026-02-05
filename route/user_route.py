@@ -8,7 +8,7 @@ from flask import request, jsonify
 from functools import wraps
 import jwt
 from utils.api_response import ApiResponse
-from service.user_service import create_user, create_admin_user, login_user, verify_jwt_token
+from service.user_service import create_user, create_admin_user, login_user, verify_jwt_token, get_user_detail, update_user_detail
 
 def register():
     """
@@ -33,6 +33,10 @@ def register():
         username = data['username']
         password = data['password']
         
+        # 获取可选的用户信息
+        phone = data.get('phone')
+        email = data.get('email')
+        
         # 获取用户角色，默认为2（普通用户）
         role = data.get('role', 2)
         
@@ -47,9 +51,17 @@ def register():
         # 验证密码长度是否超过6位
         if len(password) < 6:
             return ApiResponse.bad_request(message="密码长度不能少于6位")
+            
+        # 验证手机号格式（简单验证）
+        if phone and len(phone) < 11:
+             return ApiResponse.bad_request(message="手机号格式不正确")
+             
+        # 验证邮箱格式（简单验证）
+        if email and '@' not in email:
+             return ApiResponse.bad_request(message="邮箱格式不正确")
         
         # 调用服务层创建用户
-        result = create_user(username, password, role)
+        result = create_user(username, password, role, phone=phone, email=email)
         
         # 根据服务层结果返回相应的响应
         if result['success']:
@@ -58,9 +70,11 @@ def register():
                 message=result['message']
             )
         else:
+            print(f"Registration failed for user {username}: {result['message']}")
             return ApiResponse.bad_request(message=result['message'])
             
     except Exception as e:
+        print(f"Registration exception: {str(e)}")
         # 处理异常情况
         return ApiResponse.server_error(message=f"服务器内部错误: {str(e)}")
 
@@ -166,19 +180,69 @@ def get_current_user():
         @token_required
         def _get_current_user():
             # 从请求上下文中获取用户信息
-            user_info = request.current_user
+            token_info = request.current_user
+            user_id = token_info['user_id']
             
-            # 返回用户信息
-            return ApiResponse.success(
-                data={
-                    'id': user_info['user_id'],
-                    'username': user_info['username'],
-                    'role': user_info['role']
-                },
-                message="获取用户信息成功"
-            )
+            # 获取用户详细信息
+            result = get_user_detail(user_id)
+            
+            if result['success']:
+                return ApiResponse.success(
+                    data=result['data'],
+                    message="获取用户信息成功"
+                )
+            else:
+                return ApiResponse.bad_request(message=result['message'])
         
         return _get_current_user()
+    except Exception as e:
+        # 处理异常情况
+        return ApiResponse.server_error(message=f"服务器内部错误: {str(e)}")
+
+def update_current_user():
+    """
+    更新当前用户信息
+    
+    接收参数:
+        phone: 手机号 (可选)
+        email: 邮箱 (可选)
+        
+    返回:
+        JSON: 更新结果
+    """
+    try:
+        # 使用token_required装饰器验证令牌
+        @token_required
+        def _update_current_user():
+            # 从请求上下文中获取用户信息
+            token_info = request.current_user
+            user_id = token_info['user_id']
+            
+            # 获取请求中的JSON数据
+            data = request.get_json()
+            if not data:
+                return ApiResponse.bad_request(message="没有提供更新数据")
+                
+            phone = data.get('phone')
+            email = data.get('email')
+            
+            # 验证手机号格式（简单验证）
+            if phone and len(phone) < 11:
+                return ApiResponse.bad_request(message="手机号格式不正确")
+                
+            # 验证邮箱格式（简单验证）
+            if email and '@' not in email:
+                return ApiResponse.bad_request(message="邮箱格式不正确")
+            
+            # 调用服务层更新用户信息
+            result = update_user_detail(user_id, phone=phone, email=email)
+            
+            if result['success']:
+                return ApiResponse.success(message=result['message'])
+            else:
+                return ApiResponse.bad_request(message=result['message'])
+        
+        return _update_current_user()
     except Exception as e:
         # 处理异常情况
         return ApiResponse.server_error(message=f"服务器内部错误: {str(e)}")

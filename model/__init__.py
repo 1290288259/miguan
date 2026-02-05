@@ -14,6 +14,7 @@ from .attack_stats_model import AttackStats
 from .block_history_model import BlockHistory
 from .permission_model import Permission
 from .ai_config_model import AIConfig
+from .user_info_model import UserInfo
 
 # 导出所有模型
 __all__ = [
@@ -25,5 +26,6 @@ __all__ = [
     'AttackStats',
     'BlockHistory',
     'Permission',
-    'AIConfig'
+    'AIConfig',
+    'UserInfo'
 ]

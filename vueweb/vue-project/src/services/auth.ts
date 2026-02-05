@@ -5,12 +5,14 @@
 import axios from '../utils/axios'
 
 // 用户注册接口
-export const registerUser = async (username: string, password: string, role?: number) => {
+export const registerUser = async (username: string, password: string, role?: number, phone?: string, email?: string) => {
   try {
     const response = await axios.post('/user/register', {
       username,
       password,
-      role
+      role,
+      phone,
+      email
     })
     return response
   } catch (error) {
@@ -40,6 +42,20 @@ export const getCurrentUser = async () => {
     return response
   } catch (error) {
     console.error('获取用户信息失败:', error)
+    throw error
+  }
+}
+
+// 更新当前用户信息接口
+export const updateUserInfo = async (phone?: string, email?: string) => {
+  try {
+    const response = await axios.put('/user/me', {
+      phone,
+      email
+    })
+    return response
+  } catch (error) {
+    console.error('更新用户信息失败:', error)
     throw error
   }
 }
