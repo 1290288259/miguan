@@ -14,34 +14,15 @@
         :collapse="isCollapse"
         :collapse-transition="false"
       >
-        <el-menu-item index="/">
-          <el-icon><House /></el-icon>
-          <span>系统首页</span>
-        </el-menu-item>
-        
-        <el-menu-item index="/log-query">
-          <el-icon><Document /></el-icon>
-          <span>日志查询</span>
-        </el-menu-item>
-
-        <el-menu-item index="/match-rule-management">
-          <el-icon><Operation /></el-icon>
-          <span>匹配规则管理</span>
-        </el-menu-item>
-
-        <el-menu-item index="/honeypot-management">
-          <el-icon><Monitor /></el-icon>
-          <span>蜜罐管理</span>
-        </el-menu-item>
-
-        <el-menu-item index="/malicious-ip-management">
-          <el-icon><Warning /></el-icon>
-          <span>恶意IP管理</span>
-        </el-menu-item>
-
-        <el-menu-item index="/ai-config-management">
-          <el-icon><Cpu /></el-icon>
-          <span>AI模型配置</span>
+        <el-menu-item 
+          v-for="item in visibleMenuItems" 
+          :key="item.path" 
+          :index="item.path"
+        >
+          <el-icon>
+            <component :is="item.icon" />
+          </el-icon>
+          <span>{{ item.title }}</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
@@ -98,15 +79,50 @@ import useUserStore from '../stores/user'
 // 路由实例
 const route = useRoute()
 const router = useRouter()
-
-// 用户状态管理store
 const userStore = useUserStore()
+
+// 菜单配置
+const menuItems = [
+  { path: '/', title: '系统首页', icon: House },
+  { path: '/log-query', title: '日志查询', icon: Document },
+  { path: '/match-rule-management', title: '匹配规则管理', icon: Operation },
+  { path: '/honeypot-management', title: '蜜罐管理', icon: Monitor },
+  { path: '/malicious-ip-management', title: '恶意IP管理', icon: Warning },
+  { path: '/ai-config-management', title: 'AI模型配置', icon: Cpu }
+]
+
+// 计算可见的菜单项
+const visibleMenuItems = computed(() => {
+  const user = userStore.user.value
+  
+  // 如果没有用户信息，默认只显示首页（或者不显示，视需求而定，这里假设至少显示首页）
+  if (!user) return menuItems.filter(item => item.path === '/')
+  
+  // 管理员(role=1)拥有所有权限，但为了统一逻辑，最好也基于permissions判断
+  // 如果初始化脚本已经为管理员添加了所有权限，那么下面的逻辑对管理员也适用
+  // 如果想要硬编码管理员权限作为兜底，可以这样：
+  if (user.role === 1) return menuItems
+  
+  // 获取用户拥有的权限路径列表
+  const permissions = user.permissions || []
+  const allowedPaths = permissions.map((p: any) => p.path)
+  
+  // 过滤出用户有权限访问的菜单项
+  return menuItems.filter(item => allowedPaths.includes(item.path))
+})
 
 // 侧边栏折叠状态
 const isCollapse = ref(false)
 
 // 当前激活的菜单项
-const activeMenu = computed(() => route.path)
+const activeMenu = computed(() => {
+  const path = route.path
+  // 如果是仪表盘子页面，保持系统首页高亮
+  if (['/overview', '/trend', '/types', '/map'].some(p => path.startsWith(p))) {
+    return '/'
+  }
+  return path
+})
 
 // 面包屑导航项
 const breadcrumbItems = computed(() => {

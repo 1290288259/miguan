@@ -216,6 +216,10 @@ def login_user(username, password):
             'iat': datetime.datetime.utcnow()
         }, current_app.config['JWT_SECRET_KEY'], algorithm='HS256')
         
+        # 获取权限列表
+        permissions = Permission.query.filter_by(role=user.role).all()
+        permissions_data = [p.to_dict() for p in permissions]
+
         # 返回成功结果，包含令牌和用户信息
         return {
             'success': True,
@@ -225,7 +229,8 @@ def login_user(username, password):
             'user': {
                 'id': user.id,
                 'username': user.username,
-                'role': user.role
+                'role': user.role,
+                'permissions': permissions_data
             }
         }
     except Exception as e:

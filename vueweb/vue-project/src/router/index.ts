@@ -11,9 +11,30 @@ const router = createRouter({
       children: [
         {
           path: '',
-          name: 'dashboard',
-          // 可视化大屏页面
-          component: () => import('../views/Dashboard.vue'),
+          component: () => import('../views/dashboard/DashboardLayout.vue'),
+          children: [
+            { path: '', redirect: '/overview' },
+            { 
+              path: 'overview', 
+              name: 'dashboard-overview', 
+              component: () => import('../views/dashboard/Overview.vue') 
+            },
+            { 
+              path: 'trend', 
+              name: 'dashboard-trend', 
+              component: () => import('../views/dashboard/Trend.vue') 
+            },
+            { 
+              path: 'types', 
+              name: 'dashboard-types', 
+              component: () => import('../views/dashboard/Types.vue') 
+            },
+            { 
+              path: 'map', 
+              name: 'dashboard-map', 
+              component: () => import('../views/dashboard/Map.vue') 
+            },
+          ]
         },
         {
           path: 'test-auth',
@@ -32,30 +53,35 @@ const router = createRouter({
           name: 'log-query',
           // 日志查询页面
           component: () => import('../views/LogQuery.vue'),
+          meta: { permission: '/log-query' }
         },
         {
           path: 'match-rule-management',
           name: 'match-rule-management',
           // 匹配规则管理页面
           component: () => import('../views/MatchRuleManagement.vue'),
+          meta: { permission: '/match-rule-management' }
         },
         {
           path: 'honeypot-management',
           name: 'honeypot-management',
           // 蜜罐管理页面
           component: () => import('../views/HoneypotManagement.vue'),
+          meta: { permission: '/honeypot-management' }
         },
         {
           path: 'malicious-ip-management',
           name: 'malicious-ip-management',
           // 恶意IP管理页面
           component: () => import('../views/MaliciousIPManagement.vue'),
+          meta: { permission: '/malicious-ip-management' }
         },
         {
           path: 'ai-config-management',
           name: 'ai-config-management',
           // AI配置管理页面
           component: () => import('../views/AIConfigManagement.vue'),
+          meta: { permission: '/ai-config-management' }
         },
         {
           path: 'profile',
@@ -102,6 +128,27 @@ router.beforeEach(async (to, from, next) => {
     // 如果需要游客状态但用户已登录，则重定向到首页
     next('/')
     return
+  }
+  
+  // 权限检查
+  const user = userStore.user.value
+  if (to.meta.permission && user) {
+      // 管理员(role=1)拥有所有权限
+      if (user.role === 1) {
+          next()
+          return
+      }
+
+      // 检查权限
+      const permissions = user.permissions || []
+      const allowedPaths = permissions.map((p: any) => p.path)
+      
+      // 注意：to.meta.permission 是我们在路由定义中添加的自定义属性
+      if (!allowedPaths.includes(to.meta.permission as string)) {
+          // 无权限，重定向到首页
+          next('/')
+          return
+      }
   }
   
   // 其他情况，允许访问

@@ -6,7 +6,8 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/api/dashboard')
 @dashboard_bp.route('/trend', methods=['GET'])
 def get_trend():
     days = request.args.get('days', 7, type=int)
-    data = DashboardService.get_attack_trend(days)
+    granularity = request.args.get('granularity', 'day')
+    data = DashboardService.get_attack_trend(days, granularity)
     return jsonify({'code': 200, 'data': data})
 
 @dashboard_bp.route('/types', methods=['GET'])
