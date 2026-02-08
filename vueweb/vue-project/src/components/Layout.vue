@@ -192,13 +192,14 @@ const handleCommand = async (command: string) => {
 
 <style scoped>
 .layout-container {
-  height: calc(100vh - 60px); /* 减去顶部导航栏的高度 */
+  height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: row;
   margin: 0;
   padding: 0;
-  margin-top: 60px; /* 为顶部导航栏留出空间 */
+  padding-top: 60px; /* 改用 padding-top 为顶部导航栏留出空间 */
+  box-sizing: border-box;
 }
 
 .sidebar {
