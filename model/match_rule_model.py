@@ -6,6 +6,7 @@
 
 from database import db
 from datetime import datetime
+from utils.time_utils import get_beijing_time
 
 class MatchRule(db.Model):
     """
@@ -57,10 +58,10 @@ class MatchRule(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, comment='创建者ID')
     
     # 创建时间
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment='创建时间')
+    created_at = db.Column(db.DateTime, nullable=False, default=get_beijing_time, comment='创建时间')
     
     # 更新时间
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow, comment='更新时间')
+    updated_at = db.Column(db.DateTime, nullable=False, default=get_beijing_time, onupdate=get_beijing_time, comment='更新时间')
     
     def __repr__(self):
         """

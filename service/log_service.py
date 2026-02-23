@@ -10,6 +10,7 @@ from model.match_rule_model import MatchRule
 from service.ai_analysis_service import AIAnalysisService
 from database import db
 from datetime import datetime
+from utils.time_utils import get_beijing_time
 from typing import Dict, List, Optional, Tuple
 import re
 import threading
@@ -198,7 +199,7 @@ class LogService:
             
             # 按日期统计最近7天的日志
             from datetime import timedelta
-            seven_days_ago = datetime.utcnow() - timedelta(days=7)
+            seven_days_ago = get_beijing_time() - timedelta(days=7)
             daily_stats = db.session.query(
                 db.func.date(Log.attack_time).label('date'),
                 db.func.count(Log.id).label('count')
@@ -274,7 +275,7 @@ class LogService:
                             
                             # 更新规则统计信息
                             rule.match_count += 1
-                            rule.last_matched = datetime.utcnow()
+                            rule.last_matched = get_beijing_time()
                             
                             # 匹配到一个规则后停止（优先级高的先生效）
                             break
@@ -287,7 +288,7 @@ class LogService:
             log = Log(
                 honeypot_id=honeypot.id,
                 attacker_ip=log_data.get('attacker_ip'),
-                attack_time=datetime.utcnow(),
+                attack_time=get_beijing_time(),
                 raw_log=log_data.get('raw_log'),
                 source_ip=log_data.get('attacker_ip'),
                 target_ip=log_data.get('target_ip', '127.0.0.1'),

@@ -6,6 +6,7 @@
 
 from database import db
 from datetime import datetime
+from utils.time_utils import get_beijing_time
 
 class UserInfo(db.Model):
     """
@@ -27,10 +28,10 @@ class UserInfo(db.Model):
     email = db.Column(db.String(100), nullable=True, comment='邮箱地址')
     
     # 创建时间
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment='创建时间')
+    created_at = db.Column(db.DateTime, nullable=False, default=get_beijing_time, comment='创建时间')
     
     # 更新时间
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow, comment='更新时间')
+    updated_at = db.Column(db.DateTime, nullable=False, default=get_beijing_time, onupdate=get_beijing_time, comment='更新时间')
     
     # 定义与User模型的关系（可选，方便反向查询）
     # user = db.relationship('User', backref=db.backref('info', uselist=False))

@@ -6,6 +6,7 @@
 
 from database import db
 from datetime import datetime
+from utils.time_utils import get_beijing_time
 
 class Log(db.Model):
     """
@@ -24,7 +25,7 @@ class Log(db.Model):
     attacker_ip = db.Column(db.String(15), nullable=False, comment='攻击者IP地址')
     
     # 攻击时间
-    attack_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment='攻击时间')
+    attack_time = db.Column(db.DateTime, nullable=False, default=get_beijing_time, comment='攻击时间')
     
     # 原始日志内容
     raw_log = db.Column(db.Text, nullable=False, comment='原始日志内容')

@@ -5,6 +5,7 @@
 """
 
 from database import db
+from utils.time_utils import get_beijing_time
 
 class Permission(db.Model):
     """
@@ -26,10 +27,10 @@ class Permission(db.Model):
     description = db.Column(db.String(255), nullable=True, comment='权限描述')
     
     # 创建时间
-    created_at = db.Column(db.DateTime, server_default=db.func.now(), comment='创建时间')
+    created_at = db.Column(db.DateTime, nullable=False, default=get_beijing_time, comment='创建时间')
     
     # 更新时间
-    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now(), comment='更新时间')
+    updated_at = db.Column(db.DateTime, nullable=False, default=get_beijing_time, onupdate=get_beijing_time, comment='更新时间')
     
     def __repr__(self):
         """

@@ -14,6 +14,7 @@ from flask import Flask
 from config import Config
 from database import db
 from model import user_model, honeypot_model, log_model, malicious_ip_model, match_rule_model, attack_stats_model, block_history_model, permission_model
+from utils.time_utils import get_beijing_time
 
 def init_data():
     """
@@ -219,7 +220,7 @@ def init_data():
                         honeypot = random.choice([ssh_honeypot, http_honeypot])
                         
                         # 随机生成攻击时间
-                        attack_time = datetime.utcnow() - timedelta(hours=random.randint(1, 72))
+                        attack_time = get_beijing_time() - timedelta(hours=random.randint(1, 72))
                         
                         # 根据蜜罐类型生成不同的日志
                         if honeypot.type == 'SSH':

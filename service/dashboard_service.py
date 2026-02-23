@@ -9,6 +9,7 @@ from model.malicious_ip_model import MaliciousIP
 from database import db
 from sqlalchemy import func, desc
 from datetime import datetime, timedelta
+from utils.time_utils import get_beijing_time
 
 class DashboardService:
     """
@@ -23,7 +24,7 @@ class DashboardService:
         :param granularity: 统计粒度，'day'按天，'month'按月
         """
         try:
-            end_date = datetime.now()
+            end_date = get_beijing_time()
             start_date = end_date - timedelta(days=days)
             
             print(f"DEBUG: Querying trend from {start_date} to {end_date} with granularity {granularity}")
@@ -156,7 +157,7 @@ class DashboardService:
         """
         try:
             total_attacks = Log.query.count()
-            today_attacks = Log.query.filter(func.date(Log.attack_time) == datetime.now().strftime('%Y-%m-%d')).count()
+            today_attacks = Log.query.filter(func.date(Log.attack_time) == get_beijing_time().strftime('%Y-%m-%d')).count()
             malicious_ips = MaliciousIP.query.count()
             
             return {

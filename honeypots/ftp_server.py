@@ -8,9 +8,13 @@ import socket
 import threading
 import sys
 import os
+# Ensure src directory is in sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import requests
 import json
 from datetime import datetime
+from utils.time_utils import get_beijing_time
 import time
 
 # 配置
@@ -23,7 +27,7 @@ def log_attack(attacker_ip, attacker_port, payload, attack_type="FTP爆破", det
     记录攻击日志到后端 API
     """
     try:
-        print(f"[{datetime.now()}] 攻击来自 {attacker_ip}:{attacker_port} - {attack_type} - {payload}")
+        print(f"[{get_beijing_time()}] 攻击来自 {attacker_ip}:{attacker_port} - {attack_type} - {payload}")
         
         # 构造日志数据
         log_data = {
@@ -45,7 +49,7 @@ def log_attack(attacker_ip, attacker_port, payload, attack_type="FTP爆破", det
 
 def handle_client(client_socket, addr):
     ip, port = addr
-    print(f"[{datetime.now()}] 新连接: {ip}:{port}")
+    print(f"[{get_beijing_time()}] 新连接: {ip}:{port}")
     
     try:
         # 发送欢迎消息
@@ -86,7 +90,7 @@ def handle_client(client_socket, addr):
         print(f"[!] 连接处理异常: {e}")
     finally:
         client_socket.close()
-        print(f"[{datetime.now()}] 连接关闭: {ip}:{port}")
+        print(f"[{get_beijing_time()}] 连接关闭: {ip}:{port}")
 
 def start_server(port):
     """

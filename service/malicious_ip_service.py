@@ -8,6 +8,7 @@ import platform
 import subprocess
 import json
 from datetime import datetime
+from utils.time_utils import get_beijing_time
 from model.malicious_ip_model import MaliciousIP
 from database import db
 from utils.ip_utils import get_ip_location
@@ -33,7 +34,7 @@ class MaliciousIPService:
             
             if malicious_ip:
                 # 更新现有记录
-                malicious_ip.last_seen = datetime.utcnow()
+                malicious_ip.last_seen = get_beijing_time()
                 malicious_ip.attack_count += 1
                 
                 # 如果位置信息缺失，则更新
@@ -154,7 +155,7 @@ class MaliciousIPService:
 
             if success:
                 malicious_ip.is_blocked = True
-                malicious_ip.blocked_time = datetime.utcnow()
+                malicious_ip.blocked_time = get_beijing_time()
                 malicious_ip.block_reason = reason
                 if duration:
                     # 这里暂不实现自动解封调度，仅记录期限

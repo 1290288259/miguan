@@ -3,8 +3,16 @@ import requests
 import datetime
 import logging
 import sys
+import os
+import time
 
-# 配置日志
+# Ensure src directory is in sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from utils.time_utils import get_beijing_time
+
+# Configure logging to use Beijing time
+logging.Formatter.converter = lambda *args: get_beijing_time().timetuple()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
 

@@ -6,6 +6,7 @@
 
 from database import db
 from datetime import datetime
+from utils.time_utils import get_beijing_time
 
 class MaliciousIP(db.Model):
     """
@@ -21,10 +22,10 @@ class MaliciousIP(db.Model):
     ip_address = db.Column(db.String(15), unique=True, nullable=False, comment='IP地址')
     
     # 首次发现时间
-    first_seen = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment='首次发现时间')
+    first_seen = db.Column(db.DateTime, nullable=False, default=get_beijing_time, comment='首次发现时间')
     
     # 最后活动时间
-    last_seen = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment='最后活动时间')
+    last_seen = db.Column(db.DateTime, nullable=False, default=get_beijing_time, comment='最后活动时间')
     
     # 攻击次数
     attack_count = db.Column(db.Integer, nullable=False, default=1, comment='攻击次数')
@@ -63,10 +64,10 @@ class MaliciousIP(db.Model):
     notes = db.Column(db.Text, nullable=True, comment='备注')
     
     # 创建时间
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment='创建时间')
+    created_at = db.Column(db.DateTime, nullable=False, default=get_beijing_time, comment='创建时间')
     
     # 更新时间
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow, comment='更新时间')
+    updated_at = db.Column(db.DateTime, nullable=False, default=get_beijing_time, onupdate=get_beijing_time, comment='更新时间')
     
     def __repr__(self):
         """

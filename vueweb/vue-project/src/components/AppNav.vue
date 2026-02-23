@@ -6,6 +6,17 @@
       </div>
       
       <div class="nav-links">
+        <!-- 主题切换按钮 -->
+        <el-button 
+          link
+          @click="toggleTheme" 
+          style="margin-right: 20px; font-size: 20px;"
+          :style="{ color: isDark ? '#fff' : '#303133' }"
+          :title="isDark ? '切换亮色主题' : '切换深色主题'"
+        >
+          <el-icon><component :is="isDark ? Sunny : Moon" /></el-icon>
+        </el-button>
+
         <!-- 未登录状态显示登录和注册按钮 -->
         <template v-if="!isLoggedIn">
           <router-link to="/login" class="nav-link">登录</router-link>
@@ -32,8 +43,9 @@
 import { computed, ref, inject, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { SwitchButton, User } from '@element-plus/icons-vue'
+import { SwitchButton, User, Moon, Sunny } from '@element-plus/icons-vue'
 import useUserStore from '../stores/user'
+import { useThemeStore } from '../stores/theme'
 
 // 路由实例
 const router = useRouter()
@@ -41,6 +53,7 @@ const router = useRouter()
 // 直接使用 useUserStore，确保获取到的是全局单例状态
 // inject 可能会因为类型或提供方式导致困惑，且此处直接使用并无不妥
 const userStore = useUserStore()
+const { isDark, toggleTheme } = useThemeStore()
 
 // 创建一个立即响应的状态变量
 const isLoggingOut = ref(false)

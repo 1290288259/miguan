@@ -379,3 +379,161 @@ pre {
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+
+/* 浅色主题变量覆盖 */
+html.light-theme {
+  --scifi-bg-color: #f0f2f5;
+  --scifi-bg-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+  --scifi-primary-color: #409eff; /* Element Plus Blue */
+  --scifi-secondary-color: #67c23a;
+  --scifi-text-color: #303133;
+  --scifi-text-muted: #606266;
+  --scifi-card-bg: rgba(255, 255, 255, 0.9);
+  --scifi-border-color: #dcdfe6;
+  --scifi-border-glow: 0 0 5px rgba(64, 158, 255, 0.2);
+  --scifi-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  --scifi-glass: none;
+
+  /* Element Plus 变量覆盖 */
+  --el-color-primary: var(--scifi-primary-color);
+  --el-bg-color: #ffffff;
+  --el-bg-color-overlay: #ffffff;
+  --el-text-color-primary: var(--scifi-text-color);
+  --el-text-color-regular: var(--scifi-text-muted);
+  --el-border-color: var(--scifi-border-color);
+  --el-border-color-light: #e4e7ed;
+  --el-fill-color-blank: #ffffff;
+}
+
+/* 浅色主题组件覆盖 */
+html.light-theme body {
+  background-color: var(--scifi-bg-color);
+  background-image: var(--scifi-bg-image);
+  color: var(--scifi-text-color);
+}
+
+/* 覆盖硬编码的深色背景 */
+html.light-theme .el-input__wrapper,
+html.light-theme .el-textarea__inner {
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 1px #dcdfe6 inset !important;
+}
+
+html.light-theme .el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--scifi-primary-color) inset !important;
+}
+
+html.light-theme .el-input__inner {
+  color: var(--scifi-text-color) !important;
+}
+
+html.light-theme .el-dialog,
+html.light-theme .el-popper,
+html.light-theme .el-select-dropdown,
+html.light-theme .el-picker-panel {
+  background-color: #ffffff !important;
+  border: 1px solid #ebeef5 !important;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light-theme .el-table th, 
+html.light-theme .el-table tr, 
+html.light-theme .el-table td {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #ebeef5 !important;
+  color: #606266 !important;
+}
+
+html.light-theme .el-table {
+  --el-table-header-bg-color: #f5f7fa !important;
+  --el-table-header-text-color: #909399 !important; 
+}
+
+html.light-theme .el-table th.el-table__cell {
+    background-color: #f5f7fa !important;
+    color: #909399 !important;
+}
+
+html.light-theme .el-button:not(.el-button--primary):not(.el-button--danger):not(.el-button--success) {
+  background-color: #ffffff !important;
+  border-color: #dcdfe6 !important;
+  color: #606266 !important;
+}
+
+html.light-theme .el-button:not(.el-button--primary):not(.el-button--danger):not(.el-button--success):hover {
+  background-color: #ecf5ff !important;
+  border-color: #c6e2ff !important;
+  color: #409eff !important;
+}
+
+html.light-theme .el-descriptions__label {
+    background-color: #f5f7fa !important;
+    color: #606266 !important;
+}
+
+html.light-theme .el-descriptions__content {
+    background-color: #ffffff !important;
+    color: #303133 !important;
+}
+
+html.light-theme .el-card {
+    background-color: #ffffff !important;
+    border: 1px solid #ebeef5 !important;
+    color: #303133 !important;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light-theme .app-nav {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border-bottom: 1px solid #e6e6e6 !important;
+    color: #333 !important;
+}
+
+html.light-theme .nav-brand h1 {
+    color: #409eff !important;
+    text-shadow: none !important;
+}
+
+html.light-theme .sidebar {
+    background-color: #ffffff !important;
+    border-right: 1px solid #dcdfe6 !important;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+html.light-theme .header {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #dcdfe6 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+html.light-theme .logo-container {
+    border-bottom: 1px solid #dcdfe6 !important;
+}
+
+html.light-theme .sidebar-menu {
+    background-color: transparent !important;
+}
+
+html.light-theme .el-menu-item {
+    color: #606266 !important;
+}
+
+html.light-theme .el-menu-item:hover {
+    background-color: #ecf5ff !important;
+    color: #409eff !important;
+}
+
+html.light-theme .el-menu-item.is-active {
+    background-color: #ecf5ff !important;
+    color: #409eff !important;
+    border-right: 2px solid #409eff;
+    font-weight: bold;
+}
+
+html.light-theme .user-info {
+    color: #606266 !important;
+}
+
+html.light-theme .toggle-sidebar {
+    color: #606266 !important;
+}
