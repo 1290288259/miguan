@@ -5,8 +5,18 @@
 import { ref, computed } from 'vue'
 import { loginUser, logoutUser, getCurrentUser } from '../services/auth'
 
+export interface User {
+  id?: number
+  username: string
+  role: number
+  phone?: string
+  email?: string
+  permissions?: string[]
+  [key: string]: any
+}
+
 // 用户状态
-const user = ref(null)
+const user = ref<User | null>(null)
 const token = ref(localStorage.getItem('token') || '')
 const refreshToken = ref(localStorage.getItem('refreshToken') || '')
 const isAuthenticated = computed(() => !!token.value)

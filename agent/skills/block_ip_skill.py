@@ -15,8 +15,8 @@ class BlockIPSkill(BaseSkill):
         
     @property
     def description(self) -> str:
-        return "封禁指定的恶意IP地址，可选择封禁时长和理由"
-    
+        return "封禁指定的恶意IP地址。参数：ip_address(必填), reason(选填), duration(选填,单位:秒), block_until(选填,格式:YYYY-MM-DD HH:MM:SS)"
+
     def execute(self, input_data: Any, context: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
         """
         执行封禁操作
@@ -26,13 +26,14 @@ class BlockIPSkill(BaseSkill):
         ip_address = None
         reason = "AI自动封禁"
         duration = None # 默认永久
+        block_until = None
         
         # 解析输入
         if isinstance(input_data, dict):
             ip_address = input_data.get('ip_address') or input_data.get('source_ip')
             reason = input_data.get('reason', reason)
-            duration = input_data.get('duration', duration) # 单位：小时
-            block_until = input_data.get('block_until', None) # 截止时间字符串
+            duration = input_data.get('duration', duration) 
+            block_until = input_data.get('block_until', None) 
         elif isinstance(input_data, str):
             ip_address = input_data
             

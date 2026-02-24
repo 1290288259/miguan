@@ -49,8 +49,31 @@ from service.ai_analysis_service import AIAnalysisService
 # 导入AI配置路由蓝图
 from route.ai_config_route import ai_config_bp
 
+# 导入恶意IP服务用于初始化
+from service.malicious_ip_service import MaliciousIPService
+
 # 导入API响应封装
 from utils.api_response import ApiResponse
+import threading
+import time
+
+def start_expired_ip_check(app):
+    """
+    启动过期IP检查线程
+    """
+    def check_loop():
+        while True:
+            try:
+                MaliciousIPService.check_expired_blocks(app)
+            except Exception as e:
+                print(f"IP检查线程出错: {str(e)}")
+            # 每60秒检查一次
+            time.sleep(60)
+            
+    # 设置为守护线程，随主线程退出而退出
+    check_thread = threading.Thread(target=check_loop, daemon=True)
+    check_thread.start()
+    print("已启动恶意IP过期自动解封检查线程")
 
 def create_app():
     """
@@ -185,6 +208,9 @@ if __name__ == '__main__':
         
     # 初始化AI模型 (传入app实例以便在线程中使用上下文)
     AIAnalysisService.init_model(app)
+
+    # 启动过期IP检查线程
+    start_expired_ip_check(app)
 
     # 启动Flask开发服务器
     # debug=False表示关闭调试模式，避免watchdog兼容性问题

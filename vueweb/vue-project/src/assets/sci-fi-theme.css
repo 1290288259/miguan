@@ -36,10 +36,6 @@
 
 body {
   background-color: var(--scifi-bg-color);
-  background-image: 
-    linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
-  background-size: 30px 30px;
   color: var(--scifi-text-color);
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }

@@ -33,11 +33,12 @@ provide('userStore', userStore)
 
 <template>
   <!-- 所有页面都显示AppNav顶部导航栏，使用key强制重新渲染 -->
-  <AppNav :key="navKey" />
+    <AppNav v-if="!isAuthPage" :key="navKey" />
   
   <!-- 登录和注册页面不使用Layout -->
   <div v-if="isAuthPage" class="auth-page">
-    <RouterView />
+    <!-- 给RouterView添加key以确保路由切换时组件正确更新 -->
+    <RouterView :key="route.fullPath" />
   </div>
   
   <!-- 其他页面使用Layout布局 -->
@@ -48,10 +49,11 @@ provide('userStore', userStore)
 
 <style scoped>
 .auth-page {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  margin-top: 60px; /* 为顶部导航栏留出空间 */
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 </style>
 

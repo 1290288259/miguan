@@ -126,7 +126,7 @@ const activeMenu = computed(() => {
 
 // 面包屑导航项
 const breadcrumbItems = computed(() => {
-  const items = []
+  const items: any[] = []
   const pathArray = route.path.split('/').filter(item => item)
   
   // 根据路径生成面包屑

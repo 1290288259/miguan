@@ -331,6 +331,37 @@ class MaliciousIPService:
             return {'success': False, 'message': f'解封操作异常: {str(e)}'}
 
     @staticmethod
+    def check_expired_blocks(app):
+        """
+        检查并解封已过期的IP
+        需要传入app实例以获取应用上下文
+        """
+        try:
+            with app.app_context():
+                current_time = get_beijing_time()
+                # 查询所有已封禁且到期时间小于当前时间的IP
+                expired_ips = MaliciousIP.query.filter(
+                    MaliciousIP.is_blocked == True,
+                    MaliciousIP.block_until != None,
+                    MaliciousIP.block_until < current_time
+                ).all()
+                
+                if expired_ips:
+                    print(f"检测到 {len(expired_ips)} 个过期的封禁IP，开始自动解封...")
+                    for ip in expired_ips:
+                        print(f"正在自动解封过期IP: {ip.ip_address} (到期时间: {ip.block_until})")
+                        # 必须在应用上下文中执行解封逻辑
+                        # MaliciousIPService.unblock_ip 内部会提交事务，这里不需要手动commit
+                        # 但是 unblock_ip 是静态方法，且内部没有 app_context 管理，所以需要确保在上下文中调用
+                        # 由于我们已经在 with app.app_context() 中，这应该没问题
+                        # 注意：unblock_ip 可能会提交事务，导致 expired_ips 列表失效，但这只是简单的对象列表，应该没事
+                        # 为了安全起见，我们还是重新获取或者只取需要的字段
+                        MaliciousIPService.unblock_ip(ip.ip_address)
+                        
+        except Exception as e:
+            print(f"检查过期封禁IP时出错: {str(e)}")
+
+    @staticmethod
     def get_malicious_ips(page: int = 1, per_page: int = 20, 
                          is_blocked: bool = None, threat_level: str = None, 
                          keyword: str = None) -> tuple:

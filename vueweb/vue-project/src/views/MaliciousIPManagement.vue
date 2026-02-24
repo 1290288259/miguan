@@ -246,7 +246,7 @@ const confirmBlock = async () => {
   
   actionLoading.value = true
   try {
-    const res = await axios.post('/malicious-ips/block', {
+    const res: any = await axios.post('/malicious-ips/block', {
       ip_address: currentIp.value.ip_address,
       reason: blockForm.reason,
       block_until: blockForm.block_until

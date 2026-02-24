@@ -450,7 +450,7 @@ const showLogDetail = (row: any) => {
 const exportDialogVisible = ref(false)
 const exportLoading = ref(false)
 const exportForm = reactive({
-  dateRange: [],
+  dateRange: [] as any[],
   attack_type: '',
   threat_level: '',
   source_ip: '',
