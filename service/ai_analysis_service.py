@@ -37,7 +37,8 @@ class AIAnalysisService:
                     "api_url": config.api_url,
                     "model_name": config.model_name,
                     "provider": config.provider,
-                    "api_key": config.api_key
+                    "api_key": config.api_key,
+                    "is_auto_block": config.is_auto_block
                 }
         except Exception as e:
             logger.error(f"获取AI配置失败: {e}")
@@ -47,7 +48,8 @@ class AIAnalysisService:
             "api_url": cls.DEFAULT_API_URL,
             "model_name": cls.DEFAULT_MODEL_NAME,
             "provider": "ollama",
-            "api_key": None
+            "api_key": None,
+            "is_auto_block": False
         }
 
     @classmethod
@@ -110,6 +112,7 @@ class AIAnalysisService:
         try:
             # 获取配置
             config = cls.get_active_config()
+            logger.info(f"AI分析使用配置: {config.get('model_name')}, 自动封禁: {config.get('is_auto_block')}")
             
             # 初始化 Agent
             agent = TrafficAnalysisAgent(config)

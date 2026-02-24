@@ -2,7 +2,7 @@
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 from agent.mcp.skill import BaseSkill
-from service.log_service import LogService
+# from service.log_service import LogService # 移除导致循环引用的导入
 from utils.time_utils import get_beijing_time
 from database import db
 from model.log_model import Log

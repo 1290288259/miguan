@@ -11,6 +11,7 @@ export interface AIConfig {
   api_key?: string
   provider: string
   is_active: boolean
+  is_auto_block: boolean
   description?: string
   created_at?: string
   updated_at?: string

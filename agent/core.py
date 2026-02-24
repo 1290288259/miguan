@@ -7,6 +7,8 @@ from agent.llm_client import LLMClient
 from agent.mcp.skill import SkillRegistry
 # 确保注册技能
 import agent.skills.decoder_skill
+import agent.skills.log_query_skill
+import agent.skills.block_ip_skill
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +24,14 @@ class TrafficAnalysisAgent:
         :param llm_config: LLM 配置信息
         """
         self.llm_client = LLMClient(llm_config)
+        # 手动注册新技能 (或者依赖模块导入时的自动注册，如果有实现的话)
+        # 这里显式实例化并注册，确保可用
+        SkillRegistry.register(agent.skills.log_query_skill.LogQuerySkill())
+        SkillRegistry.register(agent.skills.block_ip_skill.BlockIPSkill())
+        
         self.skills = SkillRegistry.get_all_skills()
-        logger.info(f"TrafficAnalysisAgent initialized with skills: {list(self.skills.keys())}")
+        self.is_auto_block = llm_config.get('is_auto_block', False)
+        logger.info(f"TrafficAnalysisAgent initialized with skills: {list(self.skills.keys())}, auto_block: {self.is_auto_block}")
 
     def analyze(self, log_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -34,15 +42,27 @@ class TrafficAnalysisAgent:
         try:
             # 1. 观察与预处理 (Observation)
             context = self._gather_context(log_data)
+            source_ip = log_data.get('source_ip')
             
-            # 2. 技能执行 (Tool Execution)
-            # 自动检测 payload 并尝试解码
+            # 2. 技能执行 (Tool Execution) - 预处理阶段
+            
+            # A. 自动检测 payload 并尝试解码
             payload = log_data.get('payload') or log_data.get('raw_log', '')
             decoded_info = self._try_skills(payload)
-            
             if decoded_info:
                 context['decoded_info'] = decoded_info
-                
+            
+            # B. 查询该 IP 的历史行为 (LogQuerySkill)
+            ip_history_info = ""
+            log_query_skill = self.skills.get('log_query')
+            if log_query_skill and source_ip:
+                history_result = log_query_skill.execute(source_ip)
+                if history_result:
+                    context['ip_history'] = history_result
+                    ip_history_info = f"\n[IP历史行为]: 近24小时请求 {history_result.get('total_logs')} 次，其中恶意 {history_result.get('malicious_logs')} 次。"
+                    if history_result.get('is_suspicious'):
+                        ip_history_info += " 该IP行为可疑。"
+
             # 3. 构建 Prompt (Prompt Engineering)
             prompt = self._build_prompt(log_data, context)
             
@@ -63,10 +83,34 @@ class TrafficAnalysisAgent:
             analysis_text = result.get("analysis", "无详细分析")
             if decoded_info:
                 analysis_text += f"\n[Agent Skill]: 检测到并解码了隐藏载荷: {decoded_info}"
+            if ip_history_info:
+                analysis_text += ip_history_info
                 
+            # 6. 自动响应 (Action) - 封禁恶意 IP
+            # 如果 AI 判定为高置信度恶意攻击，且建议封禁，则自动封禁
+            attack_type = result.get("attack_type", "Unknown")
+            confidence = float(result.get("confidence", 0.0))
+            is_malicious = attack_type != "Normal" and attack_type != "Unknown"
+            
+            if self.is_auto_block and is_malicious and confidence > 0.8:
+                # 调用封禁技能
+                block_skill = self.skills.get('block_ip')
+                if block_skill and source_ip:
+                    # 默认封禁 24 小时
+                    block_result = block_skill.execute({
+                        "ip_address": source_ip,
+                        "reason": f"AI自动封禁: {attack_type} (置信度 {confidence})",
+                        "duration": 24
+                    })
+                    
+                    if block_result and block_result.get('success'):
+                        analysis_text += f"\n[Agent Action]: 已自动封禁恶意IP {source_ip} (24小时)"
+                    else:
+                        analysis_text += f"\n[Agent Action]: 尝试封禁IP失败: {block_result.get('message')}"
+
             return {
-                "ai_attack_type": result.get("attack_type", "Unknown"),
-                "ai_confidence": float(result.get("confidence", 0.0)),
+                "ai_attack_type": attack_type,
+                "ai_confidence": confidence,
                 "ai_analysis_result": analysis_text
             }
             
@@ -115,6 +159,7 @@ class TrafficAnalysisAgent:
         request_path = log_data.get('request_path', '')
         payload = log_data.get('payload', '')
         decoded_info = context.get('decoded_info', '')
+        ip_history_info = context.get('ip_history', '')
         
         # 基础 Prompt
         prompt = f"""
@@ -134,6 +179,18 @@ class TrafficAnalysisAgent:
 Agent 使用解码技能发现了以下隐藏内容:
 {decoded_info}
 请在分析时重点考虑这些解码后的内容。
+"""
+        
+        # 如果有IP历史信息，添加到 Prompt 中
+        if ip_history_info:
+            prompt += f"""
+[IP 历史行为]
+该 IP 在近 24 小时内的行为记录：
+- 总请求次数: {ip_history_info.get('total_logs', 0)}
+- 恶意请求次数: {ip_history_info.get('malicious_logs', 0)}
+- 攻击类型分布: {ip_history_info.get('attack_type_distribution', {})}
+- 历史样本: {ip_history_info.get('recent_samples', [])}
+请结合历史行为判断当前请求是否属于持续攻击的一部分。
 """
 
         prompt += """

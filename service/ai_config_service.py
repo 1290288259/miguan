@@ -39,6 +39,7 @@ class AIConfigService:
                 api_key=data.get('api_key'),
                 provider=data.get('provider', 'ollama'),
                 is_active=is_active,
+                is_auto_block=data.get('is_auto_block', False),
                 description=data.get('description')
             )
             
@@ -88,6 +89,8 @@ class AIConfigService:
                 config.provider = data['provider']
             if 'description' in data:
                 config.description = data['description']
+            if 'is_auto_block' in data:
+                config.is_auto_block = data['is_auto_block']
             
             # 这里的is_active更新通过activate_config专门处理，避免直接更新导致多选
             

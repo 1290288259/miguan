@@ -23,6 +23,18 @@
             <el-tag v-else type="info" effect="plain">未激活</el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="is_auto_block" label="自动封禁" width="100">
+          <template #default="scope">
+            <el-switch
+              v-model="scope.row.is_auto_block"
+              active-text=""
+              inactive-text=""
+              :loading="scope.row.switching"
+              style="--el-switch-on-color: #f56c6c; --el-switch-off-color: #909399"
+              @change="(val) => handleAutoBlockChange(val, scope.row)"
+            />
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="250" fixed="right">
           <template #default="scope">
             <el-button 
@@ -108,7 +120,7 @@
           <el-input v-model="form.api_key" type="password" placeholder="如果是Ollama通常不需要" show-password />
         </el-form-item>
         <el-form-item label="描述" prop="description">
-          <el-input v-model="form.description" type="textarea" />
+          <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入配置描述" class="sci-fi-input" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -269,6 +281,26 @@ const handleTest = async (row: AIConfig) => {
     loading.close()
     console.error(error)
     ElMessage.error('测试失败: ' + (error.message || '未知错误'))
+  }
+}
+
+const handleAutoBlockChange = async (val: boolean, row: any) => {
+  row.switching = true
+  try {
+    const res: any = await updateAIConfig(row.id, { is_auto_block: val })
+    if (res.code === 200) {
+      ElMessage.success(val ? '自动封禁已开启' : '自动封禁已关闭')
+    } else {
+      ElMessage.error(res.message || '操作失败')
+      // 恢复状态
+      row.is_auto_block = !val
+    }
+  } catch (error) {
+    ElMessage.error('操作失败')
+    // 恢复状态
+    row.is_auto_block = !val
+  } finally {
+    row.switching = false
   }
 }
 

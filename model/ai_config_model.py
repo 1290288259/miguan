@@ -36,6 +36,9 @@ class AIConfig(db.Model):
     # 是否启用
     is_active = db.Column(db.Boolean, nullable=False, default=False, comment='是否启用')
     
+    # 是否启用自动封禁
+    is_auto_block = db.Column(db.Boolean, nullable=False, default=False, comment='是否启用自动封禁')
+    
     # 描述
     description = db.Column(db.Text, nullable=True, comment='描述')
     
@@ -57,6 +60,7 @@ class AIConfig(db.Model):
             'api_key': self.api_key,
             'provider': self.provider,
             'is_active': self.is_active,
+            'is_auto_block': self.is_auto_block,
             'description': self.description,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None
