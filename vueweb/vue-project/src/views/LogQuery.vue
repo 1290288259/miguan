@@ -169,6 +169,8 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
+        
+        <el-table-column prop="ai_model_name" label="AI模型" width="120" align="center" show-overflow-tooltip />
 
         <el-table-column label="操作" width="100" fixed="right" align="center">
           <template #default="scope">
@@ -226,6 +228,9 @@
               </el-tag>
               <el-tag type="info" effect="plain" class="ml-2">
                 置信度: {{ (currentLog.ai_confidence * 100).toFixed(1) }}%
+              </el-tag>
+              <el-tag v-if="currentLog.ai_model_name" type="warning" effect="plain" class="ml-2">
+                模型: {{ currentLog.ai_model_name }}
               </el-tag>
             </div>
             <div class="ai-detail">

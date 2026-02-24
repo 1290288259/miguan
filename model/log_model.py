@@ -80,6 +80,7 @@ class Log(db.Model):
     ai_confidence = db.Column(db.Float, nullable=True, comment='AI识别置信度')
     ai_analysis_result = db.Column(db.Text, nullable=True, comment='AI完整分析结果')
     ai_rule_match_consistency = db.Column(db.String(20), nullable=True, comment='AI与规则匹配一致性')
+    ai_model_name = db.Column(db.String(100), nullable=True, comment='AI模型名称')
 
     def __repr__(self):
         """
@@ -119,5 +120,6 @@ class Log(db.Model):
             'ai_attack_type': self.ai_attack_type,
             'ai_confidence': self.ai_confidence,
             'ai_analysis_result': self.ai_analysis_result,
-            'ai_rule_match_consistency': self.ai_rule_match_consistency
+            'ai_rule_match_consistency': self.ai_rule_match_consistency,
+            'ai_model_name': self.ai_model_name
         }

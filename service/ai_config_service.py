@@ -28,9 +28,9 @@ class AIConfigService:
             if count == 0:
                 is_active = True
             
-            # 如果设置为激活，先取消其他激活状态
-            if is_active:
-                AIConfig.query.update({AIConfig.is_active: False})
+            # 不再强制取消其他激活状态，允许同时存在多个激活配置
+            # if is_active:
+            #     AIConfig.query.update({AIConfig.is_active: False})
             
             config = AIConfig(
                 name=data.get('name'),
@@ -52,6 +52,20 @@ class AIConfigService:
         except Exception as e:
             db.session.rollback()
             raise e
+
+    @staticmethod
+    def get_all_active_configs():
+        """
+        获取所有激活的配置
+        """
+        return AIConfig.query.filter_by(is_active=True).all()
+
+    @staticmethod
+    def get_active_config():
+        """
+        获取当前激活的配置（兼容旧接口，返回第一个激活的配置）
+        """
+        return AIConfig.query.filter_by(is_active=True).first()
 
     @staticmethod
     def get_all_configs():
@@ -136,47 +150,22 @@ class AIConfigService:
             return False
             
         try:
-            # 获取当前激活的配置
-            current_active = AIConfig.query.filter_by(is_active=True).first()
-            
-            # 取消所有激活
-            AIConfig.query.update({AIConfig.is_active: False})
+            # 不再取消其他激活状态，允许同时存在多个激活配置
+            # current_active = AIConfig.query.filter_by(is_active=True).first()
+            # AIConfig.query.update({AIConfig.is_active: False})
             
             # 激活当前
             config.is_active = True
             db.session.commit()
-            
-            # 本地模型服务管理逻辑
+
+            # 刷新AI分析服务Worker
             try:
+                from flask import current_app
                 from service.ai_analysis_service import AIAnalysisService
-                
-                # 定义判断是否为本地Ollama的辅助函数
-                def is_local_ollama(cfg):
-                    return cfg and cfg.provider == 'ollama' and ('localhost' in cfg.api_url or '127.0.0.1' in cfg.api_url)
-
-                # 1. 如果之前是本地Ollama，且现在切到了非本地Ollama（或者是不同的本地Ollama），尝试停止旧的
-                # 注意：如果只是从一个本地Ollama切到另一个本地Ollama，通常不需要停止服务，因为端口是一样的
-                # 但如果用户明确想“切换”，我们可以保持服务运行。
-                # 只有当切换到非本地模型时，才停止本地服务。
-                if current_active and is_local_ollama(current_active):
-                    if not is_local_ollama(config):
-                        # 切换到了非本地模型，停止本地服务
-                        AIAnalysisService.stop_local_ollama()
-                
-                # 2. 如果新激活的是本地Ollama，尝试启动
-                if is_local_ollama(config):
-                    # 在新线程中启动，避免阻塞接口返回
-                    import threading
-                    def start_service():
-                        AIAnalysisService.ensure_local_ollama_started(config.api_url, config.model_name)
-                    
-                    t = threading.Thread(target=start_service)
-                    t.daemon = True
-                    t.start()
-                    
+                AIAnalysisService.refresh_workers(current_app)
             except Exception as e:
-                print(f"本地模型服务自动管理失败: {e}")
-
+                print(f"刷新AI Worker失败: {e}")
+            
             return True
         except Exception as e:
             db.session.rollback()
@@ -197,8 +186,12 @@ class AIConfigService:
             
             # 本地模型服务管理逻辑
             try:
+                from flask import current_app
                 from service.ai_analysis_service import AIAnalysisService
                 
+                # 刷新Worker
+                AIAnalysisService.refresh_workers(current_app)
+
                 # 如果禁用的配置是本地Ollama，尝试停止服务
                 if config.provider == 'ollama' and ('localhost' in config.api_url or '127.0.0.1' in config.api_url):
                     AIAnalysisService.stop_local_ollama()
