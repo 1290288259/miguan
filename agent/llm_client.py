@@ -76,20 +76,12 @@ class LLMClient:
                 return self._extract_content(response.json())
                 
             except requests.exceptions.RequestException as e:
-                # 记录初次失败
-                logger.warning(f"第一次连接尝试失败: {str(e)}")
+                # 记录失败，不再自动尝试启动服务
+                logger.warning(f"连接 AI 模型失败: {str(e)}")
                 
-                # 如果是本地Ollama且连接失败，尝试启动服务
+                # 仅针对本地 Ollama 记录提示信息
                 if self.provider == 'ollama' and ('localhost' in self.api_url or '127.0.0.1' in self.api_url):
-                    logger.info("检测到本地Ollama连接失败，尝试自动启动服务...")
-                    if self.ensure_local_ollama_started(self.api_url, self.model_name):
-                         # 服务启动后重试
-                        try:
-                            response = send_request(self.api_url)
-                            response.raise_for_status()
-                            return self._extract_content(response.json())
-                        except Exception as retry_e:
-                            logger.error(f"重试失败: {str(retry_e)}")
+                    logger.warning("本地 Ollama 服务可能未启动，请在 AI 配置中点击启用以启动服务")
 
             # 智能重试逻辑：处理 404 或连接失败 (尝试不同的 endpoint)
             new_url = None

@@ -246,24 +246,7 @@ class AIConfigService:
             try:
                 response = send_request(config.api_url)
             except requests.exceptions.ConnectionError:
-                # 尝试自动启动本地Ollama服务
-                recovered = False
-                if config.provider == 'ollama' and ('localhost' in config.api_url or '127.0.0.1' in config.api_url):
-                    try:
-                        # 局部导入避免循环依赖
-                        from service.ai_analysis_service import AIAnalysisService
-                        # 尝试启动服务
-                        if AIAnalysisService.ensure_local_ollama_started(config.api_url, config.model_name):
-                            try:
-                                response = send_request(config.api_url)
-                                recovered = True
-                            except:
-                                pass
-                    except Exception as e:
-                        print(f"尝试启动本地Ollama失败: {e}")
-                
-                if not recovered:
-                    raise Exception("连接失败：无法连接到目标服务器，请检查地址和端口是否正确，以及服务是否已启动。")
+                raise Exception("连接失败：无法连接到目标服务器，请检查地址和端口是否正确，以及 Ollama 服务是否已启动。")
             except requests.exceptions.Timeout:
                 raise Exception("连接超时：服务器响应时间过长。")
 

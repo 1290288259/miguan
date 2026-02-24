@@ -70,7 +70,7 @@ class AIAnalysisService:
     def init_model(cls, app=None):
         """
         初始化AI模型
-        检查Ollama服务状态，如果未启动则尝试启动，并预加载模型
+        仅加载当前激活配置，不再自动启动本地 Ollama 服务
         """
         def _init_process(app_obj):
             # 如果提供了app对象，则使用上下文
@@ -85,15 +85,13 @@ class AIAnalysisService:
                 model_name = config['model_name']
                 provider = config['provider']
                 
-                # 仅针对本地Ollama服务进行自动启动尝试
-                if provider == 'ollama' and ('localhost' in api_url or '127.0.0.1' in api_url):
-                    if not cls.ensure_local_ollama_started(api_url, model_name):
-                        print("Ollama服务无法启动，AI分析功能可能不可用")
-                else:
-                    print(f"当前AI配置 ({provider} - {model_name}) 不需要本地自动启动检查")
+                # 记录当前配置，不再自动启动服务
+                print(f"AI模型初始化完成: 使用 {provider} 模型 {model_name}")
+                logger.info(f"AI模型初始化完成: 使用 {provider} 模型 {model_name}")
             
             except Exception as e:
                 print(f"初始化AI模型失败: {e}")
+                logger.error(f"初始化AI模型失败: {e}")
             finally:
                 if context:
                     context.pop()
