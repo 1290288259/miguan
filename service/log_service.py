@@ -447,58 +447,8 @@ class LogService:
             db.session.add(log)
             db.session.commit()
             
-            # 异步执行AI分析（避免阻塞主流程）
+            # 将AI分析任务添加到队列（避免并发过多导致AI服务超时）
             try:
-                def run_ai_analysis(app, log_id, log_data_dict):
-                    with app.app_context():
-                        try:
-                            # 重新获取日志对象
-                            log_entry = Log.query.get(log_id)
-                            if not log_entry:
-                                return
-                            
-                            # 执行分析
-                            ai_result = AIAnalysisService.analyze_log(log_data_dict)
-                            
-                            # 更新日志字段
-                            ai_attack_type = ai_result.get('ai_attack_type')
-                            log_entry.ai_attack_type = ai_attack_type
-                            log_entry.ai_confidence = ai_result.get('ai_confidence')
-                            log_entry.ai_analysis_result = ai_result.get('ai_analysis_result')
-                            
-                            # 判断与规则匹配是否一致
-                            # 规则判断: log_entry.is_malicious (True/False)
-                            # AI判断: ai_attack_type (Normal/Other)
-                            rule_is_malicious = log_entry.is_malicious
-                            
-                            # 归一化 AI 判定结果
-                            safe_types = ['normal', 'page visit', 'safe', 'unknown', '正常流量', '正常']
-                            ai_type_lower = ai_attack_type.lower() if ai_attack_type else 'unknown'
-                            ai_is_malicious = ai_type_lower not in safe_types
-                            
-                            # 特殊处理: 如果规则判定为 'Web Visit' 且 AI 判定为正常流量，视为一致
-                            # 用户需求: 规则判断为网络访问，ai判断为正常流量，应该为一致
-                            rule_attack_type = log_entry.attack_type
-                            if rule_attack_type and rule_attack_type.lower() == 'web visit' and not ai_is_malicious:
-                                log_entry.ai_rule_match_consistency = '一致'
-                            elif rule_is_malicious == ai_is_malicious:
-                                log_entry.ai_rule_match_consistency = '一致'
-                            else:
-                                log_entry.ai_rule_match_consistency = '不一致'
-                            
-                            db.session.commit()
-                            print(f"日志 ID {log_id} AI分析完成: {ai_attack_type}, 一致性: {log_entry.ai_rule_match_consistency}")
-                            
-                        except Exception as e:
-                            print(f"异步AI分析出错: {str(e)}")
-                            
-                # 获取当前app实例以便在线程中使用上下文
-                from flask import current_app
-                # 需要使用app的真实代理，因为current_app是线程局部的
-                # 注意：在某些部署方式下，这种传递app的方式可能需要调整
-                # 这里假设是简单的单进程部署
-                app = current_app._get_current_object()
-                
                 # 准备传给线程的数据（避免直接传ORM对象）
                 log_data_dict = log.to_dict()
                 # 补充可能缺少的原始字段
@@ -506,15 +456,11 @@ class LogService:
                 log_data_dict['protocol'] = log.protocol
                 log_data_dict['request_path'] = log.request_path
                 
-                thread = threading.Thread(
-                    target=run_ai_analysis,
-                    args=(app, log.id, log_data_dict)
-                )
-                thread.daemon = True
-                thread.start()
+                # 添加到队列
+                AIAnalysisService.add_task(log.id, log_data_dict)
                 
             except Exception as e:
-                print(f"启动AI分析线程失败: {str(e)}")
+                print(f"添加AI分析任务失败: {str(e)}")
             
             # 如果是恶意流量，记录到恶意IP表
             if is_malicious:
