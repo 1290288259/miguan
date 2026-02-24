@@ -4,13 +4,17 @@
 提供测试API接口
 """
 
-from flask import request
+from flask import request, Blueprint
 from utils.api_response import ApiResponse
 from service.test_service import TestService
+
+# 创建测试路由蓝图
+test_bp = Blueprint('test', __name__, url_prefix='/api/test')
 
 # 创建测试服务实例
 test_service = TestService()
 
+@test_bp.route('/hello', methods=['GET'])
 def hello():
     """
     测试问候接口
@@ -33,6 +37,7 @@ def hello():
             details={'error': str(e)}
         )
 
+@test_bp.route('/hello_with_name', methods=['GET', 'POST'])
 def hello_with_name():
     """
     带用户名的测试问候接口

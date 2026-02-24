@@ -7,12 +7,14 @@ AI配置路由
 from flask import Blueprint, request, jsonify
 from service.ai_config_service import AIConfigService
 from utils.api_response import ApiResponse
+from route.user_route import token_required
 from functools import wraps
 
 # 创建蓝图
 ai_config_bp = Blueprint('ai_config', __name__, url_prefix='/api/ai-config')
 
 @ai_config_bp.route('/', methods=['GET'])
+@token_required
 def get_configs():
     """
     获取所有配置
@@ -24,6 +26,7 @@ def get_configs():
         return ApiResponse.error(message=str(e))
 
 @ai_config_bp.route('/', methods=['POST'])
+@token_required
 def create_config():
     """
     创建配置
@@ -41,6 +44,7 @@ def create_config():
         return ApiResponse.error(message=f"创建失败: {str(e)}")
 
 @ai_config_bp.route('/<int:config_id>', methods=['PUT'])
+@token_required
 def update_config(config_id):
     """
     更新配置
@@ -57,6 +61,7 @@ def update_config(config_id):
         return ApiResponse.error(message=f"更新失败: {str(e)}")
 
 @ai_config_bp.route('/<int:config_id>', methods=['DELETE'])
+@token_required
 def delete_config(config_id):
     """
     删除配置
@@ -70,6 +75,7 @@ def delete_config(config_id):
         return ApiResponse.error(message=f"删除失败: {str(e)}")
 
 @ai_config_bp.route('/<int:config_id>/activate', methods=['POST'])
+@token_required
 def activate_config(config_id):
     """
     激活配置
@@ -83,6 +89,7 @@ def activate_config(config_id):
         return ApiResponse.error(message=f"激活失败: {str(e)}")
 
 @ai_config_bp.route('/<int:config_id>/deactivate', methods=['POST'])
+@token_required
 def deactivate_config(config_id):
     """
     禁用配置
@@ -96,6 +103,7 @@ def deactivate_config(config_id):
         return ApiResponse.error(message=f"禁用失败: {str(e)}")
 
 @ai_config_bp.route('/<int:config_id>/test', methods=['POST'])
+@token_required
 def test_config(config_id):
     """
     测试配置连接

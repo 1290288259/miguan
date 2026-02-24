@@ -31,7 +31,7 @@
               inactive-text=""
               :loading="scope.row.switching"
               style="--el-switch-on-color: #f56c6c; --el-switch-off-color: #909399"
-              @change="(val) => handleAutoBlockChange(val, scope.row)"
+              @change="(val: boolean) => handleAutoBlockChange(val, scope.row)"
             />
           </template>
         </el-table-column>

@@ -41,7 +41,7 @@ def init_data():
                 # 创建管理员用户
                 admin_user = user_model.User(
                     username='administrator',
-                    password='e10adc3949ba59abbe56e057f20f883e',  # 123456的MD5值
+                    password='8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',  # 123456的SHA256值
                     role=1  # 管理员角色
                 )
                 db.session.add(admin_user)

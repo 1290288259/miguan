@@ -4,12 +4,16 @@
 处理用户相关的HTTP请求
 """
 
-from flask import request, jsonify
+from flask import request, jsonify, Blueprint
 from functools import wraps
 import jwt
 from utils.api_response import ApiResponse
 from service.user_service import create_user, create_admin_user, login_user, verify_jwt_token, get_user_detail, update_user_detail
 
+# 创建用户路由蓝图
+user_bp = Blueprint('user', __name__, url_prefix='/api/user')
+
+@user_bp.route('/register', methods=['POST'])
 def register():
     """
     用户注册接口
@@ -78,6 +82,7 @@ def register():
         # 处理异常情况
         return ApiResponse.server_error(message=f"服务器内部错误: {str(e)}")
 
+@user_bp.route('/login', methods=['POST'])
 def login():
     """
     用户登录接口
@@ -168,6 +173,8 @@ def token_required(f):
     
     return decorated
 
+@user_bp.route('/me', methods=['GET'])
+@token_required
 def get_current_user():
     """
     获取当前用户信息
@@ -176,29 +183,26 @@ def get_current_user():
         JSON: 当前用户信息
     """
     try:
-        # 使用token_required装饰器验证令牌
-        @token_required
-        def _get_current_user():
-            # 从请求上下文中获取用户信息
-            token_info = request.current_user
-            user_id = token_info['user_id']
-            
-            # 获取用户详细信息
-            result = get_user_detail(user_id)
-            
-            if result['success']:
-                return ApiResponse.success(
-                    data=result['data'],
-                    message="获取用户信息成功"
-                )
-            else:
-                return ApiResponse.bad_request(message=result['message'])
+        # 从请求上下文中获取用户信息
+        token_info = request.current_user
+        user_id = token_info['user_id']
         
-        return _get_current_user()
+        # 获取用户详细信息
+        result = get_user_detail(user_id)
+        
+        if result['success']:
+            return ApiResponse.success(
+                data=result['data'],
+                message="获取用户信息成功"
+            )
+        else:
+            return ApiResponse.bad_request(message=result['message'])
     except Exception as e:
         # 处理异常情况
         return ApiResponse.server_error(message=f"服务器内部错误: {str(e)}")
 
+@user_bp.route('/me', methods=['PUT'])
+@token_required
 def update_current_user():
     """
     更新当前用户信息
@@ -211,48 +215,44 @@ def update_current_user():
         JSON: 更新结果
     """
     try:
-        # 使用token_required装饰器验证令牌
-        @token_required
-        def _update_current_user():
-            # 从请求上下文中获取用户信息
-            token_info = request.current_user
-            user_id = token_info['user_id']
-            
-            # 获取请求中的JSON数据
-            data = request.get_json()
-            if not data:
-                return ApiResponse.bad_request(message="没有提供更新数据")
-                
-            phone = data.get('phone')
-            email = data.get('email')
-            password = data.get('password')
-            old_password = data.get('old_password')
-            
-            # 验证手机号格式（简单验证）
-            if phone and len(phone) < 11:
-                return ApiResponse.bad_request(message="手机号格式不正确")
-                
-            # 验证邮箱格式（简单验证）
-            if email and '@' not in email:
-                return ApiResponse.bad_request(message="邮箱格式不正确")
-            
-            # 验证新密码长度
-            if password and len(password) < 6:
-                return ApiResponse.bad_request(message="新密码长度不能少于6位")
-
-            # 调用服务层更新用户信息
-            result = update_user_detail(user_id, phone=phone, email=email, password=password, old_password=old_password)
-            
-            if result['success']:
-                return ApiResponse.success(message=result['message'])
-            else:
-                return ApiResponse.bad_request(message=result['message'])
+        # 从请求上下文中获取用户信息
+        token_info = request.current_user
+        user_id = token_info['user_id']
         
-        return _update_current_user()
+        # 获取请求中的JSON数据
+        data = request.get_json()
+        if not data:
+            return ApiResponse.bad_request(message="没有提供更新数据")
+            
+        phone = data.get('phone')
+        email = data.get('email')
+        password = data.get('password')
+        old_password = data.get('old_password')
+        
+        # 验证手机号格式（简单验证）
+        if phone and len(phone) < 11:
+            return ApiResponse.bad_request(message="手机号格式不正确")
+            
+        # 验证邮箱格式（简单验证）
+        if email and '@' not in email:
+            return ApiResponse.bad_request(message="邮箱格式不正确")
+        
+        # 验证新密码长度
+        if password and len(password) < 6:
+            return ApiResponse.bad_request(message="新密码长度不能少于6位")
+
+        # 调用服务层更新用户信息
+        result = update_user_detail(user_id, phone=phone, email=email, password=password, old_password=old_password)
+        
+        if result['success']:
+            return ApiResponse.success(message=result['message'])
+        else:
+            return ApiResponse.bad_request(message=result['message'])
     except Exception as e:
         # 处理异常情况
         return ApiResponse.server_error(message=f"服务器内部错误: {str(e)}")
 
+@user_bp.route('/create_admin', methods=['POST'])
 def create_admin():
     """
     创建管理员用户接口

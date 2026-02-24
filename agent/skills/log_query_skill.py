@@ -47,8 +47,8 @@ class LogQuerySkill(BaseSkill):
             # 注意：这里直接使用 SQLAlchemy 查询，避免循环依赖 Service 层过多的逻辑
             logs = Log.query.filter(
                 Log.source_ip == ip_address,
-                Log.timestamp >= start_time,
-                Log.timestamp <= end_time
+                Log.attack_time >= start_time,
+                Log.attack_time <= end_time
             ).all()
             
             if not logs:
@@ -77,7 +77,7 @@ class LogQuerySkill(BaseSkill):
                 # 收集最近的5条日志摘要作为样本
                 if len(recent_logs) < 5:
                     recent_logs.append({
-                        "timestamp": log.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                        "timestamp": log.attack_time.strftime("%Y-%m-%d %H:%M:%S"),
                         "request_path": log.request_path,
                         "attack_type": log.attack_type,
                         "payload": log.payload[:100] if log.payload else ""
