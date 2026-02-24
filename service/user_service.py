@@ -134,7 +134,7 @@ def get_user_detail(user_id):
     except Exception as e:
         return {'success': False, 'message': str(e)}
 
-def update_user_detail(user_id, phone=None, email=None):
+def update_user_detail(user_id, phone=None, email=None, password=None, old_password=None):
     """
     更新用户详细信息
     
@@ -142,6 +142,8 @@ def update_user_detail(user_id, phone=None, email=None):
         user_id: 用户ID
         phone: 手机号
         email: 邮箱
+        password: 新密码
+        old_password: 旧密码
         
     返回:
         dict: 包含操作结果的字典
@@ -150,6 +152,24 @@ def update_user_detail(user_id, phone=None, email=None):
         user = User.query.get(user_id)
         if not user:
             return {'success': False, 'message': '用户不存在'}
+            
+        # 如果需要修改密码
+        if password:
+            if not old_password:
+                return {'success': False, 'message': '修改密码需要提供旧密码'}
+            
+            # 验证旧密码
+            sha256_hash = hashlib.sha256()
+            sha256_hash.update(old_password.encode('utf-8'))
+            hashed_old_password = sha256_hash.hexdigest()
+            
+            if user.password != hashed_old_password:
+                return {'success': False, 'message': '旧密码错误'}
+                
+            # 更新密码
+            sha256_hash_new = hashlib.sha256()
+            sha256_hash_new.update(password.encode('utf-8'))
+            user.password = sha256_hash_new.hexdigest()
             
         # 查找或创建扩展信息
         user_info = UserInfo.query.filter_by(user_id=user_id).first()

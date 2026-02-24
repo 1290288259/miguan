@@ -47,11 +47,13 @@ export const getCurrentUser = async () => {
 }
 
 // 更新当前用户信息接口
-export const updateUserInfo = async (phone?: string, email?: string) => {
+export const updateUserInfo = async (phone?: string, email?: string, password?: string, old_password?: string) => {
   try {
     const response = await axios.put('/user/me', {
       phone,
-      email
+      email,
+      password,
+      old_password
     })
     return response
   } catch (error) {

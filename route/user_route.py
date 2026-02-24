@@ -225,6 +225,8 @@ def update_current_user():
                 
             phone = data.get('phone')
             email = data.get('email')
+            password = data.get('password')
+            old_password = data.get('old_password')
             
             # 验证手机号格式（简单验证）
             if phone and len(phone) < 11:
@@ -234,8 +236,12 @@ def update_current_user():
             if email and '@' not in email:
                 return ApiResponse.bad_request(message="邮箱格式不正确")
             
+            # 验证新密码长度
+            if password and len(password) < 6:
+                return ApiResponse.bad_request(message="新密码长度不能少于6位")
+
             # 调用服务层更新用户信息
-            result = update_user_detail(user_id, phone=phone, email=email)
+            result = update_user_detail(user_id, phone=phone, email=email, password=password, old_password=old_password)
             
             if result['success']:
                 return ApiResponse.success(message=result['message'])
