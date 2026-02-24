@@ -14,7 +14,9 @@ from utils.time_utils import get_beijing_time
 from typing import Dict, List, Optional, Tuple
 import re
 import threading
-
+import csv
+import io
+from io import StringIO
 
 class LogService:
     """
@@ -114,6 +116,142 @@ class LogService:
             # 记录错误日志
             print(f"查询日志时发生错误: {str(e)}")
             return [], {'error': str(e)}
+
+    @staticmethod
+    def export_logs(attack_type: str = None, threat_level: str = None, 
+                   protocol: str = None, start_time: str = None, 
+                   end_time: str = None, keyword: str = None,
+                   source_ip: str = None, target_ip: str = None,
+                   target_port: int = None, is_malicious: bool = None,
+                   is_blocked: bool = None) -> Tuple[str, str]:
+        """
+        导出日志
+        
+        参数:
+            attack_type: 攻击类型过滤条件
+            threat_level: 威胁等级过滤条件
+            protocol: 协议类型过滤条件
+            start_time: 开始时间过滤条件
+            end_time: 结束时间过滤条件
+            keyword: 关键字，可以匹配多个字段
+            source_ip: 源IP
+            target_ip: 目标IP
+            target_port: 目标端口
+            is_malicious: 是否为恶意IP
+            is_blocked: 是否已封禁
+            
+        返回:
+            Tuple[str, str]: (csv_content, filename) 或 (None, error_message)
+        """
+        try:
+            # 构建查询
+            query = Log.query
+            
+            # 添加过滤条件
+            if attack_type:
+                query = query.filter(Log.attack_type == attack_type)
+                
+            if threat_level:
+                query = query.filter(Log.threat_level == threat_level)
+                
+            if protocol:
+                query = query.filter(Log.protocol == protocol)
+
+            if source_ip:
+                query = query.filter(Log.source_ip.like(f'%{source_ip}%'))
+
+            if target_ip:
+                query = query.filter(Log.target_ip.like(f'%{target_ip}%'))
+
+            if target_port is not None:
+                query = query.filter(Log.target_port == target_port)
+
+            if is_malicious is not None:
+                query = query.filter(Log.is_malicious == is_malicious)
+
+            if is_blocked is not None:
+                query = query.filter(Log.is_blocked == is_blocked)
+                
+            # 时间范围检查
+            if start_time and end_time:
+                start_datetime = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+                end_datetime = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+                
+                # 检查时间范围是否超过一年
+                time_diff = end_datetime - start_datetime
+                if time_diff.days > 365:
+                    return None, "导出时间范围不能超过一年"
+                    
+                query = query.filter(Log.attack_time >= start_datetime)
+                query = query.filter(Log.attack_time <= end_datetime)
+            elif start_time:
+                start_datetime = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+                query = query.filter(Log.attack_time >= start_datetime)
+            elif end_time:
+                end_datetime = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+                query = query.filter(Log.attack_time <= end_datetime)
+            
+            # 添加关键字查询条件
+            if keyword:
+                query = query.filter(
+                    Log.attack_type.like(f'%{keyword}%') |
+                    Log.threat_level.like(f'%{keyword}%') |
+                    Log.protocol.like(f'%{keyword}%') |
+                    Log.source_ip.like(f'%{keyword}%') |
+                    Log.target_ip.like(f'%{keyword}%') |
+                    Log.attack_description.like(f'%{keyword}%') |
+                    Log.raw_log.like(f'%{keyword}%') |
+                    Log.request_path.like(f'%{keyword}%') |
+                    Log.payload.like(f'%{keyword}%') |
+                    Log.user_agent.like(f'%{keyword}%') |
+                    Log.notes.like(f'%{keyword}%')
+                )
+            
+            # 按攻击时间倒序排列
+            query = query.order_by(Log.attack_time.desc())
+            
+            # 获取所有符合条件的日志
+            logs = query.all()
+            
+            # 生成CSV内容
+            output = StringIO()
+            writer = csv.writer(output)
+            
+            # 写入表头
+            headers = ['ID', '攻击时间', '攻击类型', '威胁等级', '源IP', '源端口', '目标IP', '目标端口', '协议', '请求路径', '是否恶意', '是否阻断', '攻击描述']
+            writer.writerow(headers)
+            
+            # 写入数据
+            for log in logs:
+                writer.writerow([
+                    log.id,
+                    log.attack_time.strftime('%Y-%m-%d %H:%M:%S') if log.attack_time else '',
+                    log.attack_type or '',
+                    log.threat_level or '',
+                    log.source_ip or '',
+                    log.source_port or '',
+                    log.target_ip or '',
+                    log.target_port or '',
+                    log.protocol or '',
+                    log.request_path or '',
+                    '是' if log.is_malicious else '否',
+                    '是' if log.is_blocked else '否',
+                    log.attack_description or ''
+                ])
+            
+            # 获取CSV内容
+            csv_content = output.getvalue()
+            output.close()
+            
+            # 生成文件名
+            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+            filename = f'logs_export_{timestamp}.csv'
+            
+            return csv_content, filename
+            
+        except Exception as e:
+            print(f"导出日志时发生错误: {str(e)}")
+            return None, str(e)
 
     @staticmethod
     def get_log_by_id(log_id: int) -> Optional[Dict]:

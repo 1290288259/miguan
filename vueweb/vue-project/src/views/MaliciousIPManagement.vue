@@ -116,6 +116,15 @@
         <el-form-item label="封禁原因">
           <el-input v-model="blockForm.reason" placeholder="请输入封禁原因" />
         </el-form-item>
+        <el-form-item label="解封时间">
+          <el-date-picker
+            v-model="blockForm.block_until"
+            type="datetime"
+            placeholder="选择解封时间"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 100%"
+          />
+        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -150,7 +159,8 @@ const queryForm = reactive({
 const blockDialogVisible = ref(false)
 const currentIp = ref<any>(null)
 const blockForm = reactive({
-  reason: ''
+  reason: '',
+  block_until: ''
 })
 
 // 获取数据
@@ -223,25 +233,30 @@ const handleCurrentChange = (val: number) => {
 // 封禁相关
 const handleBlock = (row: any) => {
   currentIp.value = row
-  blockForm.reason = `因频繁攻击封禁 (${row.attack_count}次)`
+  blockForm.reason = ''
+  blockForm.block_until = ''
   blockDialogVisible.value = true
 }
 
 const confirmBlock = async () => {
-  if (!currentIp.value) return
+  if (!blockForm.reason) {
+    ElMessage.warning('请输入封禁原因')
+    return
+  }
   
   actionLoading.value = true
   try {
-    await axios.post('/malicious-ips/block', {
+    const res = await axios.post('/malicious-ips/block', {
       ip_address: currentIp.value.ip_address,
-      reason: blockForm.reason
+      reason: blockForm.reason,
+      block_until: blockForm.block_until
     })
-    ElMessage.success('封禁成功')
+    
+    ElMessage.success(res.message)
     blockDialogVisible.value = false
     fetchData()
   } catch (error) {
-    console.error('封禁失败', error)
-    // 错误处理通常由axios拦截器处理，但这里也可以额外提示
+    console.error('封禁操作失败', error)
   } finally {
     actionLoading.value = false
   }

@@ -234,6 +234,100 @@
         <el-descriptions-item label="封禁时间">{{ formatDateTime(currentLog.blocked_time) || '未封禁' }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
+    
+    <!-- 导出日志对话框 -->
+    <el-dialog v-model="exportDialogVisible" title="导出日志" width="500px">
+      <el-form :model="exportForm" label-width="100px">
+        <el-form-item label="时间范围">
+          <el-date-picker
+            v-model="exportForm.dateRange"
+            type="datetimerange"
+            range-separator="至"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+          />
+          <div class="form-tip" style="color: #909399; font-size: 12px; margin-top: 5px;">
+            注意：导出时间范围不能超过一年
+          </div>
+        </el-form-item>
+        
+        <el-form-item label="攻击类型">
+          <el-select v-model="exportForm.attack_type" placeholder="请选择攻击类型" clearable style="width: 100%">
+            <el-option label="全部" value=""></el-option>
+            <el-option label="SQL注入" value="SQL注入"></el-option>
+            <el-option label="XSS" value="XSS"></el-option>
+            <el-option label="命令注入" value="命令注入"></el-option>
+            <el-option label="目录遍历" value="目录遍历"></el-option>
+            <el-option label="文件包含" value="文件包含"></el-option>
+            <el-option label="CSRF" value="CSRF"></el-option>
+            <el-option label="SSRF" value="SSRF"></el-option>
+            <el-option label="暴力破解" value="暴力破解"></el-option>
+            <el-option label="扫描探测" value="扫描探测"></el-option>
+            <el-option label="拒绝服务" value="拒绝服务"></el-option>
+            <el-option label="凭证填充" value="凭证填充"></el-option>
+            <el-option label="字典攻击" value="字典攻击"></el-option>
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item label="威胁等级">
+          <el-select v-model="exportForm.threat_level" placeholder="请选择威胁等级" clearable style="width: 100%">
+            <el-option label="全部" value=""></el-option>
+            <el-option label="低" value="low"></el-option>
+            <el-option label="中" value="medium"></el-option>
+            <el-option label="高" value="high"></el-option>
+            <el-option label="严重" value="critical"></el-option>
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item label="协议类型">
+          <el-select v-model="exportForm.protocol" placeholder="请选择协议类型" clearable style="width: 100%">
+            <el-option label="全部" value=""></el-option>
+            <el-option label="HTTP" value="HTTP"></el-option>
+            <el-option label="HTTPS" value="HTTPS"></el-option>
+            <el-option label="SSH" value="SSH"></el-option>
+            <el-option label="FTP" value="FTP"></el-option>
+            <el-option label="TELNET" value="TELNET"></el-option>
+            <el-option label="RDP" value="RDP"></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="源IP">
+          <el-input v-model="exportForm.source_ip" placeholder="请输入源IP" clearable></el-input>
+        </el-form-item>
+
+        <el-form-item label="目标IP">
+          <el-input v-model="exportForm.target_ip" placeholder="请输入目标IP" clearable></el-input>
+        </el-form-item>
+
+        <el-form-item label="目标端口">
+          <el-input v-model="exportForm.target_port" placeholder="请输入目标端口" clearable type="number"></el-input>
+        </el-form-item>
+
+        <el-form-item label="是否恶意">
+          <el-select v-model="exportForm.is_malicious" placeholder="请选择" clearable style="width: 100%">
+            <el-option label="全部" value=""></el-option>
+            <el-option label="是" value="true"></el-option>
+            <el-option label="否" value="false"></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="是否封禁">
+          <el-select v-model="exportForm.is_blocked" placeholder="请选择" clearable style="width: 100%">
+            <el-option label="全部" value=""></el-option>
+            <el-option label="是" value="true"></el-option>
+            <el-option label="否" value="false"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="exportDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmExport" :loading="exportLoading">确认导出</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -242,6 +336,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, Download, View } from '@element-plus/icons-vue'
 import axios from '../utils/axios'
+import rawAxios from 'axios'
 
 // 查询表单数据
 const queryForm = reactive({
@@ -351,9 +446,125 @@ const showLogDetail = (row: any) => {
   detailDialogVisible.value = true
 }
 
+// 导出日志相关数据
+const exportDialogVisible = ref(false)
+const exportLoading = ref(false)
+const exportForm = reactive({
+  dateRange: [],
+  attack_type: '',
+  threat_level: '',
+  source_ip: '',
+  target_ip: '',
+  target_port: '',
+  protocol: '',
+  is_malicious: '',
+  is_blocked: ''
+})
+
 // 导出日志
 const exportLogs = () => {
-  ElMessage.info('导出功能开发中...')
+  exportDialogVisible.value = true
+}
+
+// 确认导出
+const confirmExport = async () => {
+  if (exportForm.dateRange && exportForm.dateRange.length === 2) {
+    const startTime = new Date(exportForm.dateRange[0])
+    const endTime = new Date(exportForm.dateRange[1])
+    const diffTime = Math.abs(endTime.getTime() - startTime.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays > 365) {
+      ElMessage.warning('导出时间范围不能超过一年')
+      return
+    }
+  }
+
+  exportLoading.value = true
+  try {
+    const params: any = {}
+    
+    if (exportForm.attack_type) {
+      params.attack_type = exportForm.attack_type
+    }
+    
+    if (exportForm.threat_level) {
+      params.threat_level = exportForm.threat_level
+    }
+    
+    if (exportForm.source_ip) {
+      params.source_ip = exportForm.source_ip
+    }
+    
+    if (exportForm.target_ip) {
+      params.target_ip = exportForm.target_ip
+    }
+    
+    if (exportForm.target_port) {
+      params.target_port = exportForm.target_port
+    }
+    
+    if (exportForm.protocol) {
+      params.protocol = exportForm.protocol
+    }
+    
+    if (exportForm.is_malicious) {
+      params.is_malicious = exportForm.is_malicious
+    }
+    
+    if (exportForm.is_blocked) {
+      params.is_blocked = exportForm.is_blocked
+    }
+    
+    if (exportForm.dateRange && exportForm.dateRange.length === 2) {
+      params.start_time = exportForm.dateRange[0]
+      params.end_time = exportForm.dateRange[1]
+    }
+    
+    // 获取token
+    const token = localStorage.getItem('token')
+    
+    // 使用原生axios请求以获取Blob数据
+    const response = await rawAxios.get('/api/logs/export', {
+      params,
+      responseType: 'blob',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    
+    // 创建下载链接
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    
+    // 获取文件名
+    let filename = 'logs_export.csv'
+    const contentDisposition = response.headers['content-disposition']
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(/filename=(.+)/)
+      if (fileNameMatch.length === 2) {
+        filename = fileNameMatch[1]
+      }
+    }
+    
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
+    link.click()
+    
+    // 清理
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    ElMessage.success('导出成功')
+    exportDialogVisible.value = false
+    
+  } catch (error) {
+    console.error('导出日志出错:', error)
+    ElMessage.error('导出失败，请稍后重试')
+  } finally {
+    exportLoading.value = false
+  }
 }
 
 // 格式化日期时间

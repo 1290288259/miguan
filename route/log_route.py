@@ -4,7 +4,7 @@
 处理日志相关的HTTP请求
 """
 
-from flask import Blueprint, request, current_app
+from flask import Blueprint, request, current_app, make_response
 from utils.api_response import ApiResponse
 from service.log_service import LogService
 from functools import wraps
@@ -106,6 +106,83 @@ def get_logs():
             'logs': logs,
             'pagination': pagination
         }, "查询日志成功")
+        
+    except Exception as e:
+        return ApiResponse.error(f"服务器错误: {str(e)}", 500)
+
+@log_bp.route('/logs/export', methods=['GET'])
+@token_required
+def export_logs():
+    """
+    导出日志
+    
+    请求参数:
+    - attack_type: 攻击类型过滤条件
+    - threat_level: 威胁等级过滤条件
+    - protocol: 协议类型过滤条件
+    - start_time: 开始时间过滤条件
+    - end_time: 结束时间过滤条件
+    - keyword: 关键字
+    
+    返回:
+    - 成功: CSV文件
+    - 失败: 错误信息
+    """
+    try:
+        # 获取查询参数
+        attack_type = request.args.get('attack_type')
+        threat_level = request.args.get('threat_level')
+        protocol = request.args.get('protocol')
+        start_time = request.args.get('start_time')
+        end_time = request.args.get('end_time')
+        keyword = request.args.get('keyword')
+        source_ip = request.args.get('source_ip')
+        target_ip = request.args.get('target_ip')
+        target_port = request.args.get('target_port', type=int)
+        
+        is_malicious_str = request.args.get('is_malicious')
+        is_malicious = None
+        if is_malicious_str == 'true':
+            is_malicious = True
+        elif is_malicious_str == 'false':
+            is_malicious = False
+            
+        is_blocked_str = request.args.get('is_blocked')
+        is_blocked = None
+        if is_blocked_str == 'true':
+            is_blocked = True
+        elif is_blocked_str == 'false':
+            is_blocked = False
+        
+        # 调用服务层导出日志
+        csv_content, filename_or_error = LogService.export_logs(
+            attack_type=attack_type,
+            threat_level=threat_level,
+            protocol=protocol,
+            start_time=start_time,
+            end_time=end_time,
+            keyword=keyword,
+            source_ip=source_ip,
+            target_ip=target_ip,
+            target_port=target_port,
+            is_malicious=is_malicious,
+            is_blocked=is_blocked
+        )
+        
+        # 检查是否成功
+        if csv_content is None:
+            return ApiResponse.error(f"导出日志失败: {filename_or_error}")
+        
+        # 构建响应
+        response = make_response(csv_content)
+        
+        # 添加BOM头以支持Excel正确打开UTF-8编码的CSV
+        response.data = b'\xef\xbb\xbf' + response.data
+        
+        response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+        response.headers['Content-Disposition'] = f'attachment; filename={filename_or_error}'
+        
+        return response
         
     except Exception as e:
         return ApiResponse.error(f"服务器错误: {str(e)}", 500)

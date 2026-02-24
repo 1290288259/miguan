@@ -89,12 +89,13 @@ def block_ip():
         data = request.get_json()
         ip_address = data.get('ip_address')
         reason = data.get('reason')
-        duration = data.get('duration') # 可选，封禁时长
+        duration = data.get('duration') # 可选，封禁时长（秒）
+        block_until = data.get('block_until') # 可选，封禁截止时间
         
         if not ip_address:
             return ApiResponse.error("IP地址不能为空")
             
-        result = MaliciousIPService.block_ip(ip_address, reason, duration)
+        result = MaliciousIPService.block_ip(ip_address, reason, duration, block_until)
         
         if result['success']:
             return ApiResponse.success(message=result['message'])
