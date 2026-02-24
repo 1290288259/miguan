@@ -461,12 +461,33 @@ class LogService:
                             ai_result = AIAnalysisService.analyze_log(log_data_dict)
                             
                             # 更新日志字段
-                            log_entry.ai_attack_type = ai_result.get('ai_attack_type')
+                            ai_attack_type = ai_result.get('ai_attack_type')
+                            log_entry.ai_attack_type = ai_attack_type
                             log_entry.ai_confidence = ai_result.get('ai_confidence')
                             log_entry.ai_analysis_result = ai_result.get('ai_analysis_result')
                             
+                            # 判断与规则匹配是否一致
+                            # 规则判断: log_entry.is_malicious (True/False)
+                            # AI判断: ai_attack_type (Normal/Other)
+                            rule_is_malicious = log_entry.is_malicious
+                            
+                            # 归一化 AI 判定结果
+                            safe_types = ['normal', 'page visit', 'safe', 'unknown', '正常流量', '正常']
+                            ai_type_lower = ai_attack_type.lower() if ai_attack_type else 'unknown'
+                            ai_is_malicious = ai_type_lower not in safe_types
+                            
+                            # 特殊处理: 如果规则判定为 'Web Visit' 且 AI 判定为正常流量，视为一致
+                            # 用户需求: 规则判断为网络访问，ai判断为正常流量，应该为一致
+                            rule_attack_type = log_entry.attack_type
+                            if rule_attack_type and rule_attack_type.lower() == 'web visit' and not ai_is_malicious:
+                                log_entry.ai_rule_match_consistency = '一致'
+                            elif rule_is_malicious == ai_is_malicious:
+                                log_entry.ai_rule_match_consistency = '一致'
+                            else:
+                                log_entry.ai_rule_match_consistency = '不一致'
+                            
                             db.session.commit()
-                            print(f"日志 ID {log_id} AI分析完成: {ai_result.get('ai_attack_type')}")
+                            print(f"日志 ID {log_id} AI分析完成: {ai_attack_type}, 一致性: {log_entry.ai_rule_match_consistency}")
                             
                         except Exception as e:
                             print(f"异步AI分析出错: {str(e)}")

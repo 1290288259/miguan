@@ -7,7 +7,6 @@ from agent.llm_client import LLMClient
 from agent.mcp.skill import SkillRegistry
 # 确保注册技能
 import agent.skills.decoder_skill
-import agent.skills.log_query_skill
 import agent.skills.block_ip_skill
 
 logger = logging.getLogger(__name__)
@@ -26,7 +25,7 @@ class TrafficAnalysisAgent:
         self.llm_client = LLMClient(llm_config)
         # 手动注册新技能 (或者依赖模块导入时的自动注册，如果有实现的话)
         # 这里显式实例化并注册，确保可用
-        SkillRegistry.register(agent.skills.log_query_skill.LogQuerySkill())
+        SkillRegistry.register(agent.skills.decoder_skill.DecoderSkill())
         SkillRegistry.register(agent.skills.block_ip_skill.BlockIPSkill())
         
         self.skills = SkillRegistry.get_all_skills()
@@ -52,16 +51,8 @@ class TrafficAnalysisAgent:
             if decoded_info:
                 context['decoded_info'] = decoded_info
             
-            # B. 查询该 IP 的历史行为 (LogQuerySkill)
-            ip_history_info = ""
-            log_query_skill = self.skills.get('log_query')
-            if log_query_skill and source_ip:
-                history_result = log_query_skill.execute(source_ip)
-                if history_result:
-                    context['ip_history'] = history_result
-                    ip_history_info = f"\n[IP历史行为]: 近24小时请求 {history_result.get('total_logs')} 次，其中恶意 {history_result.get('malicious_logs')} 次。"
-                    if history_result.get('is_suspicious'):
-                        ip_history_info += " 该IP行为可疑。"
+            # B. 查询该 IP 的历史行为 (已移除 LogQuerySkill，仅依赖单条日志)
+            # 这里的代码块已删除，不再获取历史信息
 
             # 3. 构建 Prompt (Prompt Engineering)
             prompt = self._build_prompt(log_data, context)
@@ -83,8 +74,6 @@ class TrafficAnalysisAgent:
             analysis_text = result.get("analysis", "无详细分析")
             if decoded_info:
                 analysis_text += f"\n[Agent Skill]: 检测到并解码了隐藏载荷: {decoded_info}"
-            if ip_history_info:
-                analysis_text += ip_history_info
                 
             # 6. 自动响应 (Action) - 封禁恶意 IP
             # 如果 AI 判定为高置信度恶意攻击，且建议封禁，则自动封禁
@@ -159,11 +148,16 @@ class TrafficAnalysisAgent:
         request_path = log_data.get('request_path', '')
         payload = log_data.get('payload', '')
         decoded_info = context.get('decoded_info', '')
-        ip_history_info = context.get('ip_history', '')
+        ip_history_info = context.get('ip_history', None)
         
         # 基础 Prompt
         prompt = f"""
 你是一个网络安全专家 Agent。请分析以下蜜罐捕获的流量日志，判断其是否为恶意攻击。
+
+重要判断规则：
+1. 【正常访问】：如果是标准的 HTTP GET 请求，访问主页(/)、登录页(/login)、注册页(/register)、静态资源(/static/..., /assets/...)，且没有包含任何 SQL 注入、XSS 代码、命令执行载荷或明显的扫描特征（如 .git, .env, wp-admin 等），请务必将其判定为 "Normal" 或 "Page Visit"。
+2. 【扫描判定】：只有当请求包含明确的漏洞探测路径（如 .env, actuator, shell, admin.php, .git 等）或明显的攻击载荷时，才判定为 "Scanning" 或其他攻击类型。
+3. 【误报防止】：不要仅仅因为请求来自外部 IP 就判定为攻击。如果没有恶意特征，就是正常流量。普通用户的浏览行为不应标记为扫描。
 
 [日志信息]
 - 协议: {protocol}
@@ -196,7 +190,7 @@ Agent 使用解码技能发现了以下隐藏内容:
         prompt += """
 请按照以下JSON格式返回结果，不要包含思考过程或其他废话，只要JSON：
 {
-    "attack_type": "攻击类型(如: SQL注入, XSS, 暴力破解, 扫描, 正常流量, 未知)",
+    "attack_type": "攻击类型(如果是正常请求请返回 'Normal', 否则返回具体攻击类型如 'SQL Injection', 'XSS', 'Scanning' 等)",
     "confidence": 0.0-1.0之间的置信度数值,
     "analysis": "简短的分析理由(中文)"
 }

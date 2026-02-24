@@ -254,7 +254,7 @@ class MaliciousIPService:
                 return {'success': False, 'message': '未找到该IP记录'}
             
             if not malicious_ip.is_blocked:
-                return {'success': False, 'message': '该IP未被封禁，无需解封'}
+                return {'success': True, 'message': '该IP未被封禁或已解封'}
 
             # 2. 检测操作系统
             system_platform = platform.system()

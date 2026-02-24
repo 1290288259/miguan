@@ -79,7 +79,8 @@ class Log(db.Model):
     ai_attack_type = db.Column(db.String(50), nullable=True, comment='AI识别的攻击类型')
     ai_confidence = db.Column(db.Float, nullable=True, comment='AI识别置信度')
     ai_analysis_result = db.Column(db.Text, nullable=True, comment='AI完整分析结果')
-    
+    ai_rule_match_consistency = db.Column(db.String(20), nullable=True, comment='AI与规则匹配一致性')
+
     def __repr__(self):
         """
         日志模型的字符串表示
@@ -117,5 +118,6 @@ class Log(db.Model):
             'notes': self.notes,
             'ai_attack_type': self.ai_attack_type,
             'ai_confidence': self.ai_confidence,
-            'ai_analysis_result': self.ai_analysis_result
+            'ai_analysis_result': self.ai_analysis_result,
+            'ai_rule_match_consistency': self.ai_rule_match_consistency
         }

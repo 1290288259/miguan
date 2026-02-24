@@ -144,7 +144,7 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="is_blocked" label="已封禁" width="90">
+        <el-table-column prop="is_blocked" label="已封禁" width="80" align="center">
           <template #default="scope">
             <el-tag :type="scope.row.is_blocked ? 'danger' : 'success'">
               {{ scope.row.is_blocked ? '是' : '否' }}
@@ -152,7 +152,25 @@
           </template>
         </el-table-column>
         
-        <el-table-column label="操作" width="100" fixed="right">
+        <el-table-column prop="ai_attack_type" label="AI判定" width="100" align="center">
+           <template #default="scope">
+             <el-tag v-if="scope.row.ai_attack_type" :type="['Normal', 'normal', 'Page Visit', 'Safe', 'safe', '正常流量', '正常'].includes(scope.row.ai_attack_type) ? 'success' : 'danger'">
+               {{ scope.row.ai_attack_type }}
+             </el-tag>
+             <span v-else>-</span>
+           </template>
+         </el-table-column>
+        
+        <el-table-column prop="ai_rule_match_consistency" label="一致性" width="80" align="center">
+          <template #default="scope">
+            <el-tag v-if="scope.row.ai_rule_match_consistency" :type="scope.row.ai_rule_match_consistency === '一致' ? 'success' : 'warning'">
+              {{ scope.row.ai_rule_match_consistency }}
+            </el-tag>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="操作" width="100" fixed="right" align="center">
           <template #default="scope">
             <el-button type="primary" size="small" @click="showLogDetail(scope.row)">
               <el-icon><View /></el-icon>

@@ -71,6 +71,7 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="block_until" label="封禁到期时间" width="180" sortable />
         <el-table-column prop="last_seen" label="最后活动时间" width="180" sortable />
         <el-table-column prop="notes" label="备注" min-width="150" show-overflow-tooltip />
         

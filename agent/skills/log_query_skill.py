@@ -90,7 +90,7 @@ class LogQuerySkill(BaseSkill):
                 "malicious_logs": malicious_count,
                 "attack_type_distribution": attack_types,
                 "recent_samples": recent_logs,
-                "is_suspicious": malicious_count > 0 or total_count > 100 # 简单阈值判断
+                "is_suspicious": malicious_count > 0 or total_count > 500 # 提高阈值，避免正常高频访问被误判
             }
             
         except Exception as e:
