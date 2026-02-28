@@ -73,7 +73,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { House, Fold, Expand, ArrowDown, Avatar, Document, Operation, Monitor, Warning, Cpu } from '@element-plus/icons-vue'
+import { House, Fold, Expand, ArrowDown, Avatar, Document, Operation, Monitor, Warning, Cpu, User } from '@element-plus/icons-vue'
 import useUserStore from '../stores/user'
 
 // 路由实例
@@ -88,7 +88,8 @@ const menuItems = [
   { path: '/match-rule-management', title: '匹配规则管理', icon: Operation },
   { path: '/honeypot-management', title: '蜜罐管理', icon: Monitor },
   { path: '/malicious-ip-management', title: '恶意IP管理', icon: Warning },
-  { path: '/ai-config-management', title: 'AI模型配置', icon: Cpu }
+  { path: '/ai-config-management', title: 'AI模型配置', icon: Cpu },
+  { path: '/user-management', title: '用户管理', icon: User }
 ]
 
 // 计算可见的菜单项
@@ -98,12 +99,16 @@ const visibleMenuItems = computed(() => {
   // 如果没有用户信息，默认只显示首页（或者不显示，视需求而定，这里假设至少显示首页）
   if (!user) return menuItems.filter(item => item.path === '/')
   
-  // 管理员(role=1)拥有所有权限，但为了统一逻辑，最好也基于permissions判断
-  // 如果初始化脚本已经为管理员添加了所有权限，那么下面的逻辑对管理员也适用
-  // 如果想要硬编码管理员权限作为兜底，可以这样：
+  // 优先使用模块列表判断权限
+  if (user.modules && user.modules.length > 0) {
+    const allowedPaths = user.modules.map((m: any) => m.path)
+    return menuItems.filter(item => allowedPaths.includes(item.path))
+  }
+  
+  // 管理员(role=1)拥有所有权限 (兼容旧逻辑)
   if (user.role === 1) return menuItems
   
-  // 获取用户拥有的权限路径列表
+  // 获取用户拥有的权限路径列表 (兼容旧逻辑)
   const permissions = user.permissions || []
   const allowedPaths = permissions.map((p: any) => p.path)
   

@@ -399,6 +399,7 @@ html.light-theme {
   --el-border-color: var(--scifi-border-color);
   --el-border-color-light: #e4e7ed;
   --el-fill-color-blank: #ffffff;
+  --el-text-color-placeholder: #a8abb2; /* 浅色模式下的标准占位符颜色 */
 }
 
 /* 浅色主题组件覆盖 */

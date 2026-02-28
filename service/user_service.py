@@ -13,8 +13,11 @@ from sqlalchemy.exc import IntegrityError
 from model.user_model import User
 from model.user_info_model import UserInfo
 from model.permission_model import Permission
+from model.module_model import Module, UserModule
 
-def create_user(username, password, role=2, phone=None, email=None):
+# ... (omitted)
+
+def create_user(username, password, role=2, phone=None, email=None, module_ids=None):
     """
     创建新用户
     
@@ -24,6 +27,7 @@ def create_user(username, password, role=2, phone=None, email=None):
         role: 用户角色权限，默认为2（普通用户），1为管理员
         phone: 手机号
         email: 邮箱
+        module_ids: 模块ID列表
         
     返回:
         dict: 包含操作结果的字典
@@ -54,6 +58,26 @@ def create_user(username, password, role=2, phone=None, email=None):
                 email=email
             )
             db.session.add(user_info)
+            
+        # 分配模块权限
+        if module_ids:
+            for mid in module_ids:
+                um = UserModule(user_id=new_user.id, module_id=mid)
+                db.session.add(um)
+        else:
+            # 如果未指定模块，根据角色分配默认模块
+            default_modules = []
+            if role == 1:
+                # 管理员拥有所有模块
+                default_modules = Module.query.all()
+            elif role == 2:
+                # 普通用户拥有基础模块
+                # 这里根据路径或名称筛选
+                default_modules = Module.query.filter(Module.path.in_(['/', '/log-query', '/malicious-ip-management'])).all()
+            
+            for mod in default_modules:
+                um = UserModule(user_id=new_user.id, module_id=mod.id)
+                db.session.add(um)
         
         # 提交事务
         db.session.commit()
@@ -126,6 +150,12 @@ def get_user_detail(user_id):
         # 获取权限列表
         permissions = Permission.query.filter_by(role=user.role).all()
         data['permissions'] = [p.to_dict() for p in permissions]
+
+        # 获取用户模块列表
+        user_modules = UserModule.query.filter_by(user_id=user.id).all()
+        module_ids = [um.module_id for um in user_modules]
+        modules = Module.query.filter(Module.id.in_(module_ids)).all()
+        data['modules'] = [m.to_dict() for m in modules]
             
         return {
             'success': True,
@@ -193,6 +223,30 @@ def update_user_detail(user_id, phone=None, email=None, password=None, old_passw
         db.session.rollback()
         return {'success': False, 'message': f'更新失败: {str(e)}'}
 
+def get_all_permissions():
+    """
+    获取所有权限列表
+    
+    返回:
+        dict: 权限列表（按角色分组）
+    """
+    try:
+        permissions = Permission.query.all()
+        
+        # 按角色分组
+        role_permissions = {}
+        for p in permissions:
+            if p.role not in role_permissions:
+                role_permissions[p.role] = []
+            role_permissions[p.role].append(p.to_dict())
+            
+        return {
+            'success': True,
+            'data': role_permissions
+        }
+    except Exception as e:
+        return {'success': False, 'message': str(e)}
+
 def login_user(username, password):
     """
     用户登录验证
@@ -240,6 +294,12 @@ def login_user(username, password):
         permissions = Permission.query.filter_by(role=user.role).all()
         permissions_data = [p.to_dict() for p in permissions]
 
+        # 获取用户模块列表
+        user_modules = UserModule.query.filter_by(user_id=user.id).all()
+        module_ids = [um.module_id for um in user_modules]
+        modules = Module.query.filter(Module.id.in_(module_ids)).all()
+        modules_data = [m.to_dict() for m in modules]
+
         # 返回成功结果，包含令牌和用户信息
         return {
             'success': True,
@@ -250,7 +310,8 @@ def login_user(username, password):
                 'id': user.id,
                 'username': user.username,
                 'role': user.role,
-                'permissions': permissions_data
+                'permissions': permissions_data,
+                'modules': modules_data
             }
         }
     except Exception as e:
@@ -291,3 +352,178 @@ def verify_jwt_token(token):
             'success': False,
             'message': '令牌无效'
         }
+
+def get_user_list(page=1, size=10, keyword=None, role=None):
+    """
+    获取用户列表（分页）
+    
+    参数:
+        page: 页码
+        size: 每页数量
+        keyword: 搜索关键词（用户名/手机/邮箱）
+        role: 角色ID
+        
+    返回:
+        dict: 包含用户列表和分页信息的字典
+    """
+    try:
+        query = User.query
+        
+        # 关联查询用户信息
+        query = query.outerjoin(UserInfo, User.id == UserInfo.user_id)
+        
+        # 关键词搜索
+        if keyword:
+            keyword_pattern = f"%{keyword}%"
+            query = query.filter(
+                (User.username.like(keyword_pattern)) | 
+                (UserInfo.phone.like(keyword_pattern)) | 
+                (UserInfo.email.like(keyword_pattern))
+            )
+            
+        # 角色筛选
+        if role is not None and role != '':
+            query = query.filter(User.role == role)
+            
+        # 分页
+        pagination = query.paginate(page=page, per_page=size, error_out=False)
+        
+        users = []
+        for user in pagination.items:
+            user_data = user.to_dict()
+            # 获取扩展信息
+            user_info = UserInfo.query.filter_by(user_id=user.id).first()
+            if user_info:
+                user_data['phone'] = user_info.phone
+                user_data['email'] = user_info.email
+            else:
+                user_data['phone'] = None
+                user_data['email'] = None
+                
+            # 获取用户模块权限
+            user_modules = UserModule.query.filter_by(user_id=user.id).all()
+            module_ids = [um.module_id for um in user_modules]
+            modules = Module.query.filter(Module.id.in_(module_ids)).all()
+            user_data['modules'] = [m.to_dict() for m in modules]
+            
+            users.append(user_data)
+            
+        return {
+            'success': True,
+            'data': {
+                'items': users,
+                'total': pagination.total,
+                'pages': pagination.pages,
+                'current_page': page
+            }
+        }
+    except Exception as e:
+        return {'success': False, 'message': str(e)}
+
+def delete_user(user_id):
+    """
+    删除用户
+    
+    参数:
+        user_id: 用户ID
+        
+    返回:
+        dict: 操作结果
+    """
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return {'success': False, 'message': '用户不存在'}
+            
+        # 删除关联的用户信息
+        UserInfo.query.filter_by(user_id=user_id).delete()
+        UserModule.query.filter_by(user_id=user_id).delete()
+        
+        # 删除用户
+        db.session.delete(user)
+        db.session.commit()
+        
+        return {'success': True, 'message': '用户删除成功'}
+    except Exception as e:
+        db.session.rollback()
+        return {'success': False, 'message': f'删除失败: {str(e)}'}
+
+def admin_update_user(user_id, username=None, password=None, role=None, phone=None, email=None, module_ids=None):
+    """
+    管理员更新用户信息
+    
+    参数:
+        user_id: 用户ID
+        username: 用户名
+        password: 新密码 (直接重置，无需旧密码)
+        role: 角色
+        phone: 手机号
+        email: 邮箱
+        module_ids: 模块ID列表
+        
+    返回:
+        dict: 操作结果
+    """
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return {'success': False, 'message': '用户不存在'}
+            
+        # 更新基础信息
+        if username:
+            # 检查用户名是否重复
+            existing_user = User.query.filter_by(username=username).first()
+            if existing_user and existing_user.id != int(user_id):
+                return {'success': False, 'message': '用户名已存在'}
+            user.username = username
+            
+        if password:
+            sha256_hash = hashlib.sha256()
+            sha256_hash.update(password.encode('utf-8'))
+            user.password = sha256_hash.hexdigest()
+            
+        if role is not None:
+            user.role = role
+            
+        # 更新扩展信息
+        user_info = UserInfo.query.filter_by(user_id=user_id).first()
+        if not user_info:
+            user_info = UserInfo(user_id=user_id)
+            db.session.add(user_info)
+            
+        if phone is not None:
+            user_info.phone = phone
+        if email is not None:
+            user_info.email = email
+            
+        # 更新模块权限
+        if module_ids is not None:
+            # 删除旧权限
+            UserModule.query.filter_by(user_id=user_id).delete()
+            # 添加新权限
+            for mid in module_ids:
+                um = UserModule(user_id=user_id, module_id=mid)
+                db.session.add(um)
+            
+        db.session.commit()
+        
+        return {'success': True, 'message': '用户信息更新成功'}
+    except Exception as e:
+        db.session.rollback()
+        return {'success': False, 'message': f'更新失败: {str(e)}'}
+
+def get_all_modules():
+    """
+    获取所有模块列表
+    
+    返回:
+        dict: 模块列表
+    """
+    try:
+        modules = Module.query.all()
+        return {
+            'success': True,
+            'data': [m.to_dict() for m in modules]
+        }
+    except Exception as e:
+        return {'success': False, 'message': str(e)}

@@ -11,7 +11,8 @@ export interface User {
   role: number
   phone?: string
   email?: string
-  permissions?: string[]
+  permissions?: any[]
+  modules?: any[]
   [key: string]: any
 }
 

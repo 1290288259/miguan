@@ -84,6 +84,13 @@ const router = createRouter({
           meta: { permission: '/ai-config-management' }
         },
         {
+          path: 'user-management',
+          name: 'user-management',
+          // 用户管理页面
+          component: () => import('../views/UserManagement.vue'),
+          meta: { permission: '/user-management' }
+        },
+        {
           path: 'profile',
           name: 'profile',
           // 个人信息页面
@@ -140,8 +147,14 @@ router.beforeEach(async (to, from, next) => {
       }
 
       // 检查权限
+      // 同时检查 role-based permissions 和 user-assigned modules
       const permissions = user.permissions || []
-      const allowedPaths = permissions.map((p: any) => p.path)
+      const modules = user.modules || []
+      
+      const allowedPaths = [
+          ...permissions.map((p: any) => p.path),
+          ...modules.map((m: any) => m.path)
+      ]
       
       // 注意：to.meta.permission 是我们在路由定义中添加的自定义属性
       if (!allowedPaths.includes(to.meta.permission as string)) {

@@ -8,7 +8,7 @@ from flask import request, jsonify, Blueprint
 from functools import wraps
 import jwt
 from utils.api_response import ApiResponse
-from service.user_service import create_user, create_admin_user, login_user, verify_jwt_token, get_user_detail, update_user_detail
+from service.user_service import create_user, create_admin_user, login_user, verify_jwt_token, get_user_detail, update_user_detail, get_user_list, delete_user, admin_update_user, get_all_permissions, get_all_modules
 
 # 创建用户路由蓝图
 user_bp = Blueprint('user', __name__, url_prefix='/api/user')
@@ -172,6 +172,170 @@ def token_required(f):
         return f(*args, **kwargs)
     
     return decorated
+
+def admin_required(f):
+    """
+    管理员权限验证装饰器
+    必须先使用 @token_required
+    
+    参数:
+        f: 被装饰的函数
+        
+    返回:
+        function: 装饰后的函数
+    """
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # 检查是否已获取用户信息
+        if not hasattr(request, 'current_user') or not request.current_user:
+            return ApiResponse.unauthorized(message="需要登录")
+            
+        # 检查是否是管理员 (role=1)
+        if request.current_user.get('role') != 1:
+            return ApiResponse.forbidden(message="需要管理员权限")
+        
+        return f(*args, **kwargs)
+    
+    return decorated
+
+@user_bp.route('/permissions', methods=['GET'])
+@token_required
+@admin_required
+def get_permissions():
+    """
+    获取所有权限列表
+    """
+    try:
+        result = get_all_permissions()
+        if result['success']:
+            return ApiResponse.success(data=result['data'])
+        else:
+            return ApiResponse.server_error(message=result['message'])
+    except Exception as e:
+        return ApiResponse.server_error(message=str(e))
+
+@user_bp.route('/list', methods=['GET'])
+@token_required
+@admin_required
+def get_users():
+    """
+    获取用户列表（管理员）
+    
+    参数:
+        page: 页码
+        size: 每页数量
+        keyword: 搜索关键词
+        role: 角色ID
+    """
+    try:
+        page = request.args.get('page', 1, type=int)
+        size = request.args.get('size', 10, type=int)
+        keyword = request.args.get('keyword')
+        role = request.args.get('role', type=int)
+        
+        result = get_user_list(page, size, keyword, role)
+        
+        if result['success']:
+            return ApiResponse.success(data=result['data'])
+        else:
+            return ApiResponse.server_error(message=result['message'])
+    except Exception as e:
+        return ApiResponse.server_error(message=str(e))
+
+@user_bp.route('/<int:user_id>', methods=['DELETE'])
+@token_required
+@admin_required
+def delete_user_route(user_id):
+    """
+    删除用户（管理员）
+    """
+    try:
+        # 防止删除自己
+        if user_id == request.current_user['user_id']:
+            return ApiResponse.bad_request(message="不能删除当前登录账号")
+            
+        result = delete_user(user_id)
+        
+        if result['success']:
+            return ApiResponse.success(message=result['message'])
+        else:
+            return ApiResponse.bad_request(message=result['message'])
+    except Exception as e:
+        return ApiResponse.server_error(message=str(e))
+
+@user_bp.route('/<int:user_id>', methods=['PUT'])
+@token_required
+@admin_required
+def update_user_route(user_id):
+    """
+    更新用户信息（管理员）
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return ApiResponse.bad_request(message="没有提供更新数据")
+            
+        username = data.get('username')
+        password = data.get('password')
+        role = data.get('role')
+        phone = data.get('phone')
+        email = data.get('email')
+        module_ids = data.get('module_ids')
+        
+        result = admin_update_user(user_id, username, password, role, phone, email, module_ids)
+        
+        if result['success']:
+            return ApiResponse.success(message=result['message'])
+        else:
+            return ApiResponse.bad_request(message=result['message'])
+    except Exception as e:
+        return ApiResponse.server_error(message=str(e))
+
+@user_bp.route('/add', methods=['POST'])
+@token_required
+@admin_required
+def add_user_route():
+    """
+    添加用户（管理员）
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return ApiResponse.bad_request(message="没有提供用户数据")
+            
+        username = data.get('username')
+        password = data.get('password')
+        role = data.get('role', 2)
+        phone = data.get('phone')
+        email = data.get('email')
+        module_ids = data.get('module_ids')
+        
+        if not username or not password:
+            return ApiResponse.bad_request(message="账号和密码必填")
+            
+        result = create_user(username, password, role, phone, email, module_ids)
+        
+        if result['success']:
+            return ApiResponse.created(data={'user_id': result['user_id']}, message="用户创建成功")
+        else:
+            return ApiResponse.bad_request(message=result['message'])
+    except Exception as e:
+        return ApiResponse.server_error(message=str(e))
+
+@user_bp.route('/modules', methods=['GET'])
+@token_required
+def get_modules_route():
+    """
+    获取所有模块列表（已登录用户均可获取，用于前端展示）
+    """
+    try:
+        result = get_all_modules()
+        if result['success']:
+            return ApiResponse.success(data=result['data'], message="获取模块列表成功")
+        else:
+            return ApiResponse.server_error(message=result['message'])
+    except Exception as e:
+        return ApiResponse.server_error(message=str(e))
 
 @user_bp.route('/me', methods=['GET'])
 @token_required
