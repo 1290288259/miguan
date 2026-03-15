@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouterView } from 'vue-router'
 import useUserStore from '../stores/user'
+import DashboardLayout from '../views/dashboard/DashboardLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,7 +12,7 @@ const router = createRouter({
       children: [
         {
           path: '',
-          component: () => import('../views/dashboard/DashboardLayout.vue'),
+          component: DashboardLayout,
           children: [
             { path: '', redirect: '/overview' },
             { 
