@@ -62,7 +62,7 @@ class DevelopmentConfig(Config):
     """
     DEBUG = True  # 开启调试模式，显示详细错误信息
     # 开发环境数据库配置
-    # SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or 'sqlite:///dev.db'
+    # SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or Config.DATABASE_URI
 
 class TestingConfig(Config):
     """
@@ -73,7 +73,7 @@ class TestingConfig(Config):
     # 禁用CSRF保护，便于测试
     WTF_CSRF_ENABLED = False
     # 测试环境数据库配置
-    # SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or 'sqlite:///test.db'
+    # SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or Config.DATABASE_URI
 
 class ProductionConfig(Config):
     """
@@ -82,7 +82,7 @@ class ProductionConfig(Config):
     """
     DEBUG = False  # 关闭调试模式，提高安全性
     # 生产环境数据库配置
-    # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///prod.db'
+    # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or Config.DATABASE_URI
 
 # 配置字典，根据环境变量选择相应的配置类
 config = {

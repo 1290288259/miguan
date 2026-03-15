@@ -30,7 +30,7 @@ def init_db(app):
     # 在应用上下文中导入所有模型类，确保它们被注册
     with app.app_context():
         # 导入所有模型类，确保它们被注册
-        from model import user_model, honeypot_model, log_model, malicious_ip_model, match_rule_model, attack_stats_model, block_history_model, permission_model, user_info_model, ai_config_model
+        from model import user_model, honeypot_model, log_model, malicious_ip_model, match_rule_model, attack_stats_model, block_history_model, permission_model, user_info_model, ai_config_model, module_model
         
         # 打印所有模型类，用于调试
         print("正在导入的模型类:")
@@ -44,5 +44,10 @@ def init_db(app):
         print("Permission:", permission_model.Permission)
         print("UserInfo:", user_info_model.UserInfo)
         print("AIConfig:", ai_config_model.AIConfig)
+        print("Module:", module_model.Module)
+        print("UserModule:", module_model.UserModule)
+        
+        # 在开发环境中，如果没有使用迁移，可以尝试创建表
+        # db.create_all()
         
         print("数据库初始化完成！使用Flask-Migrate进行数据库迁移管理。")

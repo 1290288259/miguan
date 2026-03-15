@@ -38,7 +38,7 @@ from route.honeypot_route import honeypot_bp
 from route.malicious_ip_route import malicious_ip_bp
 
 # 导入仪表盘路由蓝图
-from routes.dashboard_routes import dashboard_bp
+from route.dashboard_route import dashboard_bp
 
 # 导入蜜罐服务用于初始化
 from service.honeypot_service import HoneypotService
@@ -51,6 +51,12 @@ from route.ai_config_route import ai_config_bp
 
 # 导入恶意IP服务用于初始化
 from service.malicious_ip_service import MaliciousIPService
+
+# 导入用户模型
+from model.user_model import User
+from model.user_info_model import UserInfo
+from model.permission_model import Permission
+from model.module_model import Module, UserModule
 
 # 导入API响应封装
 from utils.api_response import ApiResponse
