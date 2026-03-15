@@ -184,6 +184,7 @@ class HoneypotService:
             
             running_honeypots[hp.id] = process
             hp.status = 'running'
+            hp.pid = process.pid  # 持久化PID，供重启后恢复状态使用
             db.session.commit()
             
             return {'message': f'蜜罐 {hp.name} 已启动', 'pid': process.pid}
@@ -211,6 +212,7 @@ class HoneypotService:
             
             # 即使进程不在内存字典中（例如重启后），也要尝试更新数据库状态
             hp.status = 'stopped'
+            hp.pid = None  # 清除PID记录
             db.session.commit()
             
             return {'message': f'蜜罐 {hp.name} 已停止'}
@@ -222,7 +224,9 @@ class HoneypotService:
     def init_honeypots():
         """
         初始化蜜罐服务
-        系统启动时调用，恢复所有状态为running的蜜罐
+        系统启动时调用，恢复所有状态为running的蜜罐。
+        通过检查数据库中持久化的PID判断旧进程是否仍在运行，
+        避免重复启动已存活的蜜罐进程。
         """
         try:
             # 查询所有状态为running的蜜罐
@@ -230,22 +234,30 @@ class HoneypotService:
             print(f"正在恢复 {len(honeypots)} 个蜜罐服务...")
             
             for hp in honeypots:
-                # 尝试启动
+                # 检查持久化的PID对应的进程是否还在运行
+                if hp.pid and psutil.pid_exists(hp.pid):
+                    try:
+                        proc = psutil.Process(hp.pid)
+                        # 进一步确认进程名包含python（避免PID复用误判）
+                        if 'python' in proc.name().lower():
+                            print(f"蜜罐 {hp.name} 的进程 (PID: {hp.pid}) 仍在运行，跳过重新启动")
+                            # 将其注册回内存字典，以便后续管理
+                            # 注意：此处无法还原 Popen 对象，仅记录进程引用供监控使用
+                            # 停止操作仍通过 psutil 完成
+                            continue
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass  # 进程已消失或无权访问，继续重启
+
+                # PID不存在或进程已结束，重新启动蜜罐
                 print(f"正在启动蜜罐: {hp.name} (Port: {hp.port})...")
-                # 临时将状态设为stopped以便start_honeypot能通过检查
-                # 因为start_honeypot会检查hp.status == 'running'
-                # 但这里的hp是从数据库拿出来的，已经是running了
-                # 然而start_honeypot还会检查hp.id in running_honeypots
-                # 在初始化时，running_honeypots是空的，所以 (hp.status == 'running' and hp.id in running_honeypots) 为 False
-                # 所以可以直接调用 start_honeypot
-                
-                # 但为了安全起见，先重置内存中的状态（其实不需要，running_honeypots本来就是空的）
-                
+                # start_honeypot 会检查 (hp.status == 'running' and hp.id in running_honeypots)
+                # 初始化时 running_honeypots 为空，所以可以直接调用
                 result = HoneypotService.start_honeypot(hp.id)
                 if 'error' in result:
                     print(f"启动蜜罐 {hp.name} 失败: {result['error']}")
-                    # 如果启动失败，将状态更新为stopped
+                    # 启动失败，重置状态和PID
                     hp.status = 'stopped'
+                    hp.pid = None
                     db.session.commit()
                 else:
                     print(f"蜜罐 {hp.name} 启动成功 (PID: {result['pid']})")

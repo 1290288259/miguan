@@ -137,6 +137,19 @@ router.beforeEach(async (to, from, next) => {
     return
   }
   
+  // 权限检查前，确保用户数据已加载
+  // 修复时序 Bug：页面刷新时 Pinia store 是同步从 localStorage 初始化的，
+  // 但如果 localStorage 中的 user 数据已过期或被清除，需要重新从后端获取。
+  // 若 store 中 user 为空但 token 存在，则先异步拉取用户信息再做权限判断。
+  if (isTokenPresent && !userStore.user.value) {
+    const result = await userStore.fetchCurrentUser()
+    if (!result.success) {
+      // 获取用户信息失败（token已过期），清除状态并跳转登录
+      next('/login')
+      return
+    }
+  }
+
   // 权限检查
   const user = userStore.user.value
   if (to.meta.permission && user) {

@@ -45,6 +45,9 @@ class Honeypot(db.Model):
     # 更新时间
     updated_at = db.Column(db.DateTime, nullable=False, default=get_beijing_time, onupdate=get_beijing_time, comment='更新时间')
     
+    # 子进程PID（用于服务重启后判断进程是否仍在运行）
+    pid = db.Column(db.Integer, nullable=True, comment='蜜罐子进程PID')
+    
     def __repr__(self):
         """
         蜜罐模型的字符串表示
@@ -68,6 +71,7 @@ class Honeypot(db.Model):
             'status': self.status,
             'description': self.description,
             'config': self.config,
+            'pid': self.pid,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

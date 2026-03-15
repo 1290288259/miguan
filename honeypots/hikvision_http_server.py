@@ -150,5 +150,12 @@ def login():
     """)
 
 if __name__ == '__main__':
+    # 从命令行参数读取端口，与 ssh_server.py 和 ftp_server.py 保持一致
+    # honeypot_service.py 启动时会传入端口参数：cmd = [sys.executable, script_path, str(hp.port)]
+    if len(sys.argv) > 1:
+        try:
+            HONEYPOT_PORT = int(sys.argv[1])
+        except ValueError:
+            logger.error(f"端口参数无效: {sys.argv[1]}，使用默认端口 {HONEYPOT_PORT}")
     logger.info(f"Hikvision HTTP Honeypot listening on port {HONEYPOT_PORT}")
     app.run(host='0.0.0.0', port=HONEYPOT_PORT, debug=False)
