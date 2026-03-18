@@ -4,14 +4,18 @@
       <template #header>
         <div class="card-header">
           <span>蜜罐管理</span>
-          <el-button type="primary" size="small" @click="handleCreate">
-            <el-icon><Plus /></el-icon>
-            新建蜜罐
-          </el-button>
+          <div class="header-actions">
+            <el-button @click="refreshAllStatus" :loading="refreshingAll">
+              刷新真实状态
+            </el-button>
+            <el-button type="primary" size="small" @click="handleCreate">
+              <el-icon><Plus /></el-icon>
+              新建蜜罐
+            </el-button>
+          </div>
         </div>
       </template>
 
-      <!-- 搜索栏 -->
       <el-form :inline="true" :model="queryForm" class="demo-form-inline">
         <el-form-item label="名称">
           <el-input v-model="queryForm.keyword" placeholder="请输入蜜罐名称" clearable />
@@ -30,7 +34,7 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="fetchHoneypots">查询</el-button>
+          <el-button type="primary" @click="handleSearch">查询</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -42,33 +46,53 @@
         <el-table-column prop="type" label="类型" width="100" />
         <el-table-column prop="port" label="端口" width="100" />
         <el-table-column prop="ip_address" label="绑定IP" width="140" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="状态" width="110">
           <template #default="scope">
-            <el-tag :type="scope.row.status === 'running' ? 'success' : 'danger'">
+            <el-tag :type="scope.row.status === 'running' ? 'success' : 'info'">
               {{ scope.row.status === 'running' ? '运行中' : '已停止' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="description" label="描述" />
-        <el-table-column label="操作" width="250" fixed="right">
+        <el-table-column label="健康检查" width="150">
           <template #default="scope">
-            <el-button 
+            <div class="health-cell">
+              <el-tag :type="getHealthTagType(scope.row)">
+                {{ getHealthText(scope.row) }}
+              </el-tag>
+              <span v-if="scope.row.health_reason" class="health-reason">
+                {{ formatHealthReason(scope.row.health_reason) }}
+              </span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="pid" label="PID" width="100" />
+        <el-table-column prop="description" label="描述" min-width="180" show-overflow-tooltip />
+        <el-table-column label="操作" width="340" fixed="right">
+          <template #default="scope">
+            <el-button
               v-if="scope.row.status !== 'running'"
-              type="success" 
-              size="small" 
+              type="success"
+              size="small"
               :loading="actionLoading[scope.row.id]"
               @click="handleStart(scope.row)"
             >
               启动
             </el-button>
-            <el-button 
+            <el-button
               v-else
-              type="danger" 
-              size="small" 
+              type="danger"
+              size="small"
               :loading="actionLoading[scope.row.id]"
               @click="handleStop(scope.row)"
             >
               停止
+            </el-button>
+            <el-button
+              size="small"
+              :loading="healthLoading[scope.row.id]"
+              @click="handleHealthCheck(scope.row)"
+            >
+              校验状态
             </el-button>
             <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
             <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
@@ -89,7 +113,6 @@
       </div>
     </el-card>
 
-    <!-- 编辑/新建对话框 -->
     <el-dialog
       v-model="dialogVisible"
       :title="dialogType === 'create' ? '新建蜜罐' : '编辑蜜罐'"
@@ -116,7 +139,7 @@
           <el-input v-model="form.description" type="textarea" />
         </el-form-item>
         <el-form-item label="配置">
-          <el-input v-model="form.config" type="textarea" placeholder="JSON格式配置" />
+          <el-input v-model="form.config" type="textarea" placeholder="JSON 格式配置" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -130,31 +153,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import axios from '@/utils/axios'
 
-// 列表数据
-const honeypotList = ref([])
+interface HoneypotItem {
+  id: number
+  name: string
+  type: string
+  port: number
+  ip_address: string
+  status: 'running' | 'stopped'
+  description?: string
+  config?: string
+  pid?: number | null
+  healthy?: boolean
+  health_reason?: string
+}
+
+const honeypotList = ref<HoneypotItem[]>([])
 const loading = ref(false)
-const actionLoading = ref<Record<number, boolean>>({}) // 按钮加载状态
+const refreshingAll = ref(false)
+const actionLoading = ref<Record<number, boolean>>({})
+const healthLoading = ref<Record<number, boolean>>({})
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(20)
 
-// 查询表单
 const queryForm = reactive({
   keyword: '',
   type: '',
   status: ''
 })
 
-// 对话框控制
 const dialogVisible = ref(false)
-const dialogType = ref('create') // 'create' or 'edit'
+const dialogType = ref<'create' | 'edit'>('create')
 const form = reactive({
-  id: null,
+  id: null as number | null,
   name: '',
   type: 'SSH',
   port: 2222,
@@ -163,12 +199,17 @@ const form = reactive({
   config: ''
 })
 
-// 获取列表
+const mergeHealthState = (items: HoneypotItem[]) => {
+  honeypotList.value = items.map((item) => ({
+    ...item,
+    healthy: item.status === 'running' ? item.healthy ?? true : false,
+    health_reason: item.health_reason ?? (item.status === 'running' ? 'ok' : 'stopped')
+  }))
+}
+
 const fetchHoneypots = async () => {
   loading.value = true
   try {
-    console.log('Fetching honeypots...')
-    // axios 实例已配置 baseURL='/api' 和自动添加 token
     const response: any = await axios.get('/honeypots', {
       params: {
         page: currentPage.value,
@@ -178,48 +219,85 @@ const fetchHoneypots = async () => {
         status: queryForm.status
       }
     })
-    
-    console.log('Honeypot response:', response)
 
-    if (response && response.code === 200) {
-      if (response.data && Array.isArray(response.data.honeypots)) {
-        honeypotList.value = response.data.honeypots
-        total.value = response.data.pagination?.total || 0
-      } else {
-        console.error('Invalid data structure:', response.data)
-        honeypotList.value = []
-        total.value = 0
-        ElMessage.warning('获取到的数据格式不正确')
-      }
+    if (response?.code === 200 && response.data?.honeypots) {
+      mergeHealthState(response.data.honeypots)
+      total.value = response.data.pagination?.total || 0
     } else {
-      ElMessage.error(response?.message || '获取列表失败')
+      honeypotList.value = []
+      total.value = 0
+      ElMessage.error(response?.message || '获取蜜罐列表失败')
     }
   } catch (error: any) {
-    console.error('Fetch error:', error)
     ElMessage.error(error.message || '网络错误，无法获取蜜罐列表')
   } finally {
     loading.value = false
   }
 }
 
-// 分页处理
+const handleSearch = () => {
+  currentPage.value = 1
+  fetchHoneypots()
+}
+
 const handleSizeChange = (val: number) => {
   pageSize.value = val
   fetchHoneypots()
 }
+
 const handleCurrentChange = (val: number) => {
   currentPage.value = val
   fetchHoneypots()
 }
 
-// 启动蜜罐
-const handleStart = async (row: any) => {
+const updateRowHealth = (id: number, payload: any) => {
+  const target = honeypotList.value.find((item) => item.id === id)
+  if (!target) return
+  target.status = payload.status
+  target.pid = payload.pid
+  target.healthy = payload.healthy
+  target.health_reason = payload.reason
+}
+
+const handleHealthCheck = async (row: HoneypotItem, silent = false) => {
+  healthLoading.value[row.id] = true
+  try {
+    const response: any = await axios.get(`/honeypots/${row.id}/health`)
+    if (response.code === 200) {
+      updateRowHealth(row.id, response.data)
+      if (!silent) {
+        ElMessage.success(`蜜罐 ${row.name} 状态已同步`)
+      }
+    } else if (!silent) {
+      ElMessage.error(response.message || '状态校验失败')
+    }
+  } catch (error) {
+    if (!silent) {
+      ElMessage.error('状态校验失败')
+    }
+  } finally {
+    healthLoading.value[row.id] = false
+  }
+}
+
+const refreshAllStatus = async () => {
+  refreshingAll.value = true
+  try {
+    await fetchHoneypots()
+    ElMessage.success('已刷新所有蜜罐真实状态')
+  } finally {
+    refreshingAll.value = false
+  }
+}
+
+const handleStart = async (row: HoneypotItem) => {
   actionLoading.value[row.id] = true
   try {
     const response: any = await axios.post(`/honeypots/${row.id}/start`)
     if (response.code === 200) {
-      ElMessage.success('启动成功')
-      fetchHoneypots()
+      ElMessage.success(response.data?.message || '启动成功')
+      await handleHealthCheck(row, true)
+      await fetchHoneypots()
     } else {
       ElMessage.error(response.message || '启动失败')
     }
@@ -230,14 +308,14 @@ const handleStart = async (row: any) => {
   }
 }
 
-// 停止蜜罐
-const handleStop = async (row: any) => {
+const handleStop = async (row: HoneypotItem) => {
   actionLoading.value[row.id] = true
   try {
     const response: any = await axios.post(`/honeypots/${row.id}/stop`)
     if (response.code === 200) {
-      ElMessage.success('停止成功')
-      fetchHoneypots()
+      ElMessage.success(response.data?.message || '停止成功')
+      await handleHealthCheck(row, true)
+      await fetchHoneypots()
     } else {
       ElMessage.error(response.message || '停止失败')
     }
@@ -248,8 +326,7 @@ const handleStop = async (row: any) => {
   }
 }
 
-// 删除蜜罐
-const handleDelete = (row: any) => {
+const handleDelete = (row: HoneypotItem) => {
   ElMessageBox.confirm('确定要删除该蜜罐吗？', '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -269,7 +346,6 @@ const handleDelete = (row: any) => {
   })
 }
 
-// 打开新建对话框
 const handleCreate = () => {
   dialogType.value = 'create'
   form.id = null
@@ -282,32 +358,29 @@ const handleCreate = () => {
   dialogVisible.value = true
 }
 
-// 打开编辑对话框
-const handleEdit = (row: any) => {
+const handleEdit = (row: HoneypotItem) => {
   dialogType.value = 'edit'
   form.id = row.id
   form.name = row.name
   form.type = row.type
   form.port = row.port
   form.ip_address = row.ip_address
-  form.description = row.description
-  form.config = row.config
+  form.description = row.description || ''
+  form.config = row.config || ''
   dialogVisible.value = true
 }
 
-// 提交表单
 const submitForm = async () => {
   if (!form.name || !form.port) {
     ElMessage.warning('请填写必要信息')
     return
   }
-  
+
   try {
     const url = dialogType.value === 'create' ? '/honeypots' : `/honeypots/${form.id}`
     const method = dialogType.value === 'create' ? 'post' : 'put'
-    
     const response: any = await axios[method](url, form)
-    
+
     if (response.code === 200) {
       ElMessage.success(dialogType.value === 'create' ? '创建成功' : '更新成功')
       dialogVisible.value = false
@@ -320,6 +393,32 @@ const submitForm = async () => {
   }
 }
 
+const getHealthText = (row: HoneypotItem) => {
+  if (row.status !== 'running') {
+    return '未运行'
+  }
+  return row.healthy ? '健康' : '异常'
+}
+
+const getHealthTagType = (row: HoneypotItem) => {
+  if (row.status !== 'running') {
+    return 'info'
+  }
+  return row.healthy ? 'success' : 'warning'
+}
+
+const formatHealthReason = (reason?: string) => {
+  const reasonMap: Record<string, string> = {
+    ok: '进程和端口正常',
+    stopped: '蜜罐未运行',
+    pid_not_found: '未找到进程',
+    process_mismatch: 'PID 与蜜罐进程不匹配',
+    port_not_listening: '端口未监听',
+    process_unavailable: '进程不可访问'
+  }
+  return reason ? reasonMap[reason] || reason : ''
+}
+
 onMounted(() => {
   fetchHoneypots()
 })
@@ -329,17 +428,37 @@ onMounted(() => {
 .honeypot-management-container {
   padding: 20px;
 }
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .table-container {
   margin-top: 20px;
 }
+
 .pagination-container {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.health-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.health-reason {
+  font-size: 12px;
+  color: #909399;
+  line-height: 1.4;
 }
 </style>

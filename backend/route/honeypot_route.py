@@ -110,3 +110,14 @@ def stop_honeypot(hp_id):
         return ApiResponse.success(result)
     except Exception as e:
         return ApiResponse.error(str(e))
+
+@honeypot_bp.route('/honeypots/<int:hp_id>/health', methods=['GET'])
+@token_required
+def check_honeypot_health(hp_id):
+    try:
+        result = HoneypotService.health_check(hp_id)
+        if 'error' in result:
+            return ApiResponse.error(result['error'])
+        return ApiResponse.success(result)
+    except Exception as e:
+        return ApiResponse.error(str(e))

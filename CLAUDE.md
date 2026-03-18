@@ -184,3 +184,28 @@ const handleLogin = async () => {
 1. **蜜罐管理**：蜜罐进程需独立管理，确保主服务崩溃不影响蜜罐运行。
 2. **AI 分析**：大模型调用需使用异步队列（如 Queue + Threading），避免阻塞 HTTP 请求。
 3. **IP 封禁**：调用底层防火墙命令（iptables/netsh）时需进行操作系统判断和权限校验。
+
+## 七、现有模块与系统架构
+当前的后端服务架构已分为以下主要模块：
+
+### 1. 核心业务 API 模块 (Routes / Services / Models)
+- **User (用户权限)**：处理用户登录、认证与权限校验 (`user_route`, `user_service`, `user_model`, `user_info_model`, `permission_model`, `module_model`)
+- **Dashboard (数据大屏)**：展示实时攻击概览及统计数据 (`dashboard_route`, `dashboard_service`, `attack_stats_model`)
+- **Honeypot (蜜罐后台)**：管理蜜罐部署状态及节点信息 (`honeypot_route`, `honeypot_service`, `honeypot_model`)
+- **Log (日志审计)**：系统交互日志与攻击日志记录 (`log_route`, `log_service`, `log_model`)
+- **Malicious IP (恶意拦截)**：记录攻击源与下发封禁指令 (`malicious_ip_route`, `malicious_ip_service`, `malicious_ip_model`, `block_history_model`)
+- **Match Rule (规则引擎)**：管理预期的流量与攻击匹配特征 (`match_rule_route`, `match_rule_service`, `match_rule_model`)
+- **AI Config (大模型配置)**：LLM 接口的参数化配置与状态调用 (`ai_config_route`, `ai_config_service`, `ai_config_model`)
+
+### 2. 蜜罐组件实现 (`src/backend/honeypots/`)
+- `ftp_server.py`: 低交互 FTP 模拟器，主要针对爆破和未授权访问。
+- `ssh_server.py`: 低交互 SSH 模拟器，捕获登录尝试与恶意命令。
+- `hikvision_http_server.py`: 模拟海康威视等 IoT 设备的 Web 服务漏洞环境。
+
+### 3. Agent 与智能响应模块 (`src/backend/agent/`)
+- **Core Agent**: AI 代理调度核心。
+- **Skills**: 下游执行功能组件 (如 `block_ip_skill`, `decoder_skill`, `log_query_skill`)。
+
+
+## 八、代码重载
+后端代码修改之后必须重新启动后端进程

@@ -1,79 +1,253 @@
 # -*- coding: utf-8 -*-
 """
 蜜罐服务
-处理蜜罐相关的业务逻辑，包括启动、停止蜜罐进程
+统一管理蜜罐进程的启动、停止、健康检查和状态同步。
 """
 
-from model.honeypot_model import Honeypot
-from database import db
-from datetime import datetime
+from __future__ import annotations
+
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
+import os
 import subprocess
 import sys
-import os
-import signal
+
 import psutil
 
-# 用于存储运行中的蜜罐进程
-# key: honeypot_id, value: subprocess.Popen object
-running_honeypots = {}
+from database import db
+from model.honeypot_model import Honeypot
+
+
+@dataclass
+class HoneypotRuntime:
+    honeypot_id: int
+    pid: int
+    process: Optional[subprocess.Popen] = None
+    script_path: Optional[str] = None
+
+
+# key: honeypot_id, value: HoneypotRuntime
+running_honeypots: Dict[int, HoneypotRuntime] = {}
+
 
 class HoneypotService:
-    """
-    蜜罐服务类
-    提供蜜罐的增删改查及启停功能
-    """
-    
+    STATUS_RUNNING = 'running'
+    STATUS_STOPPED = 'stopped'
+
+    SCRIPT_MAP = {
+        'SSH': 'ssh_server.py',
+        'HTTP': 'hikvision_http_server.py',
+        'FTP': 'ftp_server.py',
+    }
+
     @staticmethod
-    def get_honeypots(page: int = 1, per_page: int = 20, type: str = None, 
-                      status: str = None, keyword: str = None) -> Tuple[List[Dict], Dict]:
-        """
-        分页查询蜜罐
-        """
+    def _get_backend_root() -> str:
+        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    @classmethod
+    def _get_honeypot_scripts_dir(cls) -> str:
+        return os.path.join(cls._get_backend_root(), 'honeypots')
+
+    @classmethod
+    def _resolve_script_path(cls, hp_type: str) -> Optional[str]:
+        script_name = cls.SCRIPT_MAP.get((hp_type or '').upper())
+        if not script_name:
+            return None
+        return os.path.join(cls._get_honeypot_scripts_dir(), script_name)
+
+    @classmethod
+    def _build_command(cls, hp: Honeypot) -> Optional[List[str]]:
+        script_path = cls._resolve_script_path(hp.type)
+        if not script_path:
+            return None
+        return [sys.executable, script_path, str(hp.port)]
+
+    @staticmethod
+    def _is_pid_alive(pid: Optional[int]) -> bool:
+        return bool(pid) and psutil.pid_exists(pid)
+
+    @classmethod
+    def _process_matches_honeypot(cls, process: psutil.Process, hp: Honeypot) -> bool:
         try:
+            cmdline = [part.lower() for part in process.cmdline()]
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            return False
+
+        script_path = cls._resolve_script_path(hp.type)
+        if not script_path:
+            return False
+
+        script_name = os.path.basename(script_path).lower()
+        port = str(hp.port)
+        
+        script_match = any(script_name in part for part in cmdline)
+        port_match = port in cmdline
+        return script_match and port_match
+
+    @staticmethod
+    def _is_listening_on_port(process: psutil.Process, port: int) -> bool:
+        try:
+            for conn in process.net_connections(kind='inet'):
+                if conn.status == psutil.CONN_LISTEN and conn.laddr and conn.laddr.port == port:
+                    return True
+        except (psutil.AccessDenied, psutil.NoSuchProcess, psutil.ZombieProcess):
+            return False
+        return False
+
+    @classmethod
+    def _inspect_honeypot_process(cls, hp: Honeypot) -> Dict:
+        pid = hp.pid
+        if not cls._is_pid_alive(pid):
+            return {
+                'is_running': False,
+                'pid': None,
+                'healthy': False,
+                'reason': 'pid_not_found',
+            }
+
+        try:
+            process = psutil.Process(pid)
+            if not cls._process_matches_honeypot(process, hp):
+                return {
+                    'is_running': False,
+                    'pid': None,
+                    'healthy': False,
+                    'reason': 'process_mismatch',
+                }
+
+            is_healthy = cls._is_listening_on_port(process, hp.port)
+            return {
+                'is_running': True,
+                'pid': pid,
+                'healthy': is_healthy,
+                'reason': 'ok' if is_healthy else 'port_not_listening',
+                'process': process,
+            }
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            return {
+                'is_running': False,
+                'pid': None,
+                'healthy': False,
+                'reason': 'process_unavailable',
+            }
+
+    @classmethod
+    def _register_runtime(
+        cls,
+        hp: Honeypot,
+        process: Optional[subprocess.Popen] = None,
+        pid: Optional[int] = None,
+    ) -> None:
+        runtime_pid = pid if pid is not None else getattr(process, 'pid', None)
+        if not runtime_pid:
+            return
+
+        running_honeypots[hp.id] = HoneypotRuntime(
+            honeypot_id=hp.id,
+            pid=runtime_pid,
+            process=process,
+            script_path=cls._resolve_script_path(hp.type),
+        )
+
+    @staticmethod
+    def _unregister_runtime(hp_id: int) -> None:
+        running_honeypots.pop(hp_id, None)
+
+    @classmethod
+    def _sync_honeypot_status(cls, hp: Honeypot, commit: bool = False) -> Dict:
+        inspection = cls._inspect_honeypot_process(hp)
+        actual_status = cls.STATUS_RUNNING if inspection['is_running'] else cls.STATUS_STOPPED
+        actual_pid = inspection['pid']
+
+        changed = hp.status != actual_status or hp.pid != actual_pid
+        if changed:
+            hp.status = actual_status
+            hp.pid = actual_pid
+            if commit:
+                db.session.commit()
+
+        if inspection['is_running'] and actual_pid:
+            cls._register_runtime(hp, pid=actual_pid)
+        else:
+            cls._unregister_runtime(hp.id)
+
+        return {
+            'honeypot_id': hp.id,
+            'status': actual_status,
+            'pid': actual_pid,
+            'healthy': inspection['healthy'],
+            'reason': inspection['reason'],
+            'changed': changed,
+        }
+
+    @classmethod
+    def _sync_honeypots_status(cls, honeypots: List[Honeypot]) -> Dict[int, Dict]:
+        results: Dict[int, Dict] = {}
+        has_changes = False
+
+        for hp in honeypots:
+            result = cls._sync_honeypot_status(hp, commit=False)
+            results[hp.id] = result
+            has_changes = has_changes or result['changed']
+
+        if has_changes:
+            db.session.commit()
+
+        return results
+
+    @classmethod
+    def health_check(cls, hp_id: int) -> Dict:
+        hp = Honeypot.query.get(hp_id)
+        if not hp:
+            return {'error': '蜜罐不存在'}
+        return cls._sync_honeypot_status(hp, commit=True)
+
+    @classmethod
+    def sync_all_statuses(cls) -> None:
+        honeypots = Honeypot.query.all()
+        cls._sync_honeypots_status(honeypots)
+
+    @staticmethod
+    def get_honeypots(
+        page: int = 1,
+        per_page: int = 20,
+        type: str = None,
+        status: str = None,
+        keyword: str = None,
+    ) -> Tuple[List[Dict], Dict]:
+        try:
+            HoneypotService.sync_all_statuses()
+
             query = Honeypot.query
-            
+
             if type:
                 query = query.filter(Honeypot.type == type)
-            
+
             if status:
                 query = query.filter(Honeypot.status == status)
-                
+
             if keyword:
                 query = query.filter(
-                    Honeypot.name.like(f'%{keyword}%') |
-                    Honeypot.description.like(f'%{keyword}%') |
-                    Honeypot.ip_address.like(f'%{keyword}%')
+                    Honeypot.name.like(f'%{keyword}%')
+                    | Honeypot.description.like(f'%{keyword}%')
+                    | Honeypot.ip_address.like(f'%{keyword}%')
                 )
-            
+
             total = query.count()
             offset = (page - 1) * per_page
             honeypots = query.offset(offset).limit(per_page).all()
-            
-            # 更新内存中的状态到数据库显示（可选，或者直接信任数据库状态）
-            # 这里我们简单检查一下进程是否还活着
-            for hp in honeypots:
-                if hp.id in running_honeypots:
-                    proc = running_honeypots[hp.id]
-                    if proc.poll() is not None:
-                        # 进程已结束
-                        del running_honeypots[hp.id]
-                        hp.status = 'stopped'
-                        db.session.commit()
-            
+
             hp_list = [hp.to_dict() for hp in honeypots]
-            
             pagination = {
                 'page': page,
                 'per_page': per_page,
                 'total': total,
                 'pages': (total + per_page - 1) // per_page,
                 'has_prev': page > 1,
-                'has_next': page * per_page < total
+                'has_next': page * per_page < total,
             }
-            
             return hp_list, pagination
-            
+
         except Exception as e:
             print(f"查询蜜罐时发生错误: {str(e)}")
             return [], {'error': str(e)}
@@ -82,9 +256,11 @@ class HoneypotService:
     def get_honeypot_by_id(hp_id: int) -> Optional[Dict]:
         try:
             hp = Honeypot.query.get(hp_id)
-            if hp:
-                return hp.to_dict()
-            return None
+            if not hp:
+                return None
+
+            HoneypotService._sync_honeypot_status(hp, commit=True)
+            return hp.to_dict()
         except Exception as e:
             print(f"查询蜜罐详情错误: {e}")
             return None
@@ -99,7 +275,7 @@ class HoneypotService:
                 ip_address=data.get('ip_address', '0.0.0.0'),
                 description=data.get('description'),
                 config=data.get('config'),
-                status='stopped'
+                status=HoneypotService.STATUS_STOPPED,
             )
             db.session.add(hp)
             db.session.commit()
@@ -114,12 +290,24 @@ class HoneypotService:
             hp = Honeypot.query.get(hp_id)
             if not hp:
                 return {'error': '蜜罐不存在'}
-            
-            if 'name' in data: hp.name = data['name']
-            if 'type' in data: hp.type = data['type']
-            if 'port' in data: hp.port = data['port']
-            if 'description' in data: hp.description = data['description']
-            
+
+            HoneypotService._sync_honeypot_status(hp, commit=True)
+            if hp.status == HoneypotService.STATUS_RUNNING:
+                return {'error': '请先停止蜜罐，再修改配置信息'}
+
+            if 'name' in data:
+                hp.name = data['name']
+            if 'type' in data:
+                hp.type = data['type']
+            if 'port' in data:
+                hp.port = data['port']
+            if 'description' in data:
+                hp.description = data['description']
+            if 'ip_address' in data:
+                hp.ip_address = data['ip_address']
+            if 'config' in data:
+                hp.config = data['config']
+
             db.session.commit()
             return {'message': '蜜罐更新成功'}
         except Exception as e:
@@ -132,13 +320,16 @@ class HoneypotService:
             hp = Honeypot.query.get(hp_id)
             if not hp:
                 return {'error': '蜜罐不存在'}
-            
-            # 如果正在运行，先停止
-            if hp.id in running_honeypots or hp.status == 'running':
-                HoneypotService.stop_honeypot(hp_id)
-            
+
+            HoneypotService._sync_honeypot_status(hp, commit=True)
+            if hp.status == HoneypotService.STATUS_RUNNING:
+                stop_result = HoneypotService.stop_honeypot(hp_id)
+                if 'error' in stop_result:
+                    return stop_result
+
             db.session.delete(hp)
             db.session.commit()
+            HoneypotService._unregister_runtime(hp_id)
             return {'message': '蜜罐删除成功'}
         except Exception as e:
             db.session.rollback()
@@ -150,46 +341,45 @@ class HoneypotService:
             hp = Honeypot.query.get(hp_id)
             if not hp:
                 return {'error': '蜜罐不存在'}
-            
-            if hp.status == 'running' and hp.id in running_honeypots:
-                return {'error': '蜜罐已经在运行中'}
-            
-            # 确定脚本路径
-            script_path = None
-            if hp.type.upper() == 'SSH':
-                script_path = os.path.join(os.getcwd(), 'honeypots', 'ssh_server.py')
-            elif hp.type.upper() == 'HTTP':
-                script_path = os.path.join(os.getcwd(), 'honeypots', 'hikvision_http_server.py')
-            elif hp.type.upper() == 'FTP':
-                script_path = os.path.join(os.getcwd(), 'honeypots', 'ftp_server.py')
-            else:
+
+            status_info = HoneypotService._sync_honeypot_status(hp, commit=True)
+            if status_info['status'] == HoneypotService.STATUS_RUNNING:
+                return {
+                    'message': f'蜜罐 {hp.name} 已在运行中',
+                    'pid': hp.pid,
+                    'healthy': status_info['healthy'],
+                }
+
+            script_path = HoneypotService._resolve_script_path(hp.type)
+            if not script_path:
                 return {'error': f'暂不支持 {hp.type} 类型的蜜罐自动启动'}
-            
+
             if not os.path.exists(script_path):
                 return {'error': f'找不到蜜罐脚本: {script_path}'}
-            
-            # 启动进程
-            # 使用 python 解释器运行脚本，并传入端口参数
-            cmd = [sys.executable, script_path, str(hp.port)]
-            
-            # Windows下使用creationflags=subprocess.CREATE_NEW_CONSOLE可以避免子进程随主进程退出（可选）
-            # 这里为了简单管理，作为子进程运行
+
+            cmd = HoneypotService._build_command(hp)
             process = subprocess.Popen(
                 cmd,
-                cwd=os.getcwd(),
-                # stdout=subprocess.PIPE, 
-                # stderr=subprocess.PIPE
-                # 不捕获输出，直接输出到控制台或者后续重定向到日志文件
+                cwd=HoneypotService._get_backend_root(),
             )
-            
-            running_honeypots[hp.id] = process
-            hp.status = 'running'
-            hp.pid = process.pid  # 持久化PID，供重启后恢复状态使用
+
+            HoneypotService._register_runtime(hp, process=process)
+            hp.status = HoneypotService.STATUS_RUNNING
+            hp.pid = process.pid
             db.session.commit()
-            
-            return {'message': f'蜜罐 {hp.name} 已启动', 'pid': process.pid}
-            
+
+            # 启动后立即做一次同步，避免进程秒退但数据库仍显示运行中。
+            status_info = HoneypotService._sync_honeypot_status(hp, commit=True)
+            if status_info['status'] != HoneypotService.STATUS_RUNNING:
+                return {'error': f'蜜罐 {hp.name} 启动失败，进程未保持运行'}
+
+            return {
+                'message': f'蜜罐 {hp.name} 已启动',
+                'pid': hp.pid,
+                'healthy': status_info['healthy'],
+            }
         except Exception as e:
+            db.session.rollback()
             return {'error': str(e)}
 
     @staticmethod
@@ -198,69 +388,47 @@ class HoneypotService:
             hp = Honeypot.query.get(hp_id)
             if not hp:
                 return {'error': '蜜罐不存在'}
-            
-            if hp.id in running_honeypots:
-                proc = running_honeypots[hp.id]
-                # 终止进程
-                proc.terminate()
+
+            HoneypotService._sync_honeypot_status(hp, commit=True)
+            target_pid = hp.pid
+
+            if not target_pid:
+                hp.status = HoneypotService.STATUS_STOPPED
+                hp.pid = None
+                db.session.commit()
+                HoneypotService._unregister_runtime(hp.id)
+                return {'message': f'蜜罐 {hp.name} 已停止'}
+
+            try:
+                process = psutil.Process(target_pid)
+                process.terminate()
                 try:
-                    proc.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    proc.kill()
-                
-                del running_honeypots[hp.id]
-            
-            # 即使进程不在内存字典中（例如重启后），也要尝试更新数据库状态
-            hp.status = 'stopped'
-            hp.pid = None  # 清除PID记录
+                    process.wait(timeout=5)
+                except psutil.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=3)
+            except psutil.NoSuchProcess:
+                pass
+
+            HoneypotService._unregister_runtime(hp.id)
+            hp.status = HoneypotService.STATUS_STOPPED
+            hp.pid = None
             db.session.commit()
-            
+
             return {'message': f'蜜罐 {hp.name} 已停止'}
-            
         except Exception as e:
+            db.session.rollback()
             return {'error': str(e)}
 
     @staticmethod
     def init_honeypots():
         """
-        初始化蜜罐服务
-        系统启动时调用，恢复所有状态为running的蜜罐。
-        通过检查数据库中持久化的PID判断旧进程是否仍在运行，
-        避免重复启动已存活的蜜罐进程。
+        初始化蜜罐服务。
+        服务启动时统一同步数据库状态，并为仍在运行的蜜罐恢复运行时登记。
         """
         try:
-            # 查询所有状态为running的蜜罐
-            honeypots = Honeypot.query.filter_by(status='running').all()
-            print(f"正在恢复 {len(honeypots)} 个蜜罐服务...")
-            
-            for hp in honeypots:
-                # 检查持久化的PID对应的进程是否还在运行
-                if hp.pid and psutil.pid_exists(hp.pid):
-                    try:
-                        proc = psutil.Process(hp.pid)
-                        # 进一步确认进程名包含python（避免PID复用误判）
-                        if 'python' in proc.name().lower():
-                            print(f"蜜罐 {hp.name} 的进程 (PID: {hp.pid}) 仍在运行，跳过重新启动")
-                            # 将其注册回内存字典，以便后续管理
-                            # 注意：此处无法还原 Popen 对象，仅记录进程引用供监控使用
-                            # 停止操作仍通过 psutil 完成
-                            continue
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
-                        pass  # 进程已消失或无权访问，继续重启
-
-                # PID不存在或进程已结束，重新启动蜜罐
-                print(f"正在启动蜜罐: {hp.name} (Port: {hp.port})...")
-                # start_honeypot 会检查 (hp.status == 'running' and hp.id in running_honeypots)
-                # 初始化时 running_honeypots 为空，所以可以直接调用
-                result = HoneypotService.start_honeypot(hp.id)
-                if 'error' in result:
-                    print(f"启动蜜罐 {hp.name} 失败: {result['error']}")
-                    # 启动失败，重置状态和PID
-                    hp.status = 'stopped'
-                    hp.pid = None
-                    db.session.commit()
-                else:
-                    print(f"蜜罐 {hp.name} 启动成功 (PID: {result['pid']})")
-                    
+            HoneypotService.sync_all_statuses()
+            running = Honeypot.query.filter_by(status=HoneypotService.STATUS_RUNNING).all()
+            print(f"已同步蜜罐状态，当前共有 {len(running)} 个蜜罐运行中。")
         except Exception as e:
             print(f"初始化蜜罐服务出错: {e}")
