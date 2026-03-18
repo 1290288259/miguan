@@ -38,6 +38,9 @@ class HoneypotService:
         'SSH': 'ssh_server.py',
         'HTTP': 'hikvision_http_server.py',
         'FTP': 'ftp_server.py',
+        'REDIS': 'redis_server.py',
+        'MYSQL': 'mysql_server.py',
+        'ELASTICSEARCH': 'elasticsearch_server.py',
     }
 
     @staticmethod
