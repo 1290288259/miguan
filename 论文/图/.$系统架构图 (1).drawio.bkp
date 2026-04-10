@@ -1,0 +1,144 @@
+<mxfile host="mcp"><diagram name="Page-1"><mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#ffffff">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="访问层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#333333;fontColor=#000000;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="100" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="管理员 / 黑客 (Client/Browser)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#333333;fontColor=#000000;fontSize=16;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="160" y="40" width="600" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="前端UI层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#a9dfbf;strokeColor=#1e8449;fontColor=#000000;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="40" y="140" width="100" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="Vue.js 3 + Element Plus&#10;(数据大屏 / 系统管理面板)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#a9dfbf;strokeColor=#1e8449;fontColor=#000000;fontSize=16;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="160" y="140" width="600" height="80" as="geometry"/>
+    </mxCell>
+        <mxCell id="6" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="30" y="130" as="sourcePoint"/>
+            <mxPoint x="780" y="130" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;fillColor=#ffffff;strokeColor=#000000;width=10;endSize=5.33;startSize=5.33" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="260" y="140" as="sourcePoint"/>
+            <mxPoint x="260" y="120" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="8" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;fillColor=#ffffff;strokeColor=#000000;width=10;endSize=5.33;startSize=5.33" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="140" as="sourcePoint"/>
+            <mxPoint x="660" y="120" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+    <mxCell id="9" value="交互服务层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#aed6f1;strokeColor=#2874a6;fontColor=#000000;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="40" y="240" width="100" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="10" value="Flask RESTful API" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#aed6f1;strokeColor=#2874a6;fontColor=#000000;fontSize=16;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="160" y="240" width="600" height="80" as="geometry"/>
+    </mxCell>
+        <mxCell id="11" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="30" y="230" as="sourcePoint"/>
+            <mxPoint x="780" y="230" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="12" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;fillColor=#ffffff;strokeColor=#000000;width=10;endSize=5.33;startSize=5.33" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="260" y="240" as="sourcePoint"/>
+            <mxPoint x="260" y="220" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="13" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;fillColor=#ffffff;strokeColor=#000000;width=10;endSize=5.33;startSize=5.33" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="240" as="sourcePoint"/>
+            <mxPoint x="660" y="220" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+    <mxCell id="14" value="核心业务层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f3c68f;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="40" y="340" width="100" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="15" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f3c68f;strokeColor=#b9770e;fontColor=#000000;fontSize=16;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="160" y="340" width="600" height="160" as="geometry"/>
+    </mxCell>
+        <mxCell id="16" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="30" y="330" as="sourcePoint"/>
+            <mxPoint x="780" y="330" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="17" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;fillColor=#ffffff;strokeColor=#000000;width=10;endSize=5.33;startSize=5.33" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="260" y="340" as="sourcePoint"/>
+            <mxPoint x="260" y="320" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="18" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;fillColor=#ffffff;strokeColor=#000000;width=10;endSize=5.33;startSize=5.33" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="340" as="sourcePoint"/>
+            <mxPoint x="660" y="320" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+    <mxCell id="19" value="数据层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1948a;strokeColor=#b03a2e;fontColor=#000000;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="40" y="520" width="100" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="20" value="MySQL / SQLite&#10;(日志表、规则表、蜜罐配置、IP库)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1948a;strokeColor=#b03a2e;fontColor=#000000;fontSize=16;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="160" y="520" width="600" height="80" as="geometry"/>
+    </mxCell>
+        <mxCell id="21" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="30" y="510" as="sourcePoint"/>
+            <mxPoint x="780" y="510" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="22" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;fillColor=#ffffff;strokeColor=#000000;width=10;endSize=5.33;startSize=5.33" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="260" y="520" as="sourcePoint"/>
+            <mxPoint x="260" y="500" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="23" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;fillColor=#ffffff;strokeColor=#000000;width=10;endSize=5.33;startSize=5.33" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="520" as="sourcePoint"/>
+            <mxPoint x="660" y="500" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+    <mxCell id="24" value="运行环境" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5b7b1;strokeColor=#a93226;fontColor=#000000;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="40" y="620" width="100" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="25" value="Python环境 + Node.js前端环境 + 大模型环境" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5b7b1;strokeColor=#a93226;fontColor=#000000;fontSize=16;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="160" y="620" width="600" height="80" as="geometry"/>
+    </mxCell>
+        <mxCell id="26" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=2;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="30" y="610" as="sourcePoint"/>
+            <mxPoint x="780" y="610" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="27" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;fillColor=#ffffff;strokeColor=#000000;width=10;endSize=5.33;startSize=5.33" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="260" y="620" as="sourcePoint"/>
+            <mxPoint x="260" y="600" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="28" value="" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;fillColor=#ffffff;strokeColor=#000000;width=10;endSize=5.33;startSize=5.33" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="660" y="620" as="sourcePoint"/>
+            <mxPoint x="660" y="600" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+    <mxCell id="29" value="低交互蜜罐引擎&#10;(流量引流/协议模拟)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="180" y="360" width="260" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="30" value="流量捕获与解析&#10;(数据预处理)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="480" y="360" width="260" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="31" value="强规则匹配防御&#10;(特征签名库/高危拦截)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="180" y="430" width="260" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="32" value="AI大模型监测研判&#10;(未知攻击分析/威胁判定)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="480" y="430" width="260" height="50" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel></diagram></mxfile>
