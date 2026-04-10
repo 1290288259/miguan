@@ -30,14 +30,17 @@
             <el-option label="XSS" value="XSS" />
             <el-option label="命令注入" value="命令注入" />
             <el-option label="目录遍历" value="目录遍历" />
+            <el-option label="WebShell" value="WebShell" />
+            <el-option label="RCE" value="RCE" />
             <el-option label="文件包含" value="文件包含" />
-            <el-option label="CSRF" value="CSRF" />
             <el-option label="SSRF" value="SSRF" />
-            <el-option label="暴力破解" value="暴力破解" />
             <el-option label="扫描探测" value="扫描探测" />
-            <el-option label="拒绝服务" value="拒绝服务" />
-            <el-option label="凭证填充" value="凭证填充" />
-            <el-option label="字典攻击" value="字典攻击" />
+            <el-option label="暴力破解" value="暴力破解" />
+            <el-option label="XXE" value="XXE" />
+            <el-option label="LDAP注入" value="LDAP注入" />
+            <el-option label="反序列化" value="反序列化" />
+            <el-option label="CRLF注入" value="CRLF注入" />
+            <el-option label="信息泄露" value="信息泄露" />
           </el-select>
         </el-form-item>
 
@@ -110,8 +113,6 @@
       </template>
 
       <el-table :data="logList" style="width: 100%" v-loading="loading" stripe border>
-        <el-table-column prop="id" label="ID" width="80" />
-
         <el-table-column prop="attack_time" label="攻击时间" width="180">
           <template #default="scope">
             {{ formatDateTime(scope.row.attack_time) }}
@@ -134,8 +135,8 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="source_ip" label="源IP" width="130" />
-        <el-table-column prop="target_ip" label="目标IP" width="130" />
+        <el-table-column prop="source_ip" label="源IP" min-width="130" />
+        <el-table-column prop="target_ip" label="目标IP" min-width="130" />
         <el-table-column prop="target_port" label="目标端口" width="100" />
         <el-table-column prop="protocol" label="协议" width="80" />
 
@@ -179,7 +180,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="ai_model_name" label="AI模型" width="120" align="center" show-overflow-tooltip />
+        <el-table-column prop="ai_model_name" label="AI模型" min-width="120" align="center" show-overflow-tooltip />
 
         <el-table-column label="操作" width="100" fixed="right" align="center">
           <template #default="scope">
@@ -206,7 +207,6 @@
 
     <el-dialog v-model="detailDialogVisible" title="日志详情" width="60%">
       <el-descriptions :column="2" border>
-        <el-descriptions-item label="日志ID">{{ currentLog.id }}</el-descriptions-item>
         <el-descriptions-item label="攻击时间">{{ formatDateTime(currentLog.attack_time) }}</el-descriptions-item>
         <el-descriptions-item label="攻击类型">{{ currentLog.attack_type }}</el-descriptions-item>
         <el-descriptions-item label="威胁等级">
@@ -290,14 +290,17 @@
             <el-option label="XSS" value="XSS" />
             <el-option label="命令注入" value="命令注入" />
             <el-option label="目录遍历" value="目录遍历" />
+            <el-option label="WebShell" value="WebShell" />
+            <el-option label="RCE" value="RCE" />
             <el-option label="文件包含" value="文件包含" />
-            <el-option label="CSRF" value="CSRF" />
             <el-option label="SSRF" value="SSRF" />
-            <el-option label="暴力破解" value="暴力破解" />
             <el-option label="扫描探测" value="扫描探测" />
-            <el-option label="拒绝服务" value="拒绝服务" />
-            <el-option label="凭证填充" value="凭证填充" />
-            <el-option label="字典攻击" value="字典攻击" />
+            <el-option label="暴力破解" value="暴力破解" />
+            <el-option label="XXE" value="XXE" />
+            <el-option label="LDAP注入" value="LDAP注入" />
+            <el-option label="反序列化" value="反序列化" />
+            <el-option label="CRLF注入" value="CRLF注入" />
+            <el-option label="信息泄露" value="信息泄露" />
           </el-select>
         </el-form-item>
 
@@ -590,10 +593,10 @@ const getThreatLevelTagType = (level: string) => {
 }
 
 const getAttackTypeTagType = (type: string) => {
-  if (['SQL注入', '命令注入', 'XSS'].includes(type)) {
+  if (['SQL注入', '命令注入', 'XSS', 'WebShell', 'RCE', 'XXE', 'LDAP注入', '反序列化'].includes(type)) {
     return 'danger'
   }
-  if (['暴力破解', '字典攻击', '凭证填充'].includes(type)) {
+  if (['暴力破解', '文件包含', 'SSRF', 'CRLF注入'].includes(type)) {
     return 'warning'
   }
   return 'info'

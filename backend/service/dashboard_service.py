@@ -36,7 +36,8 @@ class DashboardService:
                     func.date_format(Log.attack_time, '%Y-%m').label('date'),
                     func.count(Log.id).label('count')
                 ).filter(
-                    Log.attack_time >= start_date
+                    Log.attack_time >= start_date,
+                    Log.is_malicious == True
                 ).group_by(
                     func.date_format(Log.attack_time, '%Y-%m')
                 ).all()
@@ -75,7 +76,8 @@ class DashboardService:
                     func.date(Log.attack_time).label('date'),
                     func.count(Log.id).label('count')
                 ).filter(
-                    Log.attack_time >= start_date
+                    Log.attack_time >= start_date,
+                    Log.is_malicious == True
                 ).group_by(
                     func.date(Log.attack_time)
                 ).all()
@@ -110,7 +112,9 @@ class DashboardService:
                 Log.attack_type,
                 func.count(Log.id).label('count')
             ).filter(
-                Log.attack_type != None
+                Log.attack_type != None,
+                Log.is_malicious == True,
+                Log.attack_type != 'Web Visit'
             ).group_by(
                 Log.attack_type
             ).order_by(
@@ -156,8 +160,8 @@ class DashboardService:
         获取汇总数据
         """
         try:
-            total_attacks = Log.query.count()
-            today_attacks = Log.query.filter(func.date(Log.attack_time) == get_beijing_time().strftime('%Y-%m-%d')).count()
+            total_attacks = Log.query.filter(Log.is_malicious == True).count()
+            today_attacks = Log.query.filter(Log.is_malicious == True, func.date(Log.attack_time) == get_beijing_time().strftime('%Y-%m-%d')).count()
             malicious_ips = MaliciousIP.query.count()
             
             return {

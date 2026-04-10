@@ -44,7 +44,6 @@
 
     <el-card class="table-container">
       <el-table :data="honeypotList" style="width: 100%" v-loading="loading" border stripe>
-        <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="name" label="名称" width="150" />
         <el-table-column prop="type" label="类型" width="100" />
         <el-table-column prop="port" label="端口" width="100" />
@@ -68,7 +67,6 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="pid" label="PID" width="100" />
         <el-table-column prop="description" label="描述" min-width="180" show-overflow-tooltip />
         <el-table-column label="操作" width="340" fixed="right">
           <template #default="scope">

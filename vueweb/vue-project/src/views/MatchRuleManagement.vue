@@ -25,14 +25,17 @@
             <el-option label="XSS" value="XSS"></el-option>
             <el-option label="命令注入" value="命令注入"></el-option>
             <el-option label="目录遍历" value="目录遍历"></el-option>
+            <el-option label="WebShell" value="WebShell"></el-option>
+            <el-option label="RCE远程代码执行" value="RCE"></el-option>
             <el-option label="文件包含" value="文件包含"></el-option>
-            <el-option label="CSRF" value="CSRF"></el-option>
             <el-option label="SSRF" value="SSRF"></el-option>
-            <el-option label="暴力破解" value="暴力破解"></el-option>
             <el-option label="扫描探测" value="扫描探测"></el-option>
-            <el-option label="拒绝服务" value="拒绝服务"></el-option>
-            <el-option label="凭证填充" value="凭证填充"></el-option>
-            <el-option label="字典攻击" value="字典攻击"></el-option>
+            <el-option label="暴力破解" value="暴力破解"></el-option>
+            <el-option label="XXE" value="XXE"></el-option>
+            <el-option label="LDAP注入" value="LDAP注入"></el-option>
+            <el-option label="反序列化" value="反序列化"></el-option>
+            <el-option label="CRLF注入" value="CRLF注入"></el-option>
+            <el-option label="信息泄露" value="信息泄露"></el-option>
           </el-select>
         </el-form-item>
         
@@ -82,9 +85,7 @@
         stripe
         border
       >
-        <el-table-column prop="id" label="ID" width="80" />
-        
-        <el-table-column prop="name" label="规则名称" width="150" />
+        <el-table-column prop="name" label="规则名称" min-width="150" />
         
         <el-table-column prop="attack_type" label="攻击类型" width="120">
           <template #default="scope">
@@ -102,7 +103,7 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="regex_pattern" label="正则表达式" width="200" show-overflow-tooltip />
+        <el-table-column prop="regex_pattern" label="正则表达式" min-width="250" show-overflow-tooltip />
         
         <el-table-column prop="match_field" label="匹配字段" width="120" />
         
@@ -168,14 +169,17 @@
             <el-option label="XSS" value="XSS"></el-option>
             <el-option label="命令注入" value="命令注入"></el-option>
             <el-option label="目录遍历" value="目录遍历"></el-option>
+            <el-option label="WebShell" value="WebShell"></el-option>
+            <el-option label="RCE远程代码执行" value="RCE"></el-option>
             <el-option label="文件包含" value="文件包含"></el-option>
-            <el-option label="CSRF" value="CSRF"></el-option>
             <el-option label="SSRF" value="SSRF"></el-option>
-            <el-option label="暴力破解" value="暴力破解"></el-option>
             <el-option label="扫描探测" value="扫描探测"></el-option>
-            <el-option label="拒绝服务" value="拒绝服务"></el-option>
-            <el-option label="凭证填充" value="凭证填充"></el-option>
-            <el-option label="字典攻击" value="字典攻击"></el-option>
+            <el-option label="暴力破解" value="暴力破解"></el-option>
+            <el-option label="XXE" value="XXE"></el-option>
+            <el-option label="LDAP注入" value="LDAP注入"></el-option>
+            <el-option label="反序列化" value="反序列化"></el-option>
+            <el-option label="CRLF注入" value="CRLF注入"></el-option>
+            <el-option label="信息泄露" value="信息泄露"></el-option>
           </el-select>
         </el-form-item>
         
@@ -534,9 +538,9 @@ const getThreatLevelTagType = (level: string) => {
 // 获取攻击类型标签类型
 const getAttackTypeTagType = (type: string) => {
   // 根据攻击类型返回不同的标签类型
-  if (['SQL注入', '命令注入', 'XSS'].includes(type)) {
+  if (['SQL注入', '命令注入', 'XSS', 'WebShell', 'RCE', 'XXE', 'LDAP注入', '反序列化'].includes(type)) {
     return 'danger'
-  } else if (['暴力破解', '字典攻击', '凭证填充'].includes(type)) {
+  } else if (['暴力破解', '文件包含', 'SSRF', 'CRLF注入'].includes(type)) {
     return 'warning'
   } else {
     return 'info'

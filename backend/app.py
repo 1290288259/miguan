@@ -223,4 +223,5 @@ if __name__ == '__main__':
     # use_reloader=False表示关闭自动重新加载功能
     # host='0.0.0.0'表示可以从任何IP访问
     # port=5000是默认端口号
-    app.run(debug=False, use_reloader=False, host='0.0.0.0', port=5000)
+    # 使用 reloader_type='stat' 绕过新版 Python+Watchdog 的线程死锁 bug
+    app.run(debug=True, use_reloader=True, reloader_type='stat', host='0.0.0.0', port=5000)

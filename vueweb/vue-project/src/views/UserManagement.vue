@@ -57,7 +57,6 @@
           border 
           class="cyber-table"
         >
-          <el-table-column prop="id" label="ID" width="80" align="center" />
           <el-table-column prop="username" label="用户名" min-width="120">
             <template #default="scope">
               <span class="user-name-text">{{ scope.row.username }}</span>
