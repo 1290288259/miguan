@@ -1,0 +1,169 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6">
+  <diagram id="tMHDOa-nEsf3Z2aZQGVT" name="第 1 页">
+    <mxGraphModel dx="2718" dy="1469" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="attacker" parent="1" style="shape=actor;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=bottom;verticalLabelPosition=bottom;" value="系统攻击者" vertex="1">
+          <mxGeometry height="60" width="40" x="-50" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="9" edge="1" parent="1" source="admin" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="rule_engine">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1350" y="260" />
+              <mxPoint x="1350" y="40" />
+              <mxPoint x="420" y="40" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="10" connectable="0" parent="9" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="管理正则匹配规则" vertex="1">
+          <mxGeometry relative="1" x="0.1839" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="11" edge="1" parent="1" source="admin" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1280" y="460" />
+            </Array>
+            <mxPoint x="1280" y="310" as="sourcePoint" />
+            <mxPoint x="680" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="12" connectable="0" parent="11" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="管理大模型配置" vertex="1">
+          <mxGeometry relative="1" x="0.2" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="14" edge="1" parent="1" source="admin" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1420" y="280" />
+            </Array>
+            <mxPoint x="1450" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="19" connectable="0" parent="14" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="登录" vertex="1">
+          <mxGeometry relative="1" x="0.05" y="-2" as="geometry">
+            <mxPoint x="-3" y="-2" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="admin" parent="1" style="shape=actor;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=bottom;verticalLabelPosition=bottom;" value="系统管理员" vertex="1">
+          <mxGeometry height="60" width="40" x="1260" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="honeypots" parent="1" style="shape=cylinder;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="蜜罐集群&#xa;(FTP, SSH, HTTP等)" vertex="1">
+          <mxGeometry height="80" width="120" x="140" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="backend" parent="1" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="后端核心服务&#xa;(Flask API)" vertex="1">
+          <mxGeometry height="60" width="120" x="360" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="rule_engine" parent="1" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="匹配规则引擎" vertex="1">
+          <mxGeometry height="60" width="120" x="360" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="17" edge="1" parent="1" source="db" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;dashed=1;fillColor=#6a00ff;strokeColor=#3700CC;" target="frontend">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="420" y="520" />
+              <mxPoint x="910" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="18" connectable="0" parent="17" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="提供日志流量数据可视化" vertex="1">
+          <mxGeometry relative="1" x="-0.2421" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="db" parent="1" style="shape=cylinder;fillColor=#e1d5e7;strokeColor=#9673a6;" value="MySQL 数据库" vertex="1">
+          <mxGeometry height="80" width="120" x="360" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="ai_agent" parent="1" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="AI 智能分析代理&#xa;(异步任务调度)" vertex="1">
+          <mxGeometry height="60" width="120" x="560" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="websocket" parent="1" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="WebSocket服务&#xa;(实时告警推送)" vertex="1">
+          <mxGeometry height="60" width="120" x="580" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="firewall" parent="1" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" value="底层防火墙&#xa;(恶意IP封禁拦截)" vertex="1">
+          <mxGeometry height="60" width="120" x="560" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="frontend" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Web 控制台大屏&#xa;(Vue3 + Element+E)" vertex="1">
+          <mxGeometry height="60" width="120" x="880" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="e_att_hp" edge="1" parent="1" source="attacker" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#b85450;exitX=1;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="honeypots" value="发起攻击探测">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="70" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_hp_back" edge="1" parent="1" source="honeypots" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#6c8ebf;exitX=1;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="backend" value="上报攻击日志">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="340" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_back_rule" edge="1" parent="1" source="backend" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#82b366;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" target="rule_engine" value="正则规则检测">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_back_db" edge="1" parent="1" source="backend" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#82b366;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="db" value="持久化存储">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_back_ws" edge="1" parent="1" source="backend" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#82b366;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="websocket" value="判定触发告警">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ws_front" edge="1" parent="1" source="websocket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#82b366;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="frontend" value="推送告警数据">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_back_ai" edge="1" parent="1" source="backend" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#9673a6;exitX=0.75;exitY=1;entryX=0;entryY=0.5;" target="ai_agent" value="提交异步分析队列">
+          <mxGeometry relative="1" x="-0.3077" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="450" y="440" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_rule_fw" edge="1" parent="1" source="rule_engine" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#d79b00;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="firewall" value="触发自动封禁">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ai_fw" edge="1" parent="1" source="ai_agent" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;endArrow=classic;strokeColor=#b85450;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" target="firewall" value="AI 研判封禁 (Skill)">
+          <mxGeometry relative="1" x="0.4595" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="740" y="440" />
+              <mxPoint x="740" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_front_back" edge="1" parent="1" source="frontend" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;endArrow=classic;strokeColor=#6c8ebf;exitX=0.5;exitY=1;entryX=0.8;entryY=1;" target="backend" value="REST API">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="880" y="290" />
+              <mxPoint x="880" y="340" />
+              <mxPoint x="456" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_admin_front" edge="1" parent="1" source="admin" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#6c8ebf;exitX=0;exitY=0.5;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=14;" target="frontend" value="登录 / 管理系统查看仪表盘">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="930" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3" edge="1" parent="1" source="admin" style="endArrow=classic;rounded=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="firewall" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1280" y="95" />
+            </Array>
+            <mxPoint x="960" y="95" as="sourcePoint" />
+            <mxPoint x="980" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="5" connectable="0" parent="3" style="edgeLabel;align=center;verticalAlign=middle;resizable=0;points=[];rotation=0;fontSize=14;" value="管理员手动封禁/解封" vertex="1">
+          <mxGeometry relative="1" x="0.181" y="2" as="geometry">
+            <mxPoint x="9" y="-7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="用户管理&#xa;(Vue3 + Element)" vertex="1">
+          <mxGeometry height="60" width="120" x="1460" y="250" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

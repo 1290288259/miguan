@@ -1,0 +1,109 @@
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Actors -->
+    <mxCell id="attacker" value="系统攻击者" style="shape=actor;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=bottom;verticalLabelPosition=bottom;" vertex="1" parent="1">
+      <mxGeometry x="40" y="240" width="40" height="60" as="geometry"/>
+    </mxCell>
+    
+    <mxCell id="admin" value="系统管理员" style="shape=actor;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=bottom;verticalLabelPosition=bottom;" vertex="1" parent="1">
+      <mxGeometry x="920" y="240" width="40" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Components -->
+    <mxCell id="honeypots" value="蜜罐集群&#10;(FTP, SSH, HTTP等)" style="shape=cylinder;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="160" y="220" width="120" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="backend" value="后端核心服务&#10;(Flask API)" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="360" y="230" width="120" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="rule_engine" value="匹配规则引擎" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="360" y="80" width="120" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="db" value="MySQL 数据库" style="shape=cylinder;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="360" y="400" width="120" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="ai_agent" value="AI 智能分析代理&#10;(异步任务调度)" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="560" y="410" width="120" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="websocket" value="WebSocket服务&#10;(实时告警推送)" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="560" y="230" width="120" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="firewall" value="底层防火墙&#10;(恶意IP封禁拦截)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="560" y="80" width="120" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="frontend" value="Web 控制台大屏&#10;(Vue3 + Element)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="740" y="230" width="120" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Edges -->
+    <mxCell id="e_att_hp" value="发起攻击探测" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#b85450;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="attacker" target="honeypots" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e_hp_back" value="上报攻击日志" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#6c8ebf;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="honeypots" target="backend" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e_back_rule" value="正则规则检测" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#82b366;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" source="backend" target="rule_engine" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e_back_db" value="持久化存储" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#82b366;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" source="backend" target="db" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e_back_ws" value="判定触发告警" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#82b366;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="backend" target="websocket" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e_ws_front" value="推送告警数据" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#82b366;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="websocket" target="frontend" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e_back_ai" value="提交异步分析队列" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#9673a6;exitX=0.75;exitY=1;entryX=0;entryY=0.5;" edge="1" source="backend" target="ai_agent" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+            <mxPoint x="450" y="440" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="e_rule_fw" value="触发自动封禁" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#d79b00;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="rule_engine" target="firewall" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- AI Agent to Firewall need to be drawn around -->
+    <mxCell id="e_ai_fw" value="AI 研判封禁 (Skill)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;endArrow=classic;strokeColor=#b85450;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" source="ai_agent" target="firewall" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+            <mxPoint x="700" y="440" />
+            <mxPoint x="700" y="110" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="e_front_back" value="REST API" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;endArrow=classic;strokeColor=#6c8ebf;exitX=0.5;exitY=1;entryX=0.8;entryY=1;" edge="1" source="frontend" target="backend" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+            <mxPoint x="800" y="340" />
+            <mxPoint x="456" y="340" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="e_admin_front" value="登录 / 管理系统查看仪表盘" style="edgeStyle=orthogonalEdgeStyle;rounded=1;endArrow=classic;strokeColor=#6c8ebf;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" source="admin" target="frontend" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

@@ -85,7 +85,7 @@
         <mxCell id="19" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1948a;strokeColor=#b03a2e;fontColor=#000000;fontStyle=1" value="数据层" vertex="1">
           <mxGeometry height="80" width="100" x="40" y="520" as="geometry" />
         </mxCell>
-        <mxCell id="20" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1948a;strokeColor=#b03a2e;fontColor=#000000;fontSize=16;fontStyle=1" value="MySQL&amp;nbsp;&lt;br&gt;(日志表、规则表、蜜罐配置、IP库)" vertex="1">
+        <mxCell id="20" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f1948a;strokeColor=#b03a2e;fontColor=#000000;fontSize=16;fontStyle=1" value="MySQL&amp;nbsp;&lt;br&gt;(日志表、规则表、蜜罐配置、IP库、大模型配置)" vertex="1">
           <mxGeometry height="80" width="600" x="160" y="520" as="geometry" />
         </mxCell>
         <mxCell id="21" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=2;strokeColor=#999999;" value="">
@@ -131,22 +131,22 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="29" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" value="低交互蜜罐引擎&#xa;(流量引流/协议模拟)" vertex="1">
-          <mxGeometry height="50" width="150" x="180" y="360" as="geometry" />
+          <mxGeometry height="50" width="160" x="180" y="360" as="geometry" />
         </mxCell>
         <mxCell id="30" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" value="流量捕获与解析&#xa;(数据预处理)" vertex="1">
-          <mxGeometry height="50" width="150" x="370" y="360" as="geometry" />
+          <mxGeometry height="50" width="160" x="365" y="360" as="geometry" />
         </mxCell>
-        <mxCell id="31" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" value="强规则匹配防御&#xa;(特征签名库/高危拦截)" vertex="1">
-          <mxGeometry height="50" width="150" x="180" y="430" as="geometry" />
-        </mxCell>
-        <mxCell id="32" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" value="AI大模型监测研判&#xa;(未知攻击分析/威胁判定)" vertex="1">
-          <mxGeometry height="50" width="150" x="370" y="430" as="geometry" />
-        </mxCell>
-        <mxCell id="EEodvC5SaHObgGoDjHE2-32" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" value="登录与用户管理&lt;br&gt;(JWT权限认证与用户管理)" vertex="1">
+        <mxCell id="31" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" value="强规则匹配/AI大模型监测&lt;br&gt;(恶意流量检测/攻击特征匹配)" vertex="1">
           <mxGeometry height="50" width="160" x="560" y="360" as="geometry" />
         </mxCell>
-        <mxCell id="EEodvC5SaHObgGoDjHE2-33" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" value="数据可视化&lt;br&gt;(数据可视化分析与态势感知)" vertex="1">
+        <mxCell id="32" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" value="恶意IP封禁&lt;br&gt;(防火墙封禁/解封)" vertex="1">
+          <mxGeometry height="50" width="160" x="180" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="EEodvC5SaHObgGoDjHE2-32" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" value="登录与用户管理&lt;br&gt;(JWT权限认证与用户管理)" vertex="1">
           <mxGeometry height="50" width="160" x="560" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="EEodvC5SaHObgGoDjHE2-33" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b9770e;fontColor=#000000;fontStyle=1" value="数据可视化&lt;br&gt;(数据可视化分析与态势感知)" vertex="1">
+          <mxGeometry height="50" width="160" x="365" y="430" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
