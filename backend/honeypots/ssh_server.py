@@ -26,23 +26,21 @@ API_URL = "http://127.0.0.1:5000/api/logs/internal/upload"
 # 生成或加载 Host Key
 HOST_KEY = paramiko.RSAKey.generate(2048)
 
-def log_attack(attacker_ip, attacker_port, payload, attack_type="SSH登录", details=None):
+def log_attack(attacker_ip, attacker_port, payload):
     """
-    记录攻击日志到后端 API
+    记录原始攻击数据到后端 API（纯数据采集，不做分类）
     """
     try:
-        print(f"[{get_beijing_time()}] 攻击来自 {attacker_ip}:{attacker_port} - {attack_type} - {payload}")
+        print(f"[{get_beijing_time()}] 攻击来自 {attacker_ip}:{attacker_port} - {payload}")
         
-        # 构造日志数据
+        # 构造日志数据（仅原始字段，分类由后端 log_service 统一处理）
         log_data = {
             "honeypot_port": PORT,
             "attacker_ip": attacker_ip,
             "attacker_port": attacker_port,
-            "raw_log": f"Captured {attack_type}: {payload}",
+            "raw_log": f"SSH交互: {payload}",
             "payload": payload,
-            "protocol": "SSH",
-            "attack_type": attack_type,
-            "attack_description": details if details else f"SSH login attempt with {payload}"
+            "protocol": "SSH"
         }
         
         # 发送 HTTP 请求给后端
@@ -70,13 +68,7 @@ class HoneypotServer(paramiko.ServerInterface):
         捕获密码认证尝试
         """
         payload = f"Username: {username}, Password: {password}"
-        log_attack(
-            self.client_ip, 
-            self.client_port, 
-            payload, 
-            attack_type="SSH登录",
-            details=f"尝试登录用户: {username}"
-        )
+        log_attack(self.client_ip, self.client_port, payload)
         # 始终返回验证失败，诱导攻击者尝试更多密码
         return paramiko.AUTH_FAILED
 
@@ -86,13 +78,7 @@ class HoneypotServer(paramiko.ServerInterface):
         """
         hex_key = key.get_base64()
         payload = f"Username: {username}, Key: {hex_key[:30]}..."
-        log_attack(
-            self.client_ip,
-            self.client_port,
-            payload,
-            attack_type="SSH公钥扫描",
-            details=f"尝试公钥认证: {username}"
-        )
+        log_attack(self.client_ip, self.client_port, payload)
         return paramiko.AUTH_FAILED
 
     def get_allowed_auths(self, username):
@@ -107,6 +93,9 @@ def handle_connection(client_socket, addr):
     """
     ip, port = addr
     print(f"[{get_beijing_time()}] 新连接: {ip}:{port}")
+    
+    # 建立连接时即记录初步流量
+    log_attack(ip, port, "SSH Connection Opened")
     
     try:
         transport = paramiko.Transport(client_socket)

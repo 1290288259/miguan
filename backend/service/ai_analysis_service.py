@@ -209,7 +209,12 @@ class AIAnalysisService:
 
     @classmethod
     def _process_single_log(cls, log_id, log_data_dict, config=None):
-        """处理单条日志分析"""
+        """
+        处理单条日志的AI分析。
+        
+        作为多级识别引擎的第三级（AI深度分析），在正则匹配和暴力破解检测之后，
+        AI大模型进行深度综合分析，最终敲定并记录完整的攻击描述与威胁等级。
+        """
         try:
             # 重新获取日志对象
             log_entry = Log.query.get(log_id)
@@ -217,7 +222,7 @@ class AIAnalysisService:
                 logger.warning(f"日志 ID {log_id} 不存在，跳过分析")
                 return
             
-            # 3.ai判断时，检测为暴力破解就以系统为主，让ai判断为暴力破解，置信度100%
+            # 暴力破解已由系统引擎确定，AI直接确认一致，无需重复分析
             if log_entry.attack_type == '暴力破解':
                 ai_result = {
                     'ai_attack_type': '暴力破解',
@@ -227,7 +232,7 @@ class AIAnalysisService:
             else:
                 ai_result = cls.analyze_log(log_data_dict, config)
             
-            # 更新日志字段
+            # 更新AI分析字段
             ai_attack_type = ai_result.get('ai_attack_type')
             log_entry.ai_attack_type = ai_attack_type
             log_entry.ai_confidence = ai_result.get('ai_confidence')
@@ -237,16 +242,61 @@ class AIAnalysisService:
             if config:
                 log_entry.ai_model_name = config.get('model_name')
             
-            # 判断与规则匹配是否一致
-            rule_is_malicious = log_entry.is_malicious
+            # ============================================================
+            # AI最终敲定：将AI分析结果补充到主记录的攻击描述中
+            # 如果前两级引擎（正则+频次）未识别出攻击，但AI识别出了，
+            # 则用AI的判断更新主记录的 attack_type 和 threat_level
+            # ============================================================
+            ai_analysis_text = ai_result.get('ai_analysis_result', '')
+            ai_confidence = float(ai_result.get('ai_confidence', 0.0))
             
             # 归一化 AI 判定结果
             safe_types = ['normal', 'page visit', 'safe', 'unknown', '正常流量', '正常']
             ai_type_lower = ai_attack_type.lower() if ai_attack_type else 'unknown'
             ai_is_malicious = ai_type_lower not in safe_types
             
-            # 特殊处理: 如果规则判定为 '正常流量' 且 AI 判定为正常流量，视为一致
+            # AI高置信度判定为恶意，但前两级引擎未识别出攻击时：以AI结果更新主记录
+            if ai_is_malicious and ai_confidence >= 0.7 and not log_entry.is_malicious:
+                log_entry.attack_type = ai_attack_type
+                log_entry.is_malicious = True
+                # AI判定的威胁等级映射
+                if ai_confidence >= 0.9:
+                    log_entry.threat_level = 'high'
+                elif ai_confidence >= 0.7:
+                    log_entry.threat_level = 'medium'
+                
+                ai_desc = f"AI深度分析判定: {ai_attack_type} (置信度 {ai_confidence:.0%})"
+                if log_entry.attack_description:
+                    log_entry.attack_description += f" | {ai_desc}"
+                else:
+                    log_entry.attack_description = ai_desc
+                    
+                # 同步记录恶意IP（AI发现的新恶意流量）
+                try:
+                    from service.malicious_ip_service import MaliciousIPService
+                    MaliciousIPService.record_malicious_ip(
+                        ip_address=log_entry.attacker_ip,
+                        attack_type=log_entry.attack_type,
+                        threat_level=log_entry.threat_level,
+                        source_honeypot_id=log_entry.honeypot_id,
+                        notes=f"AI分析发现 - 日志 ID: {log_entry.id}",
+                    )
+                except Exception as e:
+                    logger.error(f"AI分析后记录恶意IP失败: {e}")
+            
+            # 无论如何，将AI分析摘要追加到攻击描述中（便于审计）
+            if ai_analysis_text and ai_attack_type not in ['Error', None]:
+                ai_summary = f"[AI分析] {ai_analysis_text[:200]}"
+                if log_entry.attack_description:
+                    if '[AI分析]' not in log_entry.attack_description:
+                        log_entry.attack_description += f" | {ai_summary}"
+                else:
+                    log_entry.attack_description = ai_summary
+            
+            # 计算一致性判断
+            rule_is_malicious = log_entry.is_malicious
             rule_attack_type = log_entry.attack_type
+            
             if rule_attack_type and rule_attack_type.lower() == '正常流量' and not ai_is_malicious:
                 log_entry.ai_rule_match_consistency = '一致'
             elif rule_is_malicious == ai_is_malicious:

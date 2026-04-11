@@ -40,28 +40,83 @@ class LogService:
             return False
         return attack_type.strip().lower() in cls.SAFE_ATTACK_TYPES
 
+    # 暴力破解判定阈值：1分钟内同一IP的有效认证尝试次数
+    BRUTE_FORCE_THRESHOLD = 20
+    BRUTE_FORCE_WINDOW_MINUTES = 1
+
+    # 认证类载荷的正则模式：用于判断 HTTP 等协议的载荷是否包含账号密码
+    # 匹配 "Username: xxx, Password: xxx" 格式（各蜜罐统一的凭证格式）
+    _CREDENTIAL_PATTERN = re.compile(r'Username:\s*.+,\s*Password:\s*.+', re.IGNORECASE)
+
     @classmethod
-    def _check_brute_force(cls, attacker_ip: str) -> bool:
+    def _is_credential_payload(cls, payload: str) -> bool:
         """
-        判断是否暴力破解:
-        读取1分钟内该 IP 有输入(payload 不为空) 的记录，超过 20 条即为暴力破解。
+        判断载荷是否包含认证凭证（用户名+密码）。
+        用于暴力破解检测时，区分有效的认证尝试和普通请求。
+        
+        参数:
+            payload: 请求载荷字符串
+            
+        返回:
+            bool: 是否包含认证凭证
+        """
+        if not payload:
+            return False
+        return bool(cls._CREDENTIAL_PATTERN.search(payload))
+
+    @classmethod
+    def _check_brute_force(cls, attacker_ip: str, protocol: str = None, current_payload: str = None) -> bool:
+        """
+        判断是否为暴力破解行为。
+        
+        多级识别引擎的第二级：行为频次分析。
+        规则：同一IP在1分钟内有效认证尝试次数 >= 20 则判定为暴力破解。
+        
+        对于HTTP协议：只统计包含账号密码的载荷（如登录表单提交），
+        普通的GET请求、路径探测等不计入暴力破解计数。
+        
+        对于其他协议（FTP/SSH/MySQL/Redis等）：所有带载荷的请求均计入，
+        因为这些协议连接本身就代表认证尝试。
+        
+        参数:
+            attacker_ip: 攻击者IP地址
+            protocol: 协议类型（HTTP、FTP、SSH等）
+            current_payload: 当前请求的载荷，用于判断当前请求是否算一次有效尝试
+            
+        返回:
+            bool: 是否为暴力破解
         """
         from datetime import timedelta
         from utils.time_utils import get_beijing_time
         
         if not attacker_ip:
             return False
-            
-        one_min_ago = get_beijing_time() - timedelta(minutes=1)
+
+        # 对于HTTP协议，当前请求必须包含凭证才算有效认证尝试
+        if protocol and protocol.upper() == 'HTTP':
+            if not cls._is_credential_payload(current_payload):
+                return False
+
+        one_min_ago = get_beijing_time() - timedelta(minutes=cls.BRUTE_FORCE_WINDOW_MINUTES)
         
-        count = db.session.query(db.func.count(Log.id)).filter(
+        # 构建基础查询：同一IP、1分钟内、载荷非空
+        base_filter = [
             Log.attacker_ip == attacker_ip,
             Log.attack_time >= one_min_ago,
             Log.payload.isnot(None),
             Log.payload != ''
+        ]
+        
+        # 对于HTTP协议，额外过滤：只统计包含凭证的载荷
+        if protocol and protocol.upper() == 'HTTP':
+            base_filter.append(Log.payload.like('%Username:%Password:%'))
+        
+        count = db.session.query(db.func.count(Log.id)).filter(
+            *base_filter
         ).scalar()
         
-        return (count + 1) >= 20
+        # +1 包含当前这一条（尚未入库）
+        return (count + 1) >= cls.BRUTE_FORCE_THRESHOLD
 
     @classmethod
     def _infer_is_malicious(cls, attack_type: str, threat_level: str) -> bool:
@@ -422,9 +477,14 @@ class LogService:
     def create_log(log_data: Dict) -> Dict:
         """
         创建日志记录。
+        
+        实现"正则 -> 频次 -> AI"三级恶意流量识别引擎：
+        1. 规则引擎匹配（正则识别）：正则匹配黑名单规则，直接定性已知攻击特征
+        2. 暴力破解分析（行为识别）：若正则未命中，分析频次判断是否为暴力破解
+        3. AI深度分析（大模型识别）：经过上述判断后，触发AI进行深度综合分析
 
         参数:
-            log_data: 日志数据字典
+            log_data: 日志数据字典（蜜罐上报的原始数据，不含 attack_type/threat_level）
 
         返回:
             Dict: 创建结果
@@ -436,12 +496,21 @@ class LogService:
             if not honeypot:
                 return {'error': f'未找到端口为 {honeypot_port} 的蜜罐'}
 
-            # 1.在蜜罐中，上传流量都不应该记录为何流量。判断这一步应该需要到恶意流量识别功能。
+            # ============================================================
+            # 初始化：蜜罐上报的原始流量默认为"正常流量"
+            # 蜜罐作为纯粹的数据收集层，不做任何业务判定
+            # 所有分类工作由以下多级识别引擎完成
+            # ============================================================
             attack_type = '正常流量'
-            threat_level = log_data.get('threat_level', 'low')
-            attack_description = log_data.get('attack_description')
-            is_malicious = LogService._infer_is_malicious(attack_type, threat_level)
+            threat_level = 'low'
+            attack_description = None
+            is_malicious = False
 
+            # ============================================================
+            # 第一级：规则引擎匹配（正则识别）
+            # 提取流量载荷，过一遍黑名单正则匹配引擎
+            # 判断是否包含 SQL注入、命令注入、XSS 等明显恶意特征
+            # ============================================================
             try:
                 rules = (
                     MatchRule.query.filter_by(is_enabled=True)
@@ -475,11 +544,22 @@ class LogService:
             except Exception as e:
                 print(f"规则匹配过程中出错: {str(e)}")
 
+            # ============================================================
+            # 第二级：暴力破解分析（行为频次识别）
+            # 仅在正则引擎未命中（流量仍为"正常"）时触发
+            # 分析同一IP短时间内的认证尝试频次
+            # HTTP协议：需要载荷包含账号密码才算一次有效认证尝试
+            # 其他协议：带载荷的请求即算有效认证尝试
+            # ============================================================
             if not is_malicious:
-                # 2.流量经过正则匹配引擎后判断属于正常流量，才会触发是否为暴力破解的识别
-                # 判断条件为: 该ip带有载荷的记录大于等于20
-                if log_data.get('payload'):
-                    is_brute_force = LogService._check_brute_force(log_data.get('attacker_ip'))
+                payload = log_data.get('payload')
+                protocol = log_data.get('protocol')
+                if payload:
+                    is_brute_force = LogService._check_brute_force(
+                        attacker_ip=log_data.get('attacker_ip'),
+                        protocol=protocol,
+                        current_payload=payload
+                    )
                     if is_brute_force:
                         attack_type = '暴力破解'
                         threat_level = 'high'
@@ -513,6 +593,11 @@ class LogService:
             db.session.add(log)
             db.session.commit()
 
+            # ============================================================
+            # 第三级：AI深度分析（大模型识别）
+            # 经过正则和频次判断后，异步触发AI进行深度综合分析
+            # AI会最终敲定完整的攻击描述与威胁等级
+            # ============================================================
             try:
                 log_data_dict = log.to_dict()
                 log_data_dict['payload'] = log.payload

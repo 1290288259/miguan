@@ -460,3 +460,91 @@ WebSocket 需要使用 `socketio.run()` 替代 `app.run()`，已在 `app.py` 中
 
 ## 九、代码重载
 后端代码修改之后必须重新启动后端进程
+
+---
+
+## 十、多级恶意流量识别引擎
+
+### 1. 架构概述
+
+蜜罐捕获的原始流量经过**三级识别漏斗**，逐级过滤和分类：
+
+```
+蜜罐原始数据 → 第一级：正则规则匹配 → 第二级：暴力破解频次分析 → 第三级：AI深度分析
+```
+
+### 2. 蜜罐端设计原则（纯数据采集探针）
+
+蜜罐脚本**只负责捕获原始数据**，不做任何攻击分类。上报字段：
+- `attacker_ip` / `attacker_port` — 攻击来源
+- `honeypot_port` — 蜜罐端口
+- `protocol` — 协议类型 (SSH/FTP/HTTP/TCP 等)
+- `raw_log` — 原始请求/命令完整记录
+- `payload` — 载荷内容（认证类蜜罐统一格式：`"Username: xxx, Password: xxx"`）
+- `request_path` / `user_agent` — HTTP 蜜罐专用字段
+
+**禁止**在蜜罐脚本中包含 `attack_type`、`threat_level`、`attack_description` 等分类逻辑。
+
+### 3. 三级识别流水线（`log_service.py` · `create_log()`）
+
+#### 第一级：正则规则引擎匹配
+- 从 `match_rules` 表读取所有 `is_enabled=True` 的规则，按 `priority ASC` 排序（数字越小优先级越高）
+- 匹配字段由规则的 `match_field` 决定（目前全部为 `raw_log`）
+- 命中规则后立即设置 `attack_type`、`threat_level`、`attack_description`、`is_malicious`
+- **首条命中即停止**，不会继续匹配后续规则
+
+#### 第二级：暴力破解频次分析
+- **触发条件**：第一级未命中任何规则（`attack_type` 仍为 `'正常流量'`）
+- **检测方法**：`_check_brute_force(source_ip, protocol, current_payload)`
+  - 查询同一 IP + 同一协议在最近 **1 分钟** 内的日志数量
+  - HTTP 协议特殊处理：只有包含认证凭证（`Username:...Password:...`）的请求才计入暴力破解计数
+  - 阈值：**20 次/分钟** (`BRUTE_FORCE_THRESHOLD = 20`)
+- **凭证检测**：`_is_credential_payload(payload)` 使用正则 `r'Username:\s*.+,\s*Password:\s*.+'` 判断
+- 命中后设置 `attack_type='暴力破解'`、`threat_level='high'`、`is_malicious=True`
+
+#### 第三级：AI 深度分析
+- **触发条件**：所有日志均入 AI 分析队列（`Queue + Threading` 异步执行）
+- **AI 回写机制**（`ai_analysis_service.py` · `_process_single_log()`）：
+  - 当 AI 置信度 >= 0.7 且判定为恶意时，自动回写主记录的 `attack_type`、`threat_level`、`is_malicious`
+  - AI 分析摘要追加到 `attack_description` 字段（带 `[AI分析]` 前缀）
+  - AI 发现新恶意流量时同步调用 `MaliciousIPService.record_malicious_ip()`
+  - 威胁等级映射：置信度 >= 0.9 → `high`，>= 0.7 → `medium`
+
+### 4. 匹配规则优先级说明
+
+规则按 `priority ASC` 排序匹配，关键优先级分布：
+
+| 优先级范围 | 规则类型 | 说明 |
+| :--- | :--- | :--- |
+| 1-3 | XSS、SQL注入(基础)、目录遍历 | 高频攻击，精确正则 |
+| 5 | Redis未授权访问 | 协议专用规则 |
+| 6-9 | WebShell、RCE、扫描探测 | 中等精度规则 |
+| 11-15 | SQL注入(盲注)、XXE、信息泄露 | 长正则、较复杂模式 |
+| 18 | 命令注入(宽泛匹配) | 匹配 `;` `|` `(` 等字符，优先级故意调低，避免误判 |
+| 20-50 | XSS/目录遍历/信息泄露/扫描探测(补充) | 低优先级兜底规则 |
+
+> **重要**：命令注入规则 (ID=8) 的正则包含 `(;|\||&|\$|\(|\)|...)` 极其宽泛，priority 已从 5 调整为 18，防止将 `sleep()`、`eval()`、Nmap UA 等载荷误判为命令注入。
+
+### 5. 自动化测试
+
+测试脚本：`backend/test_traffic_identification.py`
+
+- **51 个断言**，覆盖 22 个测试场景
+- 4 个正常流量测试（SSH/FTP/HTTP/ES）
+- 11 个正则规则匹配测试（SQL注入×2、XSS×2、命令注入、目录遍历、信息泄露、Redis×2、WebShell、扫描探测）
+- 5 个暴力破解测试（SSH低频/高频、HTTP纯GET不触发、HTTP凭证爆破、FTP爆破、MySQL爆破）
+- 2 个混合场景测试
+
+运行方式：
+```bash
+# 确保 Flask 后端运行在 5000 端口
+cd backend
+python run_server.py &    # 或 python app.py
+python test_traffic_identification.py
+```
+
+测试脚本在 SETUP 阶段会自动：
+- 创建/复用测试账户 `testadmin01`
+- 动态发现蜜罐端口
+- 确保 Redis 匹配规则存在
+- 将命令注入规则优先级调至 18

@@ -18,18 +18,19 @@ HOST = '0.0.0.0'
 PORT = 3307
 API_URL = "http://127.0.0.1:5000/api/logs/internal/upload"
 
-def log_attack(attacker_ip, attacker_port, payload, attack_type="MySQL登录", details=None):
+def log_attack(attacker_ip, attacker_port, payload):
+    """
+    上报原始捕获数据到后端，不做任何攻击分类
+    """
     try:
-        print(f"[{get_beijing_time()}] 攻击来自 {attacker_ip}:{attacker_port} - {attack_type} - {payload}")
+        print(f"[{get_beijing_time()}] 捕获来自 {attacker_ip}:{attacker_port} - {payload}")
         log_data = {
             "honeypot_port": PORT,
             "attacker_ip": attacker_ip,
             "attacker_port": attacker_port,
-            "raw_log": f"Captured {attack_type}: {payload}",
+            "raw_log": f"MySQL交互: {payload}",
             "payload": payload,
-            "protocol": "MySQL",
-            "attack_type": attack_type,
-            "attack_description": details if details else f"MySQL login attempt"
+            "protocol": "MySQL"
         }
         requests.post(API_URL, json=log_data)
     except Exception as e:
@@ -76,6 +77,7 @@ def handle_client(client_socket, addr):
         payload_data = data[4:]
         
         # 提取用户名（在包的不同偏移位置可能存在 null 结尾字符串）
+        clean_payload = ""
         try:
             # 简化版：通过寻找非空字符块粗略提取 username
             parts = payload_data.split(b'\x00')
@@ -85,10 +87,14 @@ def handle_client(client_socket, addr):
                     username = p.decode('utf-8', errors='ignore')
                     break
             
-            clean_payload = f"Username: {username}"
-            log_attack(ip, client_port, clean_payload, details=f"MySQL登录")
+            if username:
+                clean_payload = f"Username: {username}"
+            else:
+                clean_payload = f"Raw Data: {data[:100]}"
         except Exception:
-            pass
+            clean_payload = f"Raw Data (Err): {data[:100]}"
+            
+        log_attack(ip, client_port, clean_payload)
         
         # 返回 Access Denied 或直接断开连接
         error_packet = b"\x17\x00\x00\x02\xff\x15\x04#28000Access denied for user"

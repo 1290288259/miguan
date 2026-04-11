@@ -18,18 +18,19 @@ HOST = '0.0.0.0'
 PORT = 6379
 API_URL = "http://127.0.0.1:5000/api/logs/internal/upload"
 
-def log_attack(attacker_ip, attacker_port, payload, attack_type="Redis未授权访问", details=None):
+def log_attack(attacker_ip, attacker_port, payload):
+    """
+    记录攻击日志并上报后端（纯数据采集，不做分类）
+    """
     try:
-        print(f"[{get_beijing_time()}] 攻击来自 {attacker_ip}:{attacker_port} - {attack_type} - {payload}")
+        print(f"[{get_beijing_time()}] 攻击来自 {attacker_ip}:{attacker_port} - {payload}")
         log_data = {
             "honeypot_port": PORT,
             "attacker_ip": attacker_ip,
             "attacker_port": attacker_port,
-            "raw_log": f"Captured {attack_type}: {payload}",
+            "raw_log": f"Redis交互: {payload}",
             "payload": payload,
             "protocol": "Redis",
-            "attack_type": attack_type,
-            "attack_description": details if details else f"Redis command execution attempt: {payload}"
         }
         requests.post(API_URL, json=log_data)
     except Exception as e:
@@ -50,7 +51,7 @@ def handle_client(client_socket, addr):
             # 简化记录，把特殊字符替换掉方便查看
             clean_payload = repr(payload)
             
-            log_attack(ip, client_port, clean_payload, details=f"执行 Redis 命令: {clean_payload}")
+            log_attack(ip, client_port, clean_payload)
             
             # 返回标准的 Redis 错误信息或伪造信息
             response = b"-ERR unknown command\r\n"

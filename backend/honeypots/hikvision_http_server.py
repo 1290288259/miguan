@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 # 配置参数
-HONEYPOT_PORT = 9090
+HONEYPOT_PORT = 8888
 API_URL = "http://127.0.0.1:5000/api/logs/internal/upload"
 
 # 海康威视登录页面模板
@@ -99,19 +99,21 @@ LOGIN_TEMPLATE = """
 </html>
 """
 
-def log_attack(attacker_ip, attacker_port, payload, attack_type="Web Login", request_path="/"):
+def log_attack(attacker_ip, attacker_port, payload, request_path="/"):
+    """
+    记录原始请求数据并上报后端，不做任何攻击分类判断。
+    攻击类型识别由后端规则引擎统一处理。
+    """
     try:
         log_data = {
             "honeypot_port": HONEYPOT_PORT,
             "attacker_ip": attacker_ip,
             "attacker_port": attacker_port,
-            "raw_log": f"Login attempt: {payload}",
+            "raw_log": f"HTTP请求: {request.method} {request_path}",
             "payload": payload,
             "protocol": "HTTP",
-            "attack_type": attack_type,
             "request_path": request_path,
             "user_agent": request.headers.get('User-Agent'),
-            "attack_description": "捕获到Web登录凭证"
         }
         # 发送日志到内部API
         requests.post(API_URL, json=log_data, timeout=2)
@@ -119,28 +121,35 @@ def log_attack(attacker_ip, attacker_port, payload, attack_type="Web Login", req
     except Exception as e:
         logger.error(f"Failed to send log: {e}")
 
-@app.route('/', methods=['GET'])
-def index():
-    # 记录访问日志
+@app.before_request
+def log_all_traffic():
+    """
+    无论什么流量（正常请求、404、405等），都在此统一拦截并记录
+    """
     attacker_ip = request.remote_addr
     attacker_port = request.environ.get('REMOTE_PORT', 0)
-    log_attack(attacker_ip, attacker_port, "", "正常流量", "/")
+    
+    # 针对登录接口特殊提取 payload
+    if request.path == '/login' and request.method == 'POST':
+        username = request.form.get('username', '')
+        password = request.form.get('password', '')
+        payload = f"Username: {username}, Password: {password}"
+    else:
+        # 其他接口如果是 POST/PUT，提取 body 中的部分内容作为 payload
+        try:
+            body = request.get_data(as_text=True)
+            payload = f"{request.method} {request.path} - Data: {body[:500]}" if body else f"{request.method} {request.path}"
+        except:
+            payload = f"{request.method} {request.path}"
+            
+    log_attack(attacker_ip, attacker_port, payload, request.path)
+
+@app.route('/', methods=['GET'])
+def index():
     return render_template_string(LOGIN_TEMPLATE)
 
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-    
-    attacker_ip = request.remote_addr
-    attacker_port = request.environ.get('REMOTE_PORT', 0)
-    
-    # 构造 Payload
-    payload = f"Username: {username}, Password: {password}"
-    
-    # 记录攻击日志
-    log_attack(attacker_ip, attacker_port, payload, "Web登录", "/login")
-    
     # 始终返回登录失败
     return render_template_string("""
         <script>
@@ -148,6 +157,18 @@ def login():
             window.location.href = '/';
         </script>
     """)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify({"error": "Page not found", "status": 404}), 404
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return jsonify({"error": "Method not allowed", "status": 405}), 405
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    return jsonify({"error": "Internal server error", "status": 500}), 500
 
 if __name__ == '__main__':
     # 从命令行参数读取端口，与 ssh_server.py 和 ftp_server.py 保持一致

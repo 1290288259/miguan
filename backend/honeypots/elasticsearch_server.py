@@ -19,18 +19,19 @@ HOST = '0.0.0.0'
 PORT = 9200
 API_URL = "http://127.0.0.1:5000/api/logs/internal/upload"
 
-def log_attack(attacker_ip, attacker_port, payload, attack_type="Elasticsearch数据探测", details=None):
+def log_attack(attacker_ip, attacker_port, payload):
+    """
+    记录攻击日志并上报后端（纯数据采集，不做攻击分类）
+    """
     try:
-        print(f"[{get_beijing_time()}] 攻击来自 {attacker_ip}:{attacker_port} - {attack_type} - {payload}")
+        print(f"[{get_beijing_time()}] 攻击来自 {attacker_ip}:{attacker_port} - {payload}")
         log_data = {
             "honeypot_port": PORT,
             "attacker_ip": attacker_ip,
             "attacker_port": attacker_port,
-            "raw_log": f"Captured {attack_type}: {payload}",
+            "raw_log": f"Elasticsearch交互: {payload}",
             "payload": payload,
             "protocol": "HTTP (Elasticsearch)",
-            "attack_type": attack_type,
-            "attack_description": details if details else f"ES query attempt: {payload}"
         }
         requests.post(API_URL, json=log_data)
     except Exception as e:
@@ -55,70 +56,96 @@ class ElasticHandler(http.server.BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.end_headers()
 
-    def do_GET(self):
-        attacker_ip = self.get_client_ip()
-        path = self.path
-        
-        info_json = {
-            "name" : "es-node-1",
-            "cluster_name" : "elasticsearch",
-            "cluster_uuid" : "zD_8_hDqR0-1g7Hj52_wQn",
-            "version" : {
-                "number" : "7.10.2",
-                "build_flavor" : "default",
-                "build_type" : "docker",
-                "build_hash" : "747e1cc71def077253878a59143c1f785afa92b9",
-                "build_date" : "2021-01-13T00:42:12.435326Z",
-                "build_snapshot" : False,
-                "lucene_version" : "8.7.0",
-                "minimum_wire_compatibility_version" : "6.8.0",
-                "minimum_index_compatibility_version" : "6.0.0-beta1"
-            },
-            "tagline" : "You Know, for Search"
-        }
-        
-        if path == "/":
-            self._set_headers()
-            self.wfile.write(json.dumps(info_json).encode())
-            log_attack(attacker_ip, self.get_client_port(), "GET /", attack_type="Elasticsearch接口探测", details="尝试读取 ES 根节点信息")
-        elif "_search" in path:
-            self._set_headers()
-            self.wfile.write(b'{"took":1,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":0,"relation":"eq"},"max_score":null,"hits":[]}}')
-            log_attack(attacker_ip, self.get_client_port(), "GET " + path, attack_type="Elasticsearch数据查询", details="尝试执行 ES 查询")
-        elif "_cat" in path:
-            self.send_response(200)
-            self.send_header('Content-type', 'text/plain')
-            self.end_headers()
-            self.wfile.write(b"green open .kibana_1       xyz 1 0 1 0 4.5kb 4.5kb\n")
-            log_attack(attacker_ip, self.get_client_port(), "GET " + path, attack_type="Elasticsearch节点查询", details="尝试读取集群 cat 信息")
-        else:
-            self._set_headers(404)
-            self.wfile.write(b'{"error":"IndexNotFoundException[no such index]"}')
-
-    def do_POST(self):
+    def _route_and_respond(self, method, path):
         attacker_ip = self.get_client_ip()
         content_length = int(self.headers.get('Content-Length', 0))
-        body = self.rfile.read(content_length).decode('utf-8') if content_length > 0 else ""
+        body = self.rfile.read(content_length).decode('utf-8', errors='ignore') if content_length > 0 else ""
         
-        # 将 POST 数据转为日志记录
-        log_attack(attacker_ip, self.get_client_port(), "POST " + self.path + " - Data: " + body, attack_type="Elasticsearch利用或写入", details="尝试推送数据或利用漏洞")
+        # 不论请求什么路径，都直接在这里统一记录日志
+        payload = f"{method} {path}"
+        if body:
+            payload += f" - Data: {body[:500]}"
+            
+        log_attack(attacker_ip, self.get_client_port(), payload)
+
+        if method == "GET":
+            info_json = {
+                "name" : "es-node-1",
+                "cluster_name" : "elasticsearch",
+                "cluster_uuid" : "zD_8_hDqR0-1g7Hj52_wQn",
+                "version" : {
+                    "number" : "7.10.2",
+                    "build_flavor" : "default",
+                    "build_type" : "docker",
+                    "build_hash" : "747e1cc71def077253878a59143c1f785afa92b9",
+                    "build_date" : "2021-01-13T00:42:12.435326Z",
+                    "build_snapshot" : False,
+                    "lucene_version" : "8.7.0",
+                    "minimum_wire_compatibility_version" : "6.8.0",
+                    "minimum_index_compatibility_version" : "6.0.0-beta1"
+                },
+                "tagline" : "You Know, for Search"
+            }
+            
+            if path == "/":
+                self._set_headers()
+                self.wfile.write(json.dumps(info_json).encode())
+            elif "_search" in path:
+                self._set_headers()
+                self.wfile.write(b'{"took":1,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":0,"relation":"eq"},"max_score":null,"hits":[]}}')
+            elif "_cat" in path:
+                self.send_response(200)
+                self.send_header('Content-type', 'text/plain')
+                self.end_headers()
+                self.wfile.write(b"green open .kibana_1       xyz 1 0 1 0 4.5kb 4.5kb\n")
+            else:
+                self._set_headers(404)
+                self.wfile.write(b'{"error":"IndexNotFoundException[no such index]"}')
+
+        elif method == "POST":
+            self._set_headers(201)
+            response = {
+                "_index": "vuln_test",
+                "_type": "_doc",
+                "_id": "1",
+                "_version": 1,
+                "result": "created",
+                "_shards": {
+                    "total": 2,
+                    "successful": 1,
+                    "failed": 0
+                },
+                "_seq_no": 0,
+                "_primary_term": 1
+            }
+            self.wfile.write(json.dumps(response).encode())
+
+        elif method == "PUT":
+            self._set_headers(403)
+            self.wfile.write(b'{"error":"Forbidden","status":403}')
+            
+        else:
+            # DELETE, HEAD, OPTIONS 等通通拦截并返回 405
+            self._set_headers(405)
+            self.wfile.write(b'{"error":"Method Not Allowed"}')
+
+    def do_GET(self):
+        self._route_and_respond("GET", self.path)
+
+    def do_POST(self):
+        self._route_and_respond("POST", self.path)
+
+    def do_PUT(self):
+        self._route_and_respond("PUT", self.path)
         
-        self._set_headers(201)
-        response = {
-            "_index": "vuln_test",
-            "_type": "_doc",
-            "_id": "1",
-            "_version": 1,
-            "result": "created",
-            "_shards": {
-                "total": 2,
-                "successful": 1,
-                "failed": 0
-            },
-            "_seq_no": 0,
-            "_primary_term": 1
-        }
-        self.wfile.write(json.dumps(response).encode())
+    def do_OPTIONS(self):
+        self._route_and_respond("OPTIONS", self.path)
+        
+    def do_HEAD(self):
+        self._route_and_respond("HEAD", self.path)
+        
+    def do_DELETE(self):
+        self._route_and_respond("DELETE", self.path)
 
 class ThreadingHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True

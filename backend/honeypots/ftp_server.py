@@ -22,23 +22,21 @@ HOST = '0.0.0.0'
 PORT = 21
 API_URL = "http://127.0.0.1:5000/api/logs/internal/upload"
 
-def log_attack(attacker_ip, attacker_port, payload, attack_type="FTP登录", details=None):
+def log_attack(attacker_ip, attacker_port, payload):
     """
-    记录攻击日志到后端 API
+    记录原始捕获数据到后端 API（不做攻击分类，由后端 log_service 统一处理）
     """
     try:
-        print(f"[{get_beijing_time()}] 攻击来自 {attacker_ip}:{attacker_port} - {attack_type} - {payload}")
+        print(f"[{get_beijing_time()}] 捕获数据 {attacker_ip}:{attacker_port} - {payload}")
         
-        # 构造日志数据
+        # 构造日志数据（仅包含原始捕获信息，不含分类字段）
         log_data = {
             "honeypot_port": PORT,
             "attacker_ip": attacker_ip,
             "attacker_port": attacker_port,
-            "raw_log": f"Captured {attack_type}: {payload}",
+            "raw_log": f"FTP交互: {payload}",
             "payload": payload,
-            "protocol": "FTP",
-            "attack_type": attack_type,
-            "attack_description": details if details else f"FTP login attempt with {payload}"
+            "protocol": "FTP"
         }
         
         # 发送 HTTP 请求给后端
@@ -64,26 +62,32 @@ def handle_client(client_socket, addr):
                 break
                 
             command = data.decode('utf-8', errors='ignore').strip()
-            
+            if not command:
+                continue
+
             if command.upper().startswith("USER"):
                 username = command[5:].strip()
                 client_socket.send(b"331 Please specify the password.\r\n")
+                # 无论什么命令都记录
+                log_attack(ip, port, f"Command: {command}")
                 
             elif command.upper().startswith("PASS"):
                 password = command[5:].strip()
                 
                 # 记录捕获的凭证
                 payload = f"Username: {username}, Password: {password}"
-                log_attack(ip, port, payload, details=f"尝试登录用户: {username}")
+                log_attack(ip, port, payload)
                 
                 # 始终返回登录失败
                 client_socket.send(b"530 Login incorrect.\r\n")
                 
             elif command.upper().startswith("QUIT"):
+                log_attack(ip, port, f"Command: {command}")
                 client_socket.send(b"221 Goodbye.\r\n")
                 break
             else:
-                # 其他命令，要求先登录
+                # 其他命令，要求先登录，但也记录
+                log_attack(ip, port, f"Command: {command}")
                 client_socket.send(b"530 Please login with USER and PASS.\r\n")
                 
     except Exception as e:
