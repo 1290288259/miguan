@@ -105,14 +105,28 @@ def log_attack(attacker_ip, attacker_port, payload, request_path="/"):
     攻击类型识别由后端规则引擎统一处理。
     """
     try:
+        # 获取完整的 URL 或查询参数
+        full_url = request.url
+        query_string = request.query_string.decode('utf-8')
+        path_with_query = f"{request_path}?{query_string}" if query_string else request_path
+        
+        # 提取 Body
+        try:
+            body = request.get_data(as_text=True)
+            body_content = f"\\nData: {body}" if body else ""
+        except:
+            body_content = ""
+            
+        real_raw_log = f"{request.remote_addr} - - [{get_beijing_time().strftime('%d/%b/%Y:%H:%M:%S +0800')}] \"{request.method} {path_with_query} HTTP/1.1\" - {request.headers.get('User-Agent', '')}{body_content}"
+        
         log_data = {
             "honeypot_port": HONEYPOT_PORT,
             "attacker_ip": attacker_ip,
             "attacker_port": attacker_port,
-            "raw_log": f"HTTP请求: {request.method} {request_path}",
+            "raw_log": real_raw_log,
             "payload": payload,
             "protocol": "HTTP",
-            "request_path": request_path,
+            "request_path": path_with_query,
             "user_agent": request.headers.get('User-Agent'),
         }
         # 发送日志到内部API
@@ -129,6 +143,10 @@ def log_all_traffic():
     attacker_ip = request.remote_addr
     attacker_port = request.environ.get('REMOTE_PORT', 0)
     
+    # 构造 path_with_query 保证 payload 也能看到完整的 url
+    query_string = request.query_string.decode('utf-8')
+    path_with_query = f"{request.path}?{query_string}" if query_string else request.path
+
     # 针对登录接口特殊提取 payload
     if request.path == '/login' and request.method == 'POST':
         username = request.form.get('username', '')
@@ -138,9 +156,9 @@ def log_all_traffic():
         # 其他接口如果是 POST/PUT，提取 body 中的部分内容作为 payload
         try:
             body = request.get_data(as_text=True)
-            payload = f"{request.method} {request.path} - Data: {body[:500]}" if body else f"{request.method} {request.path}"
+            payload = f"{request.method} {path_with_query} - Data: {body[:500]}" if body else f"{request.method} {path_with_query}"
         except:
-            payload = f"{request.method} {request.path}"
+            payload = f"{request.method} {path_with_query}"
             
     log_attack(attacker_ip, attacker_port, payload, request.path)
 
