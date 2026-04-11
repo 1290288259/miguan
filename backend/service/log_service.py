@@ -27,6 +27,10 @@ class LogService:
         'unknown',
         '正常',
         '正常流量',
+        'ftp登录',
+        'web登录',
+        'mysql登录',
+        'ssh登录',
     }
     MALICIOUS_THREAT_LEVELS = {'medium', 'high', 'critical'}
 
@@ -35,6 +39,29 @@ class LogService:
         if not attack_type:
             return False
         return attack_type.strip().lower() in cls.SAFE_ATTACK_TYPES
+
+    @classmethod
+    def _check_brute_force(cls, attacker_ip: str) -> bool:
+        """
+        判断是否暴力破解:
+        读取1分钟内该 IP 有输入(payload 不为空) 的记录，超过 20 条即为暴力破解。
+        """
+        from datetime import timedelta
+        from utils.time_utils import get_beijing_time
+        
+        if not attacker_ip:
+            return False
+            
+        one_min_ago = get_beijing_time() - timedelta(minutes=1)
+        
+        count = db.session.query(db.func.count(Log.id)).filter(
+            Log.attacker_ip == attacker_ip,
+            Log.attack_time >= one_min_ago,
+            Log.payload.isnot(None),
+            Log.payload != ''
+        ).scalar()
+        
+        return (count + 1) >= 20
 
     @classmethod
     def _infer_is_malicious(cls, attack_type: str, threat_level: str) -> bool:
@@ -409,7 +436,8 @@ class LogService:
             if not honeypot:
                 return {'error': f'未找到端口为 {honeypot_port} 的蜜罐'}
 
-            attack_type = log_data.get('attack_type')
+            # 1.在蜜罐中，上传流量都不应该记录为何流量。判断这一步应该需要到恶意流量识别功能。
+            attack_type = '正常流量'
             threat_level = log_data.get('threat_level', 'low')
             attack_description = log_data.get('attack_description')
             is_malicious = LogService._infer_is_malicious(attack_type, threat_level)
@@ -446,6 +474,21 @@ class LogService:
 
             except Exception as e:
                 print(f"规则匹配过程中出错: {str(e)}")
+
+            if not is_malicious:
+                # 2.流量经过正则匹配引擎后判断属于正常流量，才会触发是否为暴力破解的识别
+                # 判断条件为: 该ip带有载荷的记录大于等于20
+                if log_data.get('payload'):
+                    is_brute_force = LogService._check_brute_force(log_data.get('attacker_ip'))
+                    if is_brute_force:
+                        attack_type = '暴力破解'
+                        threat_level = 'high'
+                        is_malicious = True
+                        rule_msg = "触发系统引擎: 暴力破解检测"
+                        if not attack_description:
+                            attack_description = rule_msg
+                        elif rule_msg not in attack_description:
+                            attack_description += f" | {rule_msg}"
 
             log = Log(
                 honeypot_id=honeypot.id,

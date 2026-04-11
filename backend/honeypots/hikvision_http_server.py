@@ -124,7 +124,7 @@ def index():
     # 记录访问日志
     attacker_ip = request.remote_addr
     attacker_port = request.environ.get('REMOTE_PORT', 0)
-    log_attack(attacker_ip, attacker_port, "Page Visit", "正常流量", "/")
+    log_attack(attacker_ip, attacker_port, "", "正常流量", "/")
     return render_template_string(LOGIN_TEMPLATE)
 
 @app.route('/login', methods=['POST'])
@@ -139,7 +139,7 @@ def login():
     payload = f"Username: {username}, Password: {password}"
     
     # 记录攻击日志
-    log_attack(attacker_ip, attacker_port, payload, "暴力破解", "/login")
+    log_attack(attacker_ip, attacker_port, payload, "Web登录", "/login")
     
     # 始终返回登录失败
     return render_template_string("""

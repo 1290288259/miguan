@@ -22,7 +22,7 @@ HOST = '0.0.0.0'
 PORT = 21
 API_URL = "http://127.0.0.1:5000/api/logs/internal/upload"
 
-def log_attack(attacker_ip, attacker_port, payload, attack_type="FTP爆破", details=None):
+def log_attack(attacker_ip, attacker_port, payload, attack_type="FTP登录", details=None):
     """
     记录攻击日志到后端 API
     """

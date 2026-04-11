@@ -217,8 +217,15 @@ class AIAnalysisService:
                 logger.warning(f"日志 ID {log_id} 不存在，跳过分析")
                 return
             
-            # 执行分析，传入特定的config
-            ai_result = cls.analyze_log(log_data_dict, config)
+            # 3.ai判断时，检测为暴力破解就以系统为主，让ai判断为暴力破解，置信度100%
+            if log_entry.attack_type == '暴力破解':
+                ai_result = {
+                    'ai_attack_type': '暴力破解',
+                    'ai_confidence': 100.0,
+                    'ai_analysis_result': '本系统已经确定判定此流量为暴力破解行为，AI确认一致（置信度100%）'
+                }
+            else:
+                ai_result = cls.analyze_log(log_data_dict, config)
             
             # 更新日志字段
             ai_attack_type = ai_result.get('ai_attack_type')

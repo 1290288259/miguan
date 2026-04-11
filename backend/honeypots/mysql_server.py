@@ -18,7 +18,7 @@ HOST = '0.0.0.0'
 PORT = 3307
 API_URL = "http://127.0.0.1:5000/api/logs/internal/upload"
 
-def log_attack(attacker_ip, attacker_port, payload, attack_type="MySQL爆破", details=None):
+def log_attack(attacker_ip, attacker_port, payload, attack_type="MySQL登录", details=None):
     try:
         print(f"[{get_beijing_time()}] 攻击来自 {attacker_ip}:{attacker_port} - {attack_type} - {payload}")
         log_data = {
@@ -86,7 +86,7 @@ def handle_client(client_socket, addr):
                     break
             
             clean_payload = f"Username: {username}"
-            log_attack(ip, client_port, clean_payload, details=f"MySQL 用户名暴力破解")
+            log_attack(ip, client_port, clean_payload, details=f"MySQL登录")
         except Exception:
             pass
         

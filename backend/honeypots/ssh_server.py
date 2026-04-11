@@ -26,7 +26,7 @@ API_URL = "http://127.0.0.1:5000/api/logs/internal/upload"
 # 生成或加载 Host Key
 HOST_KEY = paramiko.RSAKey.generate(2048)
 
-def log_attack(attacker_ip, attacker_port, payload, attack_type="SSH爆破", details=None):
+def log_attack(attacker_ip, attacker_port, payload, attack_type="SSH登录", details=None):
     """
     记录攻击日志到后端 API
     """
@@ -74,7 +74,7 @@ class HoneypotServer(paramiko.ServerInterface):
             self.client_ip, 
             self.client_port, 
             payload, 
-            attack_type="SSH弱口令爆破",
+            attack_type="SSH登录",
             details=f"尝试登录用户: {username}"
         )
         # 始终返回验证失败，诱导攻击者尝试更多密码
