@@ -23,9 +23,9 @@ import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import * as echarts from 'echarts'
 import axios from '@/utils/axios'
 
-// Sci-Fi Theme Colors
-const textColor = '#e0f7fa'
-const axisColor = 'rgba(0, 243, 255, 0.3)'
+// Light Theme Colors
+const textColor = '#606266'
+const axisColor = '#dcdfe6'
 
 // Chart refs
 const trendChart = ref<HTMLElement | null>(null)
@@ -57,12 +57,10 @@ const initTrendChart = async () => {
     trendChartInstance = echarts.init(trendChart.value)
   } else {
     trendChartInstance.showLoading({
-        text: 'Loading...',
-        color: '#00f3ff',
-        textColor: '#e0f7fa',
-        maskColor: 'rgba(0, 0, 0, 0.2)',
-        zlevel: 0
-    })
+        text: '加载中...',
+        color: '#409eff',
+        textColor: '#606266',
+        maskColor: 'rgba(255, 255, 255, 0.8)',
   }
   
   try {
@@ -79,21 +77,21 @@ const initTrendChart = async () => {
       trendChartInstance.setOption({
         tooltip: { 
           trigger: 'axis',
-          backgroundColor: 'rgba(5, 11, 20, 0.9)',
-          borderColor: '#00f3ff',
-          textStyle: { color: '#e0f7fa' }
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          borderColor: '#e4e7ed',
+          textStyle: { color: '#303133' }
         },
         grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
         xAxis: { 
           type: 'category', 
           data: dates,
           axisLine: { lineStyle: { color: axisColor } },
-          axisLabel: { color: '#00f3ff', fontSize: 12, fontWeight: 'bold' }
+          axisLabel: { color: '#606266', fontSize: 12, fontWeight: 'normal' }
         },
         yAxis: { 
           type: 'value',
-          splitLine: { lineStyle: { color: 'rgba(0, 243, 255, 0.1)' } },
-          axisLabel: { color: '#00f3ff' }
+          splitLine: { lineStyle: { color: '#ebeef5' } },
+          axisLabel: { color: '#606266' }
         },
         series: [{ 
           data: counts, 
@@ -103,14 +101,14 @@ const initTrendChart = async () => {
           symbolSize: 8,
           areaStyle: {
              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(0, 243, 255, 0.5)' },
-              { offset: 1, color: 'rgba(0, 243, 255, 0.0)' }
+              { offset: 0, color: 'rgba(64, 158, 255, 0.5)' },
+              { offset: 1, color: 'rgba(64, 158, 255, 0.0)' }
             ])
           },
           itemStyle: { 
-            color: '#00f3ff',
-            shadowColor: '#00f3ff',
-            shadowBlur: 10
+            color: '#409eff',
+            shadowColor: '#409eff',
+            shadowBlur: 5
           }
         }]
       })

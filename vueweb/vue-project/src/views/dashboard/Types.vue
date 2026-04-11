@@ -16,8 +16,8 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import axios from '@/utils/axios'
 
-// Theme Colors
-const scifiColors = ['#00f3ff', '#bc13fe', '#00ff9d', '#ff0055', '#ffe600']
+// Theme Colors (Light/Pastel)
+const lightColors = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
 
 // Chart refs
 const typeChart = ref<HTMLElement | null>(null)
@@ -35,14 +35,14 @@ const initTypeChart = async () => {
       typeChartInstance.setOption({
         tooltip: { 
           trigger: 'item',
-          backgroundColor: 'rgba(5, 11, 20, 0.9)',
-          borderColor: '#00f3ff',
-          textStyle: { color: '#e0f7fa' }
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          borderColor: '#e4e7ed',
+          textStyle: { color: '#303133' }
         },
         legend: { 
           top: '5%', 
           left: 'center',
-          textStyle: { color: '#00f3ff', fontSize: 14 }
+          textStyle: { color: '#606266', fontSize: 14 }
         },
         series: [{
           name: '攻击类型',
@@ -51,27 +51,27 @@ const initTypeChart = async () => {
           avoidLabelOverlap: false,
           itemStyle: {
             borderRadius: 10,
-            borderColor: '#050b14',
+            borderColor: '#fff',
             borderWidth: 2
           },
           label: {
             show: true,
             position: 'outside',
             formatter: '{b}: {d}%',
-            color: '#00f3ff',
+            color: '#606266',
             fontSize: 14,
-            fontWeight: 'bold'
+            fontWeight: 'normal'
           },
           emphasis: {
-            label: { show: true, fontSize: 20, fontWeight: 'bold', color: '#fff' },
+            label: { show: true, fontSize: 16, fontWeight: 'bold', color: '#303133' },
             itemStyle: {
               shadowBlur: 10,
               shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)'
+              shadowColor: 'rgba(0, 0, 0, 0.1)'
             }
           },
           data: data,
-          color: scifiColors
+          color: lightColors
         }]
       })
     }
