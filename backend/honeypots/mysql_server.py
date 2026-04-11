@@ -15,7 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.time_utils import get_beijing_time
 
 HOST = '0.0.0.0'
-PORT = 3306
+PORT = 3307
 API_URL = "http://127.0.0.1:5000/api/logs/internal/upload"
 
 def log_attack(attacker_ip, attacker_port, payload, attack_type="MySQL爆破", details=None):

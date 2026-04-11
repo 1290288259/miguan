@@ -238,9 +238,9 @@ class AIAnalysisService:
             ai_type_lower = ai_attack_type.lower() if ai_attack_type else 'unknown'
             ai_is_malicious = ai_type_lower not in safe_types
             
-            # 特殊处理: 如果规则判定为 'Web Visit' 且 AI 判定为正常流量，视为一致
+            # 特殊处理: 如果规则判定为 '正常流量' 且 AI 判定为正常流量，视为一致
             rule_attack_type = log_entry.attack_type
-            if rule_attack_type and rule_attack_type.lower() == 'web visit' and not ai_is_malicious:
+            if rule_attack_type and rule_attack_type.lower() == '正常流量' and not ai_is_malicious:
                 log_entry.ai_rule_match_consistency = '一致'
             elif rule_is_malicious == ai_is_malicious:
                 log_entry.ai_rule_match_consistency = '一致'

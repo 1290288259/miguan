@@ -229,7 +229,7 @@
         <el-descriptions-item label="AI分析结果" :span="2" class-name="ai-analysis-section">
           <div v-if="currentLog.ai_attack_type" class="ai-analysis-content">
             <div class="ai-header">
-              <el-tag :type="currentLog.ai_attack_type === 'Normal' ? 'success' : 'danger'" effect="dark">
+              <el-tag :type="['Normal', 'normal', 'Page Visit', 'Safe', 'safe', '正常流量', '正常'].includes(currentLog.ai_attack_type) ? 'success' : 'danger'" effect="dark">
                 AI判定: {{ currentLog.ai_attack_type }}
               </el-tag>
               <el-tag type="info" effect="plain" class="ml-2">
@@ -598,6 +598,9 @@ const getAttackTypeTagType = (type: string) => {
   }
   if (['暴力破解', '文件包含', 'SSRF', 'CRLF注入'].includes(type)) {
     return 'warning'
+  }
+  if (['正常流量', '正常', 'Normal', 'Page Visit'].includes(type)) {
+    return 'success'
   }
   return 'info'
 }

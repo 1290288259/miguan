@@ -114,7 +114,7 @@ class DashboardService:
             ).filter(
                 Log.attack_type != None,
                 Log.is_malicious == True,
-                Log.attack_type != 'Web Visit'
+                Log.attack_type != '正常流量'
             ).group_by(
                 Log.attack_type
             ).order_by(

@@ -79,7 +79,7 @@ class TrafficAnalysisAgent:
             # 如果 AI 判定为高置信度恶意攻击，且建议封禁，则自动封禁
             attack_type = result.get("attack_type", "Unknown")
             confidence = float(result.get("confidence", 0.0))
-            is_malicious = attack_type != "Normal" and attack_type != "Unknown"
+            is_malicious = attack_type not in ["Normal", "Unknown", "正常流量", "Page Visit", "正常"]
             
             if self.is_auto_block and is_malicious and confidence > 0.8:
                 # 调用封禁技能
@@ -155,8 +155,8 @@ class TrafficAnalysisAgent:
 你是一个网络安全专家 Agent。请分析以下蜜罐捕获的流量日志，判断其是否为恶意攻击。
 
 重要判断规则：
-1. 【正常访问】：如果是标准的 HTTP GET 请求，访问主页(/)、登录页(/login)、注册页(/register)、静态资源(/static/..., /assets/...)，且没有包含任何 SQL 注入、XSS 代码、命令执行载荷或明显的扫描特征（如 .git, .env, wp-admin 等），请务必将其判定为 "Normal" 或 "Page Visit"。
-2. 【扫描判定】：只有当请求包含明确的漏洞探测路径（如 .env, actuator, shell, admin.php, .git 等）或明显的攻击载荷时，才判定为 "Scanning" 或其他攻击类型。
+1. 【正常访问】：如果是标准的 HTTP GET 请求，访问主页(/)、登录页(/login)、注册页(/register)、静态资源(/static/..., /assets/...)，且没有包含任何 SQL 注入、XSS 代码、命令执行载荷或明显的扫描特征（如 .git, .env, wp-admin 等），请务必将其判定为 "正常流量"。
+2. 【扫描判定】：只有当请求包含明确的漏洞探测路径（如 .env, actuator, shell, admin.php, .git 等）或明显的攻击载荷时，才判定为 "扫描探测" 或其他攻击类型。
 3. 【误报防止】：不要仅仅因为请求来自外部 IP 就判定为攻击。如果没有恶意特征，就是正常流量。普通用户的浏览行为不应标记为扫描。
 
 [日志信息]
@@ -190,7 +190,7 @@ Agent 使用解码技能发现了以下隐藏内容:
         prompt += """
 请按照以下JSON格式返回结果，不要包含思考过程或其他废话，只要JSON：
 {
-    "attack_type": "攻击类型(如果是正常请求请返回 'Normal', 否则返回具体攻击类型如 'SQL Injection', 'XSS', 'Scanning' 等)",
+    "attack_type": "攻击类型(如果是正常请求务必返回 '正常流量', 否则返回具体且规范的中文攻击类型，如 'SQL注入', 'XSS', '扫描探测', '暴力破解', '命令注入' 等)",
     "confidence": 0.0-1.0之间的置信度数值,
     "analysis": "简短的分析理由(中文)"
 }

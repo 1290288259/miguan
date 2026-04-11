@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Tuple
 import os
 import subprocess
 import sys
+import time
 
 import psutil
 
@@ -90,11 +91,17 @@ class HoneypotService:
     @staticmethod
     def _is_listening_on_port(process: psutil.Process, port: int) -> bool:
         try:
-            for conn in process.net_connections(kind='inet'):
-                if conn.status == psutil.CONN_LISTEN and conn.laddr and conn.laddr.port == port:
-                    return True
+            # 同样需要检查所有的子进程，有的框架/蜜罐会 fork 出工作进程来监听端口
+            processes_to_check = [process] + process.children(recursive=True)
+            for p in processes_to_check:
+                try:
+                    for conn in p.net_connections(kind='inet'):
+                        if conn.status == psutil.CONN_LISTEN and conn.laddr and conn.laddr.port == port:
+                            return True
+                except (psutil.AccessDenied, psutil.NoSuchProcess, psutil.ZombieProcess):
+                    continue
         except (psutil.AccessDenied, psutil.NoSuchProcess, psutil.ZombieProcess):
-            return False
+            pass
         return False
 
     @classmethod
@@ -361,9 +368,16 @@ class HoneypotService:
                 return {'error': f'找不到蜜罐脚本: {script_path}'}
 
             cmd = HoneypotService._build_command(hp)
+            
+            # 移除 Werkzeug 相关环境变量，防止子进程被当成 reload 子进程
+            env = os.environ.copy()
+            env.pop('WERKZEUG_RUN_MAIN', None)
+            env.pop('WERKZEUG_SERVER_FD', None)
+            
             process = subprocess.Popen(
                 cmd,
                 cwd=HoneypotService._get_backend_root(),
+                env=env,
             )
 
             HoneypotService._register_runtime(hp, process=process)
@@ -371,10 +385,11 @@ class HoneypotService:
             hp.pid = process.pid
             db.session.commit()
 
-            # 启动后立即做一次同步，避免进程秒退但数据库仍显示运行中。
+            # 启动后稍作等待然后做一次同步，避免进程秒退但数据库仍显示运行中。
+            time.sleep(1.0)
             status_info = HoneypotService._sync_honeypot_status(hp, commit=True)
             if status_info['status'] != HoneypotService.STATUS_RUNNING:
-                return {'error': f'蜜罐 {hp.name} 启动失败，进程未保持运行'}
+                return {'error': f'蜜罐 {hp.name} 启动失败，可能是端口冲突或配置错误，请检查端口是否被占用'}
 
             return {
                 'message': f'蜜罐 {hp.name} 已启动',
