@@ -1,50 +1,76 @@
-<mxGraphModel dx="1000" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
-  <root>
-    <mxCell id="0"/>
-    <mxCell id="1" parent="0"/>
-    <mxCell id="boundary" value="登录模块" style="swimlane;html=1;startSize=20;fillColor=none;" vertex="1" parent="1">
-      <mxGeometry x="250" y="40" width="300" height="420" as="geometry"/>
-    </mxCell>
-    
-    <mxCell id="actor1" value="管理员/普通用户" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
-      <mxGeometry x="100" y="200" width="30" height="60" as="geometry"/>
-    </mxCell>
-    
-    <mxCell id="uc1" value="用户注册" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-      <mxGeometry x="340" y="80" width="120" height="40" as="geometry"/>
-    </mxCell>
-    <mxCell id="uc2" value="用户登录" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-      <mxGeometry x="340" y="150" width="120" height="40" as="geometry"/>
-    </mxCell>
-    <mxCell id="uc3" value="个人信息管理" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-      <mxGeometry x="340" y="220" width="120" height="40" as="geometry"/>
-    </mxCell>
-    <mxCell id="uc4" value="权限管理" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-      <mxGeometry x="340" y="290" width="120" height="40" as="geometry"/>
-    </mxCell>
-    <mxCell id="uc5" value="失败限制及锁定拦截" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-      <mxGeometry x="330" y="380" width="140" height="40" as="geometry"/>
-    </mxCell>
-
-    <mxCell id="edge1" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="actor1" target="uc1">
-      <mxGeometry relative="1" as="geometry"/>
-    </mxCell>
-    <mxCell id="edge2" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="actor1" target="uc2">
-      <mxGeometry relative="1" as="geometry"/>
-    </mxCell>
-    <mxCell id="edge3" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="actor1" target="uc3">
-      <mxGeometry relative="1" as="geometry"/>
-    </mxCell>
-    <mxCell id="edge4" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="actor1" target="uc4">
-      <mxGeometry relative="1" as="geometry"/>
-    </mxCell>
-
-    <mxCell id="edge5" style="endArrow=classic;dashed=1;html=1;rounded=0;" edge="1" parent="1" source="uc5" target="uc2">
-      <mxGeometry relative="1" as="geometry"/>
-    </mxCell>
-    
-    <mxCell id="label5" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="edge5">
-      <mxGeometry x="0.2" y="1" relative="1" as="geometry"/>
-    </mxCell>
-  </root>
-</mxGraphModel>
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6">
+  <diagram id="3VOfZrlk3HL9z5x5gwo9" name="第 1 页">
+    <mxGraphModel dx="851" dy="1830" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="boundary" parent="1" style="swimlane;html=1;startSize=20;fillColor=none;" value="登录模块" vertex="1">
+          <mxGeometry height="510" width="300" x="250" y="-30" as="geometry" />
+        </mxCell>
+        <mxCell id="uc5" parent="boundary" style="ellipse;whiteSpace=wrap;html=1;" value="失败限制及锁定拦截" vertex="1">
+          <mxGeometry height="40" width="140" x="80" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="JpgxV1TQvF7Qu8jwfM7A-6" parent="boundary" style="ellipse;whiteSpace=wrap;html=1;" value="密码安全存储" vertex="1">
+          <mxGeometry height="40" width="120" x="90" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="actor1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="管理员" vertex="1">
+          <mxGeometry height="60" width="30" x="100" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="JpgxV1TQvF7Qu8jwfM7A-7" edge="1" parent="1" source="uc1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="JpgxV1TQvF7Qu8jwfM7A-6" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc1" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="用户注册" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="uc2" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="用户登录" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="uc3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="个人信息管理" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="uc4" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="用户、权限管理" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="edge1" edge="1" parent="1" source="actor1" style="endArrow=none;html=1;rounded=0;" target="uc1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2" edge="1" parent="1" source="actor1" style="endArrow=none;html=1;rounded=0;" target="uc2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3" edge="1" parent="1" source="actor1" style="endArrow=none;html=1;rounded=0;" target="uc3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge4" edge="1" parent="1" source="actor1" style="endArrow=none;html=1;rounded=0;" target="uc4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge5" edge="1" parent="1" source="uc5" style="endArrow=classic;dashed=1;html=1;rounded=0;" target="uc2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="label5" connectable="0" parent="edge5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="0.2" y="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JpgxV1TQvF7Qu8jwfM7A-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="普通用户" vertex="1">
+          <mxGeometry height="60" width="30" x="690" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="JpgxV1TQvF7Qu8jwfM7A-2" edge="1" parent="1" source="uc1" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.3333333333333333;entryDx=0;entryDy=0;entryPerimeter=0;" target="JpgxV1TQvF7Qu8jwfM7A-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560" y="327" as="sourcePoint" />
+            <mxPoint x="795" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JpgxV1TQvF7Qu8jwfM7A-3" edge="1" parent="1" source="uc2" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="JpgxV1TQvF7Qu8jwfM7A-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="620" y="377" as="sourcePoint" />
+            <mxPoint x="650" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JpgxV1TQvF7Qu8jwfM7A-4" edge="1" parent="1" source="uc3" style="endArrow=none;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="JpgxV1TQvF7Qu8jwfM7A-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="470" y="367" as="sourcePoint" />
+            <mxPoint x="705" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
