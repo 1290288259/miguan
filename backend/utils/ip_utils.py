@@ -151,3 +151,56 @@ def get_ip_location(ip_address: str) -> tuple[str, str]:
             logger.error(f"Fallback API error for {ip_address}: {e}")
 
     return location, isp
+
+@lru_cache(maxsize=10000)
+def get_ip_coordinates(ip_address: str) -> tuple[float, float]:
+    """
+    获取IP地址的经纬度坐标
+    
+    参数:
+        ip_address: IP地址字符串
+        
+    返回:
+        tuple[float, float]: (经度, 纬度)，无法识别则返回 (0.0, 0.0)
+    """
+    if not ip_address:
+        return 0.0, 0.0
+        
+    try:
+        ip = ipaddress.ip_address(ip_address)
+        if ip.is_private or ip.is_loopback or ip.is_reserved or ip.is_link_local:
+            return 116.4074, 39.9042 # 默认局域网坐标（北京）
+    except ValueError:
+        return 0.0, 0.0
+
+    _init_readers()
+
+    longitude = 0.0
+    latitude = 0.0
+
+    if _city_reader:
+        try:
+            response = _city_reader.city(ip_address)
+            if response.location.longitude is not None and response.location.latitude is not None:
+                longitude = response.location.longitude
+                latitude = response.location.latitude
+        except geoip2.errors.AddressNotFoundError:
+            pass
+        except Exception as e:
+            logger.error(f"GeoIP City DB error getting coordinates for {ip_address}: {e}")
+
+    # 如果本地库未找到坐标，则尝试 Fallback API
+    if longitude == 0.0 and latitude == 0.0:
+        try:
+            url = f"http://ip-api.com/json/{ip_address}?lang=zh-CN"
+            response = requests.get(url, timeout=3)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('status') == 'success':
+                    longitude = float(data.get('lon', 0.0))
+                    latitude = float(data.get('lat', 0.0))
+        except Exception as e:
+            logger.error(f"Fallback API error getting coordinates for {ip_address}: {e}")
+
+    return longitude, latitude

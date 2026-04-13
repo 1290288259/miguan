@@ -380,7 +380,8 @@ agent/
 | `init_permissions.py` | 初始化权限条目 |
 | `init_honeypot.py` | 初始化默认蜜罐配置 |
 | `config.py` | Flask 配置类（数据库URI、JWT密钥、CORS等） |
-| `app.py` | Flask 应用入口，注册所有蓝图 |
+| `extensions.py` | Flask 扩展实例集中管理（SocketIO 全局单例），避免 reloader 实例不一致 |
+| `app.py` | Flask 应用入口，注册所有蓝图，初始化 SocketIO 并注册 /ws namespace |
 
 ### 9. 数据库迁移
 
@@ -424,12 +425,15 @@ log_service.py · create_log()
 
 | 文件 | 职责 |
 | :--- | :--- |
-| `backend/app.py` | 全局 `socketio = SocketIO()` 单例，`socketio.init_app(app, ...)` 初始化，`socketio.run()` 替代 `app.run()` |
-| `backend/service/log_service.py` | `create_log()` 末尾注入 `socketio.emit('new_attack', payload, namespace='/ws')` |
-| `frontend/src/composables/useSocket.ts` | 全局 Socket 单例管理，提供 `onAttack/offAttack` 订阅方法，引用计数自动管理连接生命周期 |
-| `frontend/src/views/dashboard/DashboardLayout.vue` | 订阅 `new_attack`，显示 `ElNotification` 弹窗 + 高危横幅（含滑入动画），菜单栏显示连接状态指示灯 |
-| `frontend/src/views/dashboard/Overview.vue` | 订阅 `new_attack`，数字跳动闪烁 + 实时告警列表（最多 10 条，列表滑入动画） |
-| `frontend/src/views/dashboard/Map.vue` | 订阅 `new_attack`，追加 `effectScatter` 脉冲散点到地图，5 秒后自动消失 |
+| `backend/extensions.py` | **全局唯一** `socketio = SocketIO()` 实例，所有模块必须从此处导入 socketio，避免 werkzeug reloader 导致实例不一致 |
+| `backend/app.py` | `from extensions import socketio`，调用 `socketio.init_app(app, ...)`，注册 `/ws` namespace 的 connect/disconnect handler，使用 `socketio.run()` 替代 `app.run()` |
+| `backend/service/log_service.py` | `create_log()` 末尾 `from extensions import socketio`，emit `new_attack` 事件到 `/ws` namespace |
+| `frontend/src/composables/useSocket.ts` | 全局 Socket 单例管理，`connectSocket()`/`disconnectSocket()` 由 DashboardLayout 统一管理生命周期，提供 `onAttack/offAttack` 订阅方法，pending 队列 + 重连恢复（先 `off('new_attack')` 再统一重绑，避免 handler 重复注册） |
+| `frontend/src/views/dashboard/DashboardLayout.vue` | 订阅 `new_attack`，显示 `ElNotification` 弹窗 + 高危横幅（含滑入动画），菜单栏显示连接状态指示灯（绿/红），使用 `<keep-alive>` 缓存子路由 |
+| `frontend/src/views/dashboard/Overview.vue` | 订阅 `new_attack`，数字递增 + bounce 跳动动画 + 实时告警列表（最多 10 条，transition-group 滑入动画） |
+| `frontend/src/views/dashboard/Map.vue` | 订阅 `new_attack`，追加 `effectScatter` 脉冲散点到地图（使用 `Map` 结构消除竞态），5 秒后自动消失，过滤 `(0,0)` null-island 坐标 |
+
+> **重要**：`socketio` 实例必须从 `extensions.py` 导入，**禁止**从 `app.py` 导入。原因：werkzeug 的 `use_reloader=True` 会在子进程中重新执行 `app.py`，导致 `app.py` 中定义的 `socketio` 和其他模块缓存导入的 `socketio` 不是同一个对象。`extensions.py` 作为独立模块不受 reloader 影响。
 
 ### 4. 推送事件规范
 
@@ -447,7 +451,9 @@ log_service.py · create_log()
   "protocol": "HTTP",
   "target_port": 80,
   "attack_time": "2026-03-27T10:30:00",
-  "attack_description": "触发规则: SQL注入检测"
+  "attack_description": "触发规则: SQL注入检测",
+  "longitude": 116.4074,
+  "latitude": 39.9042
 }
 ```
 
@@ -455,6 +461,13 @@ log_service.py · create_log()
 
 WebSocket 需要使用 `socketio.run()` 替代 `app.run()`，已在 `app.py` 中完成更新。
 重启后端后 WebSocket 功能即生效，无需额外操作。
+
+### 6. WebSocket 测试脚本
+
+| 文件 | 用途 |
+| :--- | :--- |
+| `backend/test/test_realtime_report.py` | 主测试脚本：30 次/60 秒全球 IP 的 SQL 注入攻击，用于验证大屏 4 个核心动态效果 |
+| `backend/test/verify_websocket.py` | WebSocket 推送端到端验证：Python socketio 客户端连接 `/ws`，发 3 条攻击，验证 4 项指标（事件到达、坐标、攻击类型、威胁等级） |
 
 ---
 

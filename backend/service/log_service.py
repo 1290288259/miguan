@@ -20,19 +20,19 @@ from utils.time_utils import get_beijing_time
 
 class LogService:
     SAFE_ATTACK_TYPES = {
-        'normal',
-        'page visit',
-        'web visit',
-        'safe',
-        'unknown',
-        '正常',
-        '正常流量',
-        'ftp登录',
-        'web登录',
-        'mysql登录',
-        'ssh登录',
+        "normal",
+        "page visit",
+        "web visit",
+        "safe",
+        "unknown",
+        "正常",
+        "正常流量",
+        "ftp登录",
+        "web登录",
+        "mysql登录",
+        "ssh登录",
     }
-    MALICIOUS_THREAT_LEVELS = {'medium', 'high', 'critical'}
+    MALICIOUS_THREAT_LEVELS = {"medium", "high", "critical"}
 
     @classmethod
     def _is_safe_attack_type(cls, attack_type: str) -> bool:
@@ -46,17 +46,17 @@ class LogService:
 
     # 认证类载荷的正则模式：用于判断 HTTP 等协议的载荷是否包含账号密码
     # 匹配 "Username: xxx, Password: xxx" 格式（各蜜罐统一的凭证格式）
-    _CREDENTIAL_PATTERN = re.compile(r'Username:\s*.+,\s*Password:\s*.+', re.IGNORECASE)
+    _CREDENTIAL_PATTERN = re.compile(r"Username:\s*.+,\s*Password:\s*.+", re.IGNORECASE)
 
     @classmethod
     def _is_credential_payload(cls, payload: str) -> bool:
         """
         判断载荷是否包含认证凭证（用户名+密码）。
         用于暴力破解检测时，区分有效的认证尝试和普通请求。
-        
+
         参数:
             payload: 请求载荷字符串
-            
+
         返回:
             bool: 是否包含认证凭证
         """
@@ -65,56 +65,58 @@ class LogService:
         return bool(cls._CREDENTIAL_PATTERN.search(payload))
 
     @classmethod
-    def _check_brute_force(cls, attacker_ip: str, protocol: str = None, current_payload: str = None) -> bool:
+    def _check_brute_force(
+        cls, attacker_ip: str, protocol: str = None, current_payload: str = None
+    ) -> bool:
         """
         判断是否为暴力破解行为。
-        
+
         多级识别引擎的第二级：行为频次分析。
         规则：同一IP在1分钟内有效认证尝试次数 >= 20 则判定为暴力破解。
-        
+
         对于HTTP协议：只统计包含账号密码的载荷（如登录表单提交），
         普通的GET请求、路径探测等不计入暴力破解计数。
-        
+
         对于其他协议（FTP/SSH/MySQL/Redis等）：所有带载荷的请求均计入，
         因为这些协议连接本身就代表认证尝试。
-        
+
         参数:
             attacker_ip: 攻击者IP地址
             protocol: 协议类型（HTTP、FTP、SSH等）
             current_payload: 当前请求的载荷，用于判断当前请求是否算一次有效尝试
-            
+
         返回:
             bool: 是否为暴力破解
         """
         from datetime import timedelta
         from utils.time_utils import get_beijing_time
-        
+
         if not attacker_ip:
             return False
 
         # 对于HTTP协议，当前请求必须包含凭证才算有效认证尝试
-        if protocol and protocol.upper() == 'HTTP':
+        if protocol and protocol.upper() == "HTTP":
             if not cls._is_credential_payload(current_payload):
                 return False
 
-        one_min_ago = get_beijing_time() - timedelta(minutes=cls.BRUTE_FORCE_WINDOW_MINUTES)
-        
+        one_min_ago = get_beijing_time() - timedelta(
+            minutes=cls.BRUTE_FORCE_WINDOW_MINUTES
+        )
+
         # 构建基础查询：同一IP、1分钟内、载荷非空
         base_filter = [
             Log.attacker_ip == attacker_ip,
             Log.attack_time >= one_min_ago,
             Log.payload.isnot(None),
-            Log.payload != ''
+            Log.payload != "",
         ]
-        
+
         # 对于HTTP协议，额外过滤：只统计包含凭证的载荷
-        if protocol and protocol.upper() == 'HTTP':
-            base_filter.append(Log.payload.like('%Username:%Password:%'))
-        
-        count = db.session.query(db.func.count(Log.id)).filter(
-            *base_filter
-        ).scalar()
-        
+        if protocol and protocol.upper() == "HTTP":
+            base_filter.append(Log.payload.like("%Username:%Password:%"))
+
+        count = db.session.query(db.func.count(Log.id)).filter(*base_filter).scalar()
+
         # +1 包含当前这一条（尚未入库）
         return (count + 1) >= cls.BRUTE_FORCE_THRESHOLD
 
@@ -168,26 +170,26 @@ class LogService:
                 query = query.filter(Log.protocol == protocol)
 
             if start_time:
-                start_datetime = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+                start_datetime = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
                 query = query.filter(Log.attack_time >= start_datetime)
 
             if end_time:
-                end_datetime = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+                end_datetime = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
                 query = query.filter(Log.attack_time <= end_datetime)
 
             if keyword:
                 query = query.filter(
-                    Log.attack_type.like(f'%{keyword}%')
-                    | Log.threat_level.like(f'%{keyword}%')
-                    | Log.protocol.like(f'%{keyword}%')
-                    | Log.source_ip.like(f'%{keyword}%')
-                    | Log.target_ip.like(f'%{keyword}%')
-                    | Log.attack_description.like(f'%{keyword}%')
-                    | Log.raw_log.like(f'%{keyword}%')
-                    | Log.request_path.like(f'%{keyword}%')
-                    | Log.payload.like(f'%{keyword}%')
-                    | Log.user_agent.like(f'%{keyword}%')
-                    | Log.notes.like(f'%{keyword}%')
+                    Log.attack_type.like(f"%{keyword}%")
+                    | Log.threat_level.like(f"%{keyword}%")
+                    | Log.protocol.like(f"%{keyword}%")
+                    | Log.source_ip.like(f"%{keyword}%")
+                    | Log.target_ip.like(f"%{keyword}%")
+                    | Log.attack_description.like(f"%{keyword}%")
+                    | Log.raw_log.like(f"%{keyword}%")
+                    | Log.request_path.like(f"%{keyword}%")
+                    | Log.payload.like(f"%{keyword}%")
+                    | Log.user_agent.like(f"%{keyword}%")
+                    | Log.notes.like(f"%{keyword}%")
                 )
 
             query = query.order_by(Log.attack_time.desc())
@@ -198,21 +200,21 @@ class LogService:
             log_list = [log.to_dict() for log in logs]
 
             pagination = {
-                'page': page,
-                'per_page': per_page,
-                'total': total,
-                'pages': (total + per_page - 1) // per_page,
-                'has_prev': page > 1,
-                'has_next': page * per_page < total,
-                'prev_num': page - 1 if page > 1 else None,
-                'next_num': page + 1 if page * per_page < total else None,
+                "page": page,
+                "per_page": per_page,
+                "total": total,
+                "pages": (total + per_page - 1) // per_page,
+                "has_prev": page > 1,
+                "has_next": page * per_page < total,
+                "prev_num": page - 1 if page > 1 else None,
+                "next_num": page + 1 if page * per_page < total else None,
             }
 
             return log_list, pagination
 
         except Exception as e:
             print(f"查询日志时发生错误: {str(e)}")
-            return [], {'error': str(e)}
+            return [], {"error": str(e)}
 
     @staticmethod
     def export_logs(
@@ -260,10 +262,10 @@ class LogService:
                 query = query.filter(Log.protocol == protocol)
 
             if source_ip:
-                query = query.filter(Log.source_ip.like(f'%{source_ip}%'))
+                query = query.filter(Log.source_ip.like(f"%{source_ip}%"))
 
             if target_ip:
-                query = query.filter(Log.target_ip.like(f'%{target_ip}%'))
+                query = query.filter(Log.target_ip.like(f"%{target_ip}%"))
 
             if target_port is not None:
                 query = query.filter(Log.target_port == target_port)
@@ -275,8 +277,8 @@ class LogService:
                 query = query.filter(Log.is_blocked == is_blocked)
 
             if start_time and end_time:
-                start_datetime = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
-                end_datetime = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+                start_datetime = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+                end_datetime = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
                 time_diff = end_datetime - start_datetime
                 if time_diff.days > 365:
                     return None, "导出时间范围不能超过一年"
@@ -284,25 +286,25 @@ class LogService:
                 query = query.filter(Log.attack_time >= start_datetime)
                 query = query.filter(Log.attack_time <= end_datetime)
             elif start_time:
-                start_datetime = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+                start_datetime = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
                 query = query.filter(Log.attack_time >= start_datetime)
             elif end_time:
-                end_datetime = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+                end_datetime = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
                 query = query.filter(Log.attack_time <= end_datetime)
 
             if keyword:
                 query = query.filter(
-                    Log.attack_type.like(f'%{keyword}%')
-                    | Log.threat_level.like(f'%{keyword}%')
-                    | Log.protocol.like(f'%{keyword}%')
-                    | Log.source_ip.like(f'%{keyword}%')
-                    | Log.target_ip.like(f'%{keyword}%')
-                    | Log.attack_description.like(f'%{keyword}%')
-                    | Log.raw_log.like(f'%{keyword}%')
-                    | Log.request_path.like(f'%{keyword}%')
-                    | Log.payload.like(f'%{keyword}%')
-                    | Log.user_agent.like(f'%{keyword}%')
-                    | Log.notes.like(f'%{keyword}%')
+                    Log.attack_type.like(f"%{keyword}%")
+                    | Log.threat_level.like(f"%{keyword}%")
+                    | Log.protocol.like(f"%{keyword}%")
+                    | Log.source_ip.like(f"%{keyword}%")
+                    | Log.target_ip.like(f"%{keyword}%")
+                    | Log.attack_description.like(f"%{keyword}%")
+                    | Log.raw_log.like(f"%{keyword}%")
+                    | Log.request_path.like(f"%{keyword}%")
+                    | Log.payload.like(f"%{keyword}%")
+                    | Log.user_agent.like(f"%{keyword}%")
+                    | Log.notes.like(f"%{keyword}%")
                 )
 
             query = query.order_by(Log.attack_time.desc())
@@ -311,44 +313,48 @@ class LogService:
             output = StringIO()
             writer = csv.writer(output)
             headers = [
-                'ID',
-                '攻击时间',
-                '攻击类型',
-                '威胁等级',
-                '源IP',
-                '源端口',
-                '目标IP',
-                '目标端口',
-                '协议',
-                '请求路径',
-                '是否恶意',
-                '是否阻断',
-                '攻击描述',
+                "ID",
+                "攻击时间",
+                "攻击类型",
+                "威胁等级",
+                "源IP",
+                "源端口",
+                "目标IP",
+                "目标端口",
+                "协议",
+                "请求路径",
+                "是否恶意",
+                "是否阻断",
+                "攻击描述",
             ]
             writer.writerow(headers)
 
             for log in logs:
-                writer.writerow([
-                    log.id,
-                    log.attack_time.strftime('%Y-%m-%d %H:%M:%S') if log.attack_time else '',
-                    log.attack_type or '',
-                    log.threat_level or '',
-                    log.source_ip or '',
-                    log.source_port or '',
-                    log.target_ip or '',
-                    log.target_port or '',
-                    log.protocol or '',
-                    log.request_path or '',
-                    '是' if log.is_malicious else '否',
-                    '是' if log.is_blocked else '否',
-                    log.attack_description or '',
-                ])
+                writer.writerow(
+                    [
+                        log.id,
+                        log.attack_time.strftime("%Y-%m-%d %H:%M:%S")
+                        if log.attack_time
+                        else "",
+                        log.attack_type or "",
+                        log.threat_level or "",
+                        log.source_ip or "",
+                        log.source_port or "",
+                        log.target_ip or "",
+                        log.target_port or "",
+                        log.protocol or "",
+                        log.request_path or "",
+                        "是" if log.is_malicious else "否",
+                        "是" if log.is_blocked else "否",
+                        log.attack_description or "",
+                    ]
+                )
 
             csv_content = output.getvalue()
             output.close()
 
-            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-            filename = f'logs_export_{timestamp}.csv'
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            filename = f"logs_export_{timestamp}.csv"
             return csv_content, filename
 
         except Exception as e:
@@ -431,7 +437,7 @@ class LogService:
             attack_type_stats = (
                 db.session.query(
                     Log.attack_type,
-                    db.func.count(Log.id).label('count'),
+                    db.func.count(Log.id).label("count"),
                 )
                 .filter(Log.attack_type.isnot(None))
                 .group_by(Log.attack_type)
@@ -441,7 +447,7 @@ class LogService:
             threat_level_stats = (
                 db.session.query(
                     Log.threat_level,
-                    db.func.count(Log.id).label('count'),
+                    db.func.count(Log.id).label("count"),
                 )
                 .filter(Log.threat_level.isnot(None))
                 .group_by(Log.threat_level)
@@ -453,8 +459,8 @@ class LogService:
             seven_days_ago = get_beijing_time() - timedelta(days=7)
             daily_stats = (
                 db.session.query(
-                    db.func.date(Log.attack_time).label('date'),
-                    db.func.count(Log.id).label('count'),
+                    db.func.date(Log.attack_time).label("date"),
+                    db.func.count(Log.id).label("count"),
                 )
                 .filter(Log.attack_time >= seven_days_ago)
                 .group_by(db.func.date(Log.attack_time))
@@ -462,22 +468,28 @@ class LogService:
             )
 
             return {
-                'total_logs': total_logs,
-                'malicious_logs': malicious_logs,
-                'blocked_logs': blocked_logs,
-                'attack_type_stats': [{'type': at[0], 'count': at[1]} for at in attack_type_stats],
-                'threat_level_stats': [{'level': tl[0], 'count': tl[1]} for tl in threat_level_stats],
-                'daily_stats': [{'date': str(ds[0]), 'count': ds[1]} for ds in daily_stats],
+                "total_logs": total_logs,
+                "malicious_logs": malicious_logs,
+                "blocked_logs": blocked_logs,
+                "attack_type_stats": [
+                    {"type": at[0], "count": at[1]} for at in attack_type_stats
+                ],
+                "threat_level_stats": [
+                    {"level": tl[0], "count": tl[1]} for tl in threat_level_stats
+                ],
+                "daily_stats": [
+                    {"date": str(ds[0]), "count": ds[1]} for ds in daily_stats
+                ],
             }
         except Exception as e:
             print(f"获取日志统计信息时发生错误: {str(e)}")
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     @staticmethod
     def create_log(log_data: Dict) -> Dict:
         """
         创建日志记录。
-        
+
         实现"正则 -> 频次 -> AI"三级恶意流量识别引擎：
         1. 规则引擎匹配（正则识别）：正则匹配黑名单规则，直接定性已知攻击特征
         2. 暴力破解分析（行为识别）：若正则未命中，分析频次判断是否为暴力破解
@@ -490,19 +502,19 @@ class LogService:
             Dict: 创建结果
         """
         try:
-            honeypot_port = log_data.get('honeypot_port')
+            honeypot_port = log_data.get("honeypot_port")
             honeypot = Honeypot.query.filter_by(port=honeypot_port).first()
 
             if not honeypot:
-                return {'error': f'未找到端口为 {honeypot_port} 的蜜罐'}
+                return {"error": f"未找到端口为 {honeypot_port} 的蜜罐"}
 
             # ============================================================
             # 初始化：蜜罐上报的原始流量默认为"正常流量"
             # 蜜罐作为纯粹的数据收集层，不做任何业务判定
             # 所有分类工作由以下多级识别引擎完成
             # ============================================================
-            attack_type = '正常流量'
-            threat_level = 'low'
+            attack_type = "正常流量"
+            threat_level = "low"
             attack_description = None
             is_malicious = False
 
@@ -521,7 +533,7 @@ class LogService:
                 for rule in rules:
                     match_content = log_data.get(rule.match_field)
 
-                    if match_content is None and rule.match_field != 'raw_log':
+                    if match_content is None and rule.match_field != "raw_log":
                         pass
 
                     if match_content is not None:
@@ -529,7 +541,9 @@ class LogService:
                         if re.search(rule.regex_pattern, content_str, re.IGNORECASE):
                             attack_type = rule.attack_type
                             threat_level = rule.threat_level
-                            is_malicious = LogService._infer_is_malicious(attack_type, threat_level)
+                            is_malicious = LogService._infer_is_malicious(
+                                attack_type, threat_level
+                            )
 
                             rule_msg = f"触发规则: {rule.name}"
                             if not attack_description:
@@ -552,17 +566,17 @@ class LogService:
             # 其他协议：带载荷的请求即算有效认证尝试
             # ============================================================
             if not is_malicious:
-                payload = log_data.get('payload')
-                protocol = log_data.get('protocol')
+                payload = log_data.get("payload")
+                protocol = log_data.get("protocol")
                 if payload:
                     is_brute_force = LogService._check_brute_force(
-                        attacker_ip=log_data.get('attacker_ip'),
+                        attacker_ip=log_data.get("attacker_ip"),
                         protocol=protocol,
-                        current_payload=payload
+                        current_payload=payload,
                     )
                     if is_brute_force:
-                        attack_type = '暴力破解'
-                        threat_level = 'high'
+                        attack_type = "暴力破解"
+                        threat_level = "high"
                         is_malicious = True
                         rule_msg = "触发系统引擎: 暴力破解检测"
                         if not attack_description:
@@ -572,22 +586,22 @@ class LogService:
 
             log = Log(
                 honeypot_id=honeypot.id,
-                attacker_ip=log_data.get('attacker_ip'),
+                attacker_ip=log_data.get("attacker_ip"),
                 attack_time=get_beijing_time(),
-                raw_log=log_data.get('raw_log'),
-                source_ip=log_data.get('attacker_ip'),
-                target_ip=log_data.get('target_ip', '127.0.0.1'),
-                source_port=log_data.get('attacker_port'),
-                target_port=log_data.get('honeypot_port'),
-                protocol=log_data.get('protocol'),
-                user_agent=log_data.get('user_agent'),
-                request_path=log_data.get('request_path'),
+                raw_log=log_data.get("raw_log"),
+                source_ip=log_data.get("attacker_ip"),
+                target_ip=log_data.get("target_ip", "127.0.0.1"),
+                source_port=log_data.get("attacker_port"),
+                target_port=log_data.get("honeypot_port"),
+                protocol=log_data.get("protocol"),
+                user_agent=log_data.get("user_agent"),
+                request_path=log_data.get("request_path"),
                 attack_type=attack_type,
                 attack_description=attack_description,
-                payload=log_data.get('payload'),
+                payload=log_data.get("payload"),
                 threat_level=threat_level,
                 is_malicious=is_malicious,
-                notes=log_data.get('notes'),
+                notes=log_data.get("notes"),
             )
 
             db.session.add(log)
@@ -600,9 +614,9 @@ class LogService:
             # ============================================================
             try:
                 log_data_dict = log.to_dict()
-                log_data_dict['payload'] = log.payload
-                log_data_dict['protocol'] = log.protocol
-                log_data_dict['request_path'] = log.request_path
+                log_data_dict["payload"] = log.payload
+                log_data_dict["protocol"] = log.protocol
+                log_data_dict["request_path"] = log.request_path
                 AIAnalysisService.add_task(log.id, log_data_dict)
             except Exception as e:
                 print(f"添加 AI 分析任务失败: {str(e)}")
@@ -621,13 +635,37 @@ class LogService:
                 except Exception as e:
                     print(f"自动记录恶意 IP 失败: {str(e)}")
 
+                # WebSocket 实时推送
+                try:
+                    from extensions import socketio
+                    from utils.ip_utils import get_ip_coordinates
+
+                    # 动态获取IP的经纬度用于大屏展示脉冲红点
+                    longitude, latitude = get_ip_coordinates(log.attacker_ip)
+
+                    ws_payload = {
+                        "log_id": log.id,
+                        "source_ip": log.attacker_ip,
+                        "attack_type": log.attack_type,
+                        "threat_level": log.threat_level,
+                        "protocol": log.protocol,
+                        "target_port": log.target_port,
+                        "attack_time": log.attack_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                        "attack_description": log.attack_description,
+                        "longitude": longitude,
+                        "latitude": latitude,
+                    }
+                    socketio.emit("new_attack", ws_payload, namespace="/ws")
+                except Exception as e:
+                    print(f"WebSocket 推送失败: {str(e)}")
+
             return {
-                'log_id': log.id,
-                'status': 'created',
-                'message': '日志创建成功',
+                "log_id": log.id,
+                "status": "created",
+                "message": "日志创建成功",
             }
 
         except Exception as e:
             db.session.rollback()
             print(f"创建日志时发生错误: {str(e)}")
-            return {'error': str(e)}
+            return {"error": str(e)}

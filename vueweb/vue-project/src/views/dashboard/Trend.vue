@@ -61,6 +61,7 @@ const initTrendChart = async () => {
         color: '#409eff',
         textColor: '#606266',
         maskColor: 'rgba(255, 255, 255, 0.8)',
+    })
   }
   
   try {

@@ -24,6 +24,12 @@ class User(db.Model):
     
     # 权限（1=管理员，2=普通用户）
     role = db.Column(db.Integer, nullable=False, default=2, comment='权限角色')
+
+    # 失败登录尝试次数
+    failed_login_attempts = db.Column(db.Integer, default=0, comment='连续登录失败次数')
+    
+    # 账户锁定截止时间
+    locked_until = db.Column(db.DateTime, nullable=True, comment='账户锁定截止时间')
     
     def __repr__(self):
         """

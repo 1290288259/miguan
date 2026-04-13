@@ -267,12 +267,48 @@ def login_user(username, password):
         # 查询用户
         user = User.query.filter_by(username=username).first()
         
-        # 验证用户是否存在和密码是否正确
-        if not user or user.password != hashed_password:
+        # 验证用户是否存在
+        if not user:
             return {
                 'success': False,
                 'message': '用户名或密码错误'
             }
+            
+        now = datetime.datetime.utcnow()
+
+        # 检查账户是否已被锁定
+        if user.locked_until and user.locked_until > now:
+            minutes_left = int((user.locked_until - now).total_seconds() / 60) + 1
+            return {
+                'success': False,
+                'message': f'由于连续多次尝试失败，账户已被锁定，请在 {minutes_left} 分钟后再试'
+            }
+
+        # 如果密码不正确
+        if user.password != hashed_password:
+            user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
+            
+            # 如果达到5次，则锁定账户15分钟
+            if user.failed_login_attempts >= 5:
+                user.locked_until = now + datetime.timedelta(minutes=15)
+                db.session.commit()
+                return {
+                    'success': False,
+                    'message': '密码错误次数过多，您的账户已被锁定 15 分钟'
+                }
+            
+            db.session.commit()
+            remaining_attempts = 5 - user.failed_login_attempts
+            return {
+                'success': False,
+                'message': f'用户名或密码错误，还有 {remaining_attempts} 次尝试机会'
+            }
+            
+        # 登录成功，重置失败次数和锁定时间
+        if (user.failed_login_attempts and user.failed_login_attempts > 0) or user.locked_until:
+            user.failed_login_attempts = 0
+            user.locked_until = None
+            db.session.commit()
         
         # 生成JWT访问令牌
         access_token = jwt.encode({
