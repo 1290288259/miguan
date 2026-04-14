@@ -140,6 +140,8 @@ class LogService:
         start_time: str = None,
         end_time: str = None,
         keyword: str = None,
+        log_id: str = None,
+        source_ip: str = None,
     ) -> Tuple[List[Dict], Dict]:
         """
         分页查询日志，支持条件筛选和关键字检索。
@@ -177,6 +179,11 @@ class LogService:
                 end_datetime = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
                 query = query.filter(Log.attack_time <= end_datetime)
 
+            if log_id:
+                query = query.filter(Log.id == log_id)
+            if source_ip:
+                query = query.filter(Log.source_ip.like(f"%{source_ip}%"))
+
             if keyword:
                 query = query.filter(
                     Log.attack_type.like(f"%{keyword}%")
@@ -192,7 +199,7 @@ class LogService:
                     | Log.notes.like(f"%{keyword}%")
                 )
 
-            query = query.order_by(Log.attack_time.desc())
+            query = query.order_by(Log.id.desc())
 
             total = query.count()
             offset = (page - 1) * per_page
@@ -291,6 +298,11 @@ class LogService:
             elif end_time:
                 end_datetime = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
                 query = query.filter(Log.attack_time <= end_datetime)
+
+            if log_id:
+                query = query.filter(Log.id == log_id)
+            if source_ip:
+                query = query.filter(Log.source_ip.like(f"%{source_ip}%"))
 
             if keyword:
                 query = query.filter(

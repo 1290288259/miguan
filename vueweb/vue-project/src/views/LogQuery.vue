@@ -1,104 +1,26 @@
 <template>
   <div class="log-query-container">
-    <el-card class="page-header">
+    <el-card class="page-header" style="margin-bottom: 20px;">
       <template #header>
         <div class="card-header">
           <span>日志查询</span>
         </div>
       </template>
-
-      <el-form :model="queryForm" :inline="true" class="query-form">
-        <el-form-item label="关键字">
-          <el-input
-            v-model="queryForm.keyword"
-            placeholder="请输入关键字"
-            clearable
-            style="width: 200px"
-            @keyup.enter="handleQuery"
-          />
-        </el-form-item>
-
-        <el-form-item label="攻击类型">
-          <el-select
-            v-model="queryForm.attack_type"
-            placeholder="请选择攻击类型"
-            clearable
-            style="width: 160px"
-          >
-            <el-option label="全部" value="" />
-            <el-option label="SQL注入" value="SQL注入" />
-            <el-option label="XSS" value="XSS" />
-            <el-option label="命令注入" value="命令注入" />
-            <el-option label="目录遍历" value="目录遍历" />
-            <el-option label="WebShell" value="WebShell" />
-            <el-option label="RCE" value="RCE" />
-            <el-option label="文件包含" value="文件包含" />
-            <el-option label="SSRF" value="SSRF" />
-            <el-option label="扫描探测" value="扫描探测" />
-            <el-option label="暴力破解" value="暴力破解" />
-            <el-option label="XXE" value="XXE" />
-            <el-option label="LDAP注入" value="LDAP注入" />
-            <el-option label="反序列化" value="反序列化" />
-            <el-option label="CRLF注入" value="CRLF注入" />
-            <el-option label="信息泄露" value="信息泄露" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="威胁等级">
-          <el-select
-            v-model="queryForm.threat_level"
-            placeholder="请选择威胁等级"
-            clearable
-            style="width: 160px"
-          >
-            <el-option label="全部" value="" />
-            <el-option label="低" value="low" />
-            <el-option label="中" value="medium" />
-            <el-option label="高" value="high" />
-            <el-option label="严重" value="critical" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="协议类型">
-          <el-select
-            v-model="queryForm.protocol"
-            placeholder="请选择协议类型"
-            clearable
-            style="width: 160px"
-          >
-            <el-option label="全部" value="" />
-            <el-option label="HTTP" value="HTTP" />
-            <el-option label="HTTPS" value="HTTPS" />
-            <el-option label="SSH" value="SSH" />
-            <el-option label="FTP" value="FTP" />
-            <el-option label="TELNET" value="TELNET" />
-            <el-option label="RDP" value="RDP" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="攻击时间范围">
-          <el-date-picker
-            v-model="queryForm.dateRange"
-            type="datetimerange"
-            range-separator="至"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-            format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss"
-          />
-        </el-form-item>
-
-        <el-form-item>
-          <el-button type="primary" @click="handleQuery" :loading="loading">
-            <el-icon><Search /></el-icon>
-            查询
-          </el-button>
-          <el-button @click="resetQuery">
-            <el-icon><Refresh /></el-icon>
-            重置
-          </el-button>
-        </el-form-item>
-      </el-form>
+      <div class="search-form">
+        <el-form :inline="true" :model="queryForm" class="demo-form-inline" @submit.prevent>
+          <el-form-item label="关键字:">
+            <el-input v-model="queryForm.keyword" placeholder="全局关键字搜索" clearable style="width: 300px;" @keyup.enter="handleQuery" />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="handleQuery">
+              <el-icon><Search /></el-icon> 查询
+            </el-button>
+            <el-button @click="resetQuery">
+              <el-icon><Refresh /></el-icon> 重置过滤
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
     </el-card>
 
     <el-card class="log-table-container">
@@ -113,13 +35,76 @@
       </template>
 
       <el-table :data="logList" style="width: 100%" v-loading="loading" stripe border>
-        <el-table-column prop="attack_time" label="攻击时间" width="180">
+        <el-table-column prop="id" width="80">
+          <template #header>
+            <div style="display: flex; align-items: center; cursor: pointer;">
+              <span>ID</span>
+              <el-popover placement="bottom" trigger="click" :width="200">
+                <template #reference>
+                  <el-icon style="margin-left:4px; font-size: 14px"><Filter /></el-icon>
+                </template>
+                <div>
+                  <el-input v-model="queryForm.id" placeholder="搜索 ID" clearable size="small" />
+                  <el-button type="primary" size="small" @click="handleQuery" style="margin-top:10px; width:100%">查询</el-button>
+                </div>
+              </el-popover>
+            </div>
+          </template>
+          <template #default="scope">{{ scope.row.id }}</template>
+        </el-table-column>
+
+        <el-table-column prop="attack_time" width="180">
+          <template #header>
+            <div style="display: flex; align-items: center; cursor: pointer;">
+              <span>攻击时间</span>
+              <el-popover placement="bottom" trigger="click" :width="350">
+                <template #reference>
+                  <el-icon style="margin-left:4px; font-size: 14px"><Filter /></el-icon>
+                </template>
+                <div>
+                  <el-date-picker
+                    v-model="queryForm.dateRange"
+                    type="datetimerange"
+                    range-separator="至"
+                    start-placeholder="开始时间"
+                    end-placeholder="结束时间"
+                    format="YYYY-MM-DD HH:mm:ss"
+                    value-format="YYYY-MM-DD HH:mm:ss"
+                    size="small"
+                    style="width: 100%"
+                  />
+                  <el-button type="primary" size="small" @click="handleQuery" style="margin-top:10px; width:100%">查询</el-button>
+                </div>
+              </el-popover>
+            </div>
+          </template>
           <template #default="scope">
             {{ formatDateTime(scope.row.attack_time) }}
           </template>
         </el-table-column>
 
-        <el-table-column prop="attack_type" label="攻击类型" width="120">
+        <el-table-column prop="attack_type" width="130">
+          <template #header>
+            <div style="display: flex; align-items: center; cursor: pointer;">
+              <span>攻击类型</span>
+              <el-popover placement="bottom" trigger="click" :width="200">
+                <template #reference>
+                  <el-icon style="margin-left:4px; font-size: 14px"><Filter /></el-icon>
+                </template>
+                <div>
+                  <el-select v-model="queryForm.attack_type" placeholder="选择攻击类型" clearable size="small" style="width:100%">
+                    <el-option label="全部" value="" />
+                    <el-option label="SQL注入" value="SQL注入" />
+                    <el-option label="XSS" value="XSS" />
+                    <el-option label="暴力破解" value="暴力破解" />
+                    <el-option label="正常流量" value="正常流量" />
+                    <el-option label="扫描探测" value="扫描探测" />
+                  </el-select>
+                  <el-button type="primary" size="small" @click="handleQuery" style="margin-top:10px; width:100%">查询</el-button>
+                </div>
+              </el-popover>
+            </div>
+          </template>
           <template #default="scope">
             <el-tag :type="getAttackTypeTagType(scope.row.attack_type)">
               {{ scope.row.attack_type }}
@@ -127,7 +112,27 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="threat_level" label="威胁等级" width="100">
+        <el-table-column prop="threat_level" width="110">
+          <template #header>
+            <div style="display: flex; align-items: center; cursor: pointer;">
+              <span>威胁等级</span>
+              <el-popover placement="bottom" trigger="click" :width="180">
+                <template #reference>
+                  <el-icon style="margin-left:4px; font-size: 14px"><Filter /></el-icon>
+                </template>
+                <div>
+                  <el-select v-model="queryForm.threat_level" placeholder="选择威胁等级" clearable size="small" style="width:100%">
+                    <el-option label="全部" value="" />
+                    <el-option label="低" value="low" />
+                    <el-option label="中" value="medium" />
+                    <el-option label="高" value="high" />
+                    <el-option label="严重" value="critical" />
+                  </el-select>
+                  <el-button type="primary" size="small" @click="handleQuery" style="margin-top:10px; width:100%">查询</el-button>
+                </div>
+              </el-popover>
+            </div>
+          </template>
           <template #default="scope">
             <el-tag :type="getThreatLevelTagType(scope.row.threat_level)">
               {{ getThreatLevelText(scope.row.threat_level) }}
@@ -135,10 +140,52 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="source_ip" label="源IP" min-width="130" />
-        <el-table-column prop="target_ip" label="目标IP" min-width="130" />
+        <el-table-column prop="source_ip" min-width="150">
+          <template #header>
+            <div style="display: flex; align-items: center; cursor: pointer;">
+              <span>源IP</span>
+              <el-popover placement="bottom" trigger="click" :width="230">
+                <template #reference>
+                  <el-icon style="margin-left:4px; font-size: 14px"><Filter /></el-icon>
+                </template>
+                <div>
+                  <div style="margin-bottom: 5px; font-size: 12px; color: #666;">Top恶意IP筛选:</div>
+                  <div style="display:flex; flex-direction:column; gap:5px; margin-bottom: 10px;">
+                    <el-button size="small" v-for="ip in topIPs" :key="ip" @click="quickSearchIP(ip)">{{ ip }}</el-button>
+                    <span v-if="!topIPs.length" style="font-size: 12px; color: #ccc;">暂无数据</span>
+                  </div>
+                  <el-input v-model="queryForm.source_ip" placeholder="输入源IP搜索" clearable size="small" />
+                  <el-button type="primary" size="small" @click="handleQuery" style="margin-top:10px; width:100%">查询</el-button>
+                </div>
+              </el-popover>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="target_ip" label="目标IP" min-width="120" />
         <el-table-column prop="target_port" label="目标端口" width="100" />
-        <el-table-column prop="protocol" label="协议" width="80" />
+        
+        <el-table-column prop="protocol" width="100">
+          <template #header>
+            <div style="display: flex; align-items: center; cursor: pointer;">
+              <span>协议</span>
+              <el-popover placement="bottom" trigger="click" :width="160">
+                <template #reference>
+                  <el-icon style="margin-left:4px; font-size: 14px"><Filter /></el-icon>
+                </template>
+                <div>
+                  <el-select v-model="queryForm.protocol" placeholder="选择协议" clearable size="small" style="width:100%">
+                    <el-option label="全部" value="" />
+                    <el-option label="HTTP" value="HTTP" />
+                    <el-option label="SSH" value="SSH" />
+                    <el-option label="FTP" value="FTP" />
+                  </el-select>
+                  <el-button type="primary" size="small" @click="handleQuery" style="margin-top:10px; width:100%">查询</el-button>
+                </div>
+              </el-popover>
+            </div>
+          </template>
+        </el-table-column>
 
         <el-table-column prop="is_malicious" label="恶意IP" width="90">
           <template #default="scope">
@@ -368,16 +415,34 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Download, Refresh, Search, View } from '@element-plus/icons-vue'
+import { Download, Refresh, Search, View, Filter } from '@element-plus/icons-vue'
 import rawAxios from 'axios'
 import axios from '../utils/axios'
+
+const topIPs = ref<string[]>([])
+const fetchTopIPs = async () => {
+  try {
+    const response: any = await axios.get('/malicious-ips', { params: { page: 1, per_page: 3, sort: 'count' } })
+    if (response.code === 200 && response.data && response.data.ips) {
+      topIPs.value = response.data.ips.map((item: any) => item.ip_address).slice(0, 3)
+    }
+  } catch (error) {
+    console.error('获取热门IP失败', error)
+  }
+}
+const quickSearchIP = (ip: string) => {
+  queryForm.source_ip = ip
+  handleQuery()
+}
 
 const queryForm = reactive({
   keyword: '',
   attack_type: '',
   threat_level: '',
   protocol: '',
-  dateRange: [] as string[]
+  dateRange: [] as any[],
+  id: '',
+  source_ip: ''
 })
 
 const pagination = reactive({
@@ -414,6 +479,12 @@ const getLogList = async () => {
       per_page: pagination.perPage
     }
 
+    if (queryForm.id) {
+      params.log_id = queryForm.id
+    }
+    if (queryForm.source_ip) {
+      params.source_ip = queryForm.source_ip
+    }
     if (queryForm.keyword) {
       params.keyword = queryForm.keyword
     }
@@ -458,6 +529,8 @@ const resetQuery = () => {
   queryForm.threat_level = ''
   queryForm.protocol = ''
   queryForm.dateRange = []
+  queryForm.id = ''
+  queryForm.source_ip = ''
   pagination.page = 1
   getLogList()
 }
@@ -607,6 +680,7 @@ const getAttackTypeTagType = (type: string) => {
 
 onMounted(() => {
   getLogList()
+  fetchTopIPs()
 })
 </script>
 
@@ -625,8 +699,14 @@ onMounted(() => {
   align-items: center;
 }
 
-.query-form {
-  margin-top: 10px;
+.search-form {
+  padding-top: 15px;
+}
+
+.demo-form-inline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .log-table-container {

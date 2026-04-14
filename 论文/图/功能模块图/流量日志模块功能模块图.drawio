@@ -1,0 +1,77 @@
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- 根节点 -->
+    <mxCell id="2" value="流量日志模块" style="rounded=1;fillColor=#1e4d78;strokeColor=#1e4d78;fontColor=#ffffff;fontSize=16;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="260" y="30" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <!-- 二级节点 -->
+    <mxCell id="3" value="日志采集" style="rounded=1;fillColor=#2e75b6;strokeColor=#2e75b6;fontColor=#ffffff;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="20" y="140" width="130" height="44" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="恶意流量识别" style="rounded=1;fillColor=#2e75b6;strokeColor=#2e75b6;fontColor=#ffffff;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="190" y="140" width="140" height="44" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="日志查询与管理" style="rounded=1;fillColor=#2e75b6;strokeColor=#2e75b6;fontColor=#ffffff;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="375" y="140" width="140" height="44" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="日志导出" style="rounded=1;fillColor=#2e75b6;strokeColor=#2e75b6;fontColor=#ffffff;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="555" y="140" width="130" height="44" as="geometry"/>
+    </mxCell>
+    <!-- 三级：日志采集 -->
+    <mxCell id="10" value="攻击源IP记录" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="0" y="250" width="110" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="11" value="协议/端口记录" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="120" y="250" width="110" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="11b" value="原始载荷记录" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="55" y="300" width="110" height="36" as="geometry"/>
+    </mxCell>
+    <!-- 三级：恶意流量识别 -->
+    <mxCell id="12" value="正则规则引擎匹配" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="170" y="250" width="120" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="13" value="暴力破解频次分析" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="300" y="250" width="120" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="13b" value="AI深度分析" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="235" y="300" width="110" height="36" as="geometry"/>
+    </mxCell>
+    <!-- 三级：日志查询与管理 -->
+    <mxCell id="14" value="多维度过滤查询" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="370" y="250" width="120" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="15" value="分页展示" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="500" y="250" width="90" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="15b" value="日志详情查看" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="430" y="300" width="110" height="36" as="geometry"/>
+    </mxCell>
+    <!-- 三级：日志导出 -->
+    <mxCell id="16" value="CSV格式导出" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="555" y="250" width="110" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="17" value="按条件范围导出" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="555" y="300" width="120" height="36" as="geometry"/>
+    </mxCell>
+    <!-- 连线：根→二级 -->
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="2" target="3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="2" target="4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="2" target="5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="2" target="6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- 二级→三级 -->
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="3" target="10" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="3" target="11" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e6b" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="3" target="11b" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="4" target="12" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="4" target="13" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e8b" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="4" target="13b" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="5" target="14" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="5" target="15" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e10b" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="5" target="15b" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="6" target="16" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="6" target="17" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

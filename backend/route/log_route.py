@@ -77,6 +77,8 @@ def get_logs():
         start_time = request.args.get('start_time')
         end_time = request.args.get('end_time')
         keyword = request.args.get('keyword')
+        log_id = request.args.get('log_id')
+        source_ip = request.args.get('source_ip')
         
         # 参数验证
         if page < 1:
@@ -94,7 +96,9 @@ def get_logs():
             protocol=protocol,
             start_time=start_time,
             end_time=end_time,
-            keyword=keyword
+            keyword=keyword,
+            log_id=log_id,
+            source_ip=source_ip
         )
         
         # 检查是否有错误
@@ -136,6 +140,7 @@ def export_logs():
         start_time = request.args.get('start_time')
         end_time = request.args.get('end_time')
         keyword = request.args.get('keyword')
+        log_id = request.args.get('log_id')
         source_ip = request.args.get('source_ip')
         target_ip = request.args.get('target_ip')
         target_port = request.args.get('target_port', type=int)
@@ -162,6 +167,7 @@ def export_logs():
             start_time=start_time,
             end_time=end_time,
             keyword=keyword,
+            log_id=log_id,
             source_ip=source_ip,
             target_ip=target_ip,
             target_port=target_port,

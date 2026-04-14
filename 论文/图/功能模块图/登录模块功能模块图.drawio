@@ -1,0 +1,68 @@
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- 根节点：登录模块 -->
+    <mxCell id="2" value="登录模块" style="rounded=1;fillColor=#1e4d78;strokeColor=#1e4d78;fontColor=#ffffff;fontSize=16;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="30" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- 二级节点 -->
+    <mxCell id="3" value="用户认证" style="rounded=1;fillColor=#2e75b6;strokeColor=#2e75b6;fontColor=#ffffff;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="140" width="130" height="44" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="权限管理" style="rounded=1;fillColor=#2e75b6;strokeColor=#2e75b6;fontColor=#ffffff;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="215" y="140" width="130" height="44" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="安全防护" style="rounded=1;fillColor=#2e75b6;strokeColor=#2e75b6;fontColor=#ffffff;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="390" y="140" width="130" height="44" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="会话管理" style="rounded=1;fillColor=#2e75b6;strokeColor=#2e75b6;fontColor=#ffffff;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="565" y="140" width="130" height="44" as="geometry"/>
+    </mxCell>
+    <!-- 三级：用户认证子项 -->
+    <mxCell id="10" value="用户注册" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="10" y="250" width="100" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="11" value="用户登录" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="120" y="250" width="100" height="36" as="geometry"/>
+    </mxCell>
+    <!-- 三级：权限管理子项 -->
+    <mxCell id="12" value="管理员角色" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="175" y="250" width="100" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="13" value="普通用户角色" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="285" y="250" width="110" height="36" as="geometry"/>
+    </mxCell>
+    <!-- 三级：安全防护子项 -->
+    <mxCell id="14" value="密码加密存储" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="350" y="250" width="110" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="15" value="登录次数限制" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="470" y="250" width="110" height="36" as="geometry"/>
+    </mxCell>
+    <!-- 三级：会话管理子项 -->
+    <mxCell id="16" value="JWT令牌生成" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="530" y="250" width="110" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="17" value="Token验证" style="rounded=1;fillColor=#d6e4f0;strokeColor=#2e75b6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="650" y="250" width="100" height="36" as="geometry"/>
+    </mxCell>
+    <!-- 连线：根→二级 -->
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="2" target="3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="2" target="4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="2" target="5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="2" target="6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- 连线：用户认证→三级 -->
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="3" target="10" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="3" target="11" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- 连线：权限管理→三级 -->
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="4" target="12" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="4" target="13" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- 连线：安全防护→三级 -->
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="5" target="14" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="5" target="15" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- 连线：会话管理→三级 -->
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="6" target="16" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="6" target="17" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>
