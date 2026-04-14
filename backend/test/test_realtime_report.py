@@ -24,7 +24,7 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
-UPLOAD_URL = "http://127.0.0.1:5000/api/logs/internal/upload"
+UPLOAD_URL = "http://192.168.6.130:5000/api/logs/internal/upload"
 
 # 全球代表性公网IP，包含四大洲，用于大屏地图显示
 IP_LIST = [

@@ -531,29 +531,36 @@ class LogService:
                 )
 
                 for rule in rules:
-                    match_content = log_data.get(rule.match_field)
+                    try:
+                        match_content = log_data.get(rule.match_field)
 
-                    if match_content is None and rule.match_field != "raw_log":
-                        pass
+                        if match_content is None and rule.match_field != "raw_log":
+                            pass
 
-                    if match_content is not None:
-                        content_str = str(match_content)
-                        if re.search(rule.regex_pattern, content_str, re.IGNORECASE):
-                            attack_type = rule.attack_type
-                            threat_level = rule.threat_level
-                            is_malicious = LogService._infer_is_malicious(
-                                attack_type, threat_level
-                            )
+                        if match_content is not None:
+                            content_str = str(match_content)
+                            if re.search(rule.regex_pattern, content_str, re.IGNORECASE):
+                                attack_type = rule.attack_type
+                                threat_level = rule.threat_level
+                                is_malicious = LogService._infer_is_malicious(
+                                    attack_type, threat_level
+                                )
 
-                            rule_msg = f"触发规则: {rule.name}"
-                            if not attack_description:
-                                attack_description = rule_msg
-                            elif rule_msg not in attack_description:
-                                attack_description += f" | {rule_msg}"
+                                rule_msg = f"触发规则: {rule.name}"
+                                if not attack_description:
+                                    attack_description = rule_msg
+                                elif rule_msg not in attack_description:
+                                    attack_description += f" | {rule_msg}"
 
-                            rule.match_count += 1
-                            rule.last_matched = get_beijing_time()
-                            break
+                                rule.match_count += 1
+                                rule.last_matched = get_beijing_time()
+                                break
+                    except re.error as e:
+                        print(f"规则 {rule.name} 正则表达式错误: {str(e)}")
+                        continue
+                    except Exception as e:
+                        print(f"应用规则 {rule.name} 时出错: {str(e)}")
+                        continue
 
             except Exception as e:
                 print(f"规则匹配过程中出错: {str(e)}")

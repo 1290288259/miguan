@@ -122,6 +122,14 @@ class MatchRuleService:
             Dict: 创建结果
         """
         try:
+            import re
+            pattern = rule_data.get('regex_pattern')
+            if pattern:
+                try:
+                    re.compile(pattern)
+                except re.error as e:
+                    return {'error': f'正则表达式语法错误: {str(e)}'}
+
             # 创建新的规则对象
             rule = MatchRule(
                 name=rule_data.get('name'),
@@ -179,7 +187,13 @@ class MatchRuleService:
             if 'attack_type' in rule_data:
                 rule.attack_type = rule_data['attack_type']
             if 'regex_pattern' in rule_data:
-                rule.regex_pattern = rule_data['regex_pattern']
+                pattern = rule_data['regex_pattern']
+                import re
+                try:
+                    re.compile(pattern)
+                except re.error as e:
+                    return {'error': f'正则表达式语法错误: {str(e)}'}
+                rule.regex_pattern = pattern
             if 'threat_level' in rule_data:
                 rule.threat_level = rule_data['threat_level']
             if 'description' in rule_data:
