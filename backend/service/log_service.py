@@ -15,121 +15,10 @@ from model.honeypot_model import Honeypot
 from model.log_model import Log
 from model.match_rule_model import MatchRule
 from service.ai_analysis_service import AIAnalysisService
+from service.traffic_analyzer_service import TrafficAnalyzerService
 from utils.time_utils import get_beijing_time
 
-
 class LogService:
-    SAFE_ATTACK_TYPES = {
-        "normal",
-        "page visit",
-        "web visit",
-        "safe",
-        "unknown",
-        "正常",
-        "正常流量",
-        "ftp登录",
-        "web登录",
-        "mysql登录",
-        "ssh登录",
-    }
-    MALICIOUS_THREAT_LEVELS = {"medium", "high", "critical"}
-
-    @classmethod
-    def _is_safe_attack_type(cls, attack_type: str) -> bool:
-        if not attack_type:
-            return False
-        return attack_type.strip().lower() in cls.SAFE_ATTACK_TYPES
-
-    # 暴力破解判定阈值：1分钟内同一IP的有效认证尝试次数
-    BRUTE_FORCE_THRESHOLD = 20
-    BRUTE_FORCE_WINDOW_MINUTES = 1
-
-    # 认证类载荷的正则模式：用于判断 HTTP 等协议的载荷是否包含账号密码
-    # 匹配 "Username: xxx, Password: xxx" 格式（各蜜罐统一的凭证格式）
-    _CREDENTIAL_PATTERN = re.compile(r"Username:\s*.+,\s*Password:\s*.+", re.IGNORECASE)
-
-    @classmethod
-    def _is_credential_payload(cls, payload: str) -> bool:
-        """
-        判断载荷是否包含认证凭证（用户名+密码）。
-        用于暴力破解检测时，区分有效的认证尝试和普通请求。
-
-        参数:
-            payload: 请求载荷字符串
-
-        返回:
-            bool: 是否包含认证凭证
-        """
-        if not payload:
-            return False
-        return bool(cls._CREDENTIAL_PATTERN.search(payload))
-
-    @classmethod
-    def _check_brute_force(
-        cls, attacker_ip: str, protocol: str = None, current_payload: str = None
-    ) -> bool:
-        """
-        判断是否为暴力破解行为。
-
-        多级识别引擎的第二级：行为频次分析。
-        规则：同一IP在1分钟内有效认证尝试次数 >= 20 则判定为暴力破解。
-
-        对于HTTP协议：只统计包含账号密码的载荷（如登录表单提交），
-        普通的GET请求、路径探测等不计入暴力破解计数。
-
-        对于其他协议（FTP/SSH/MySQL/Redis等）：所有带载荷的请求均计入，
-        因为这些协议连接本身就代表认证尝试。
-
-        参数:
-            attacker_ip: 攻击者IP地址
-            protocol: 协议类型（HTTP、FTP、SSH等）
-            current_payload: 当前请求的载荷，用于判断当前请求是否算一次有效尝试
-
-        返回:
-            bool: 是否为暴力破解
-        """
-        from datetime import timedelta
-        from utils.time_utils import get_beijing_time
-
-        if not attacker_ip:
-            return False
-
-        # 对于HTTP协议，当前请求必须包含凭证才算有效认证尝试
-        if protocol and protocol.upper() == "HTTP":
-            if not cls._is_credential_payload(current_payload):
-                return False
-
-        one_min_ago = get_beijing_time() - timedelta(
-            minutes=cls.BRUTE_FORCE_WINDOW_MINUTES
-        )
-
-        # 构建基础查询：同一IP、1分钟内、载荷非空
-        base_filter = [
-            Log.attacker_ip == attacker_ip,
-            Log.attack_time >= one_min_ago,
-            Log.payload.isnot(None),
-            Log.payload != "",
-        ]
-
-        # 对于HTTP协议，额外过滤：只统计包含凭证的载荷
-        if protocol and protocol.upper() == "HTTP":
-            base_filter.append(Log.payload.like("%Username:%Password:%"))
-
-        count = db.session.query(db.func.count(Log.id)).filter(*base_filter).scalar()
-
-        # +1 包含当前这一条（尚未入库）
-        return (count + 1) >= cls.BRUTE_FORCE_THRESHOLD
-
-    @classmethod
-    def _infer_is_malicious(cls, attack_type: str, threat_level: str) -> bool:
-        if cls._is_safe_attack_type(attack_type):
-            return False
-
-        if threat_level and threat_level.strip().lower() in cls.MALICIOUS_THREAT_LEVELS:
-            return True
-
-        return bool(attack_type)
-
     @staticmethod
     def get_logs(
         page: int = 1,
@@ -521,87 +410,14 @@ class LogService:
                 return {"error": f"未找到端口为 {honeypot_port} 的蜜罐"}
 
             # ============================================================
-            # 初始化：蜜罐上报的原始流量默认为"正常流量"
-            # 蜜罐作为纯粹的数据收集层，不做任何业务判定
-            # 所有分类工作由以下多级识别引擎完成
+            # 调用独立的流量分析服务，获取判定结果
             # ============================================================
-            attack_type = "正常流量"
-            threat_level = "low"
-            attack_description = None
-            is_malicious = False
-
-            # ============================================================
-            # 第一级：规则引擎匹配（正则识别）
-            # 提取流量载荷，过一遍黑名单正则匹配引擎
-            # 判断是否包含 SQL注入、命令注入、XSS 等明显恶意特征
-            # ============================================================
-            try:
-                rules = (
-                    MatchRule.query.filter_by(is_enabled=True)
-                    .order_by(MatchRule.priority.asc())
-                    .all()
-                )
-
-                for rule in rules:
-                    try:
-                        match_content = log_data.get(rule.match_field)
-
-                        if match_content is None and rule.match_field != "raw_log":
-                            pass
-
-                        if match_content is not None:
-                            content_str = str(match_content)
-                            if re.search(rule.regex_pattern, content_str, re.IGNORECASE):
-                                attack_type = rule.attack_type
-                                threat_level = rule.threat_level
-                                is_malicious = LogService._infer_is_malicious(
-                                    attack_type, threat_level
-                                )
-
-                                rule_msg = f"触发规则: {rule.name}"
-                                if not attack_description:
-                                    attack_description = rule_msg
-                                elif rule_msg not in attack_description:
-                                    attack_description += f" | {rule_msg}"
-
-                                rule.match_count += 1
-                                rule.last_matched = get_beijing_time()
-                                break
-                    except re.error as e:
-                        print(f"规则 {rule.name} 正则表达式错误: {str(e)}")
-                        continue
-                    except Exception as e:
-                        print(f"应用规则 {rule.name} 时出错: {str(e)}")
-                        continue
-
-            except Exception as e:
-                print(f"规则匹配过程中出错: {str(e)}")
-
-            # ============================================================
-            # 第二级：暴力破解分析（行为频次识别）
-            # 仅在正则引擎未命中（流量仍为"正常"）时触发
-            # 分析同一IP短时间内的认证尝试频次
-            # HTTP协议：需要载荷包含账号密码才算一次有效认证尝试
-            # 其他协议：带载荷的请求即算有效认证尝试
-            # ============================================================
-            if not is_malicious:
-                payload = log_data.get("payload")
-                protocol = log_data.get("protocol")
-                if payload:
-                    is_brute_force = LogService._check_brute_force(
-                        attacker_ip=log_data.get("attacker_ip"),
-                        protocol=protocol,
-                        current_payload=payload,
-                    )
-                    if is_brute_force:
-                        attack_type = "暴力破解"
-                        threat_level = "high"
-                        is_malicious = True
-                        rule_msg = "触发系统引擎: 暴力破解检测"
-                        if not attack_description:
-                            attack_description = rule_msg
-                        elif rule_msg not in attack_description:
-                            attack_description += f" | {rule_msg}"
+            analysis_result = TrafficAnalyzerService.analyze(log_data)
+            
+            attack_type = analysis_result["attack_type"]
+            threat_level = analysis_result["threat_level"]
+            is_malicious = analysis_result["is_malicious"]
+            attack_description = analysis_result["attack_description"]
 
             log = Log(
                 honeypot_id=honeypot.id,
