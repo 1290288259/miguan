@@ -65,30 +65,52 @@ def handle_client(client_socket, addr):
             if not command:
                 continue
 
-            if command.upper().startswith("USER"):
+            cmd_upper = command.upper()
+            
+            if cmd_upper.startswith("USER"):
                 username = command[5:].strip()
                 client_socket.send(b"331 Please specify the password.\r\n")
-                # 无论什么命令都记录
                 log_attack(ip, port, f"Command: {command}")
                 
-            elif command.upper().startswith("PASS"):
+            elif cmd_upper.startswith("PASS"):
                 password = command[5:].strip()
-                
-                # 记录捕获的凭证
                 payload = f"Username: {username}, Password: {password}"
                 log_attack(ip, port, payload)
+                # False success
+                client_socket.send(b"230 Login successful.\r\n")
                 
-                # 始终返回登录失败
-                client_socket.send(b"530 Login incorrect.\r\n")
+            elif cmd_upper.startswith("SYST"):
+                log_attack(ip, port, f"Command: {command}")
+                client_socket.send(b"215 UNIX Type: L8\r\n")
                 
-            elif command.upper().startswith("QUIT"):
+            elif cmd_upper.startswith("FEAT"):
+                log_attack(ip, port, f"Command: {command}")
+                client_socket.send(b"211-Features:\r\n EPRT\r\n EPSV\r\n MDTM\r\n PASV\r\n REST STREAM\r\n SIZE\r\n TVFS\r\n211 End\r\n")
+                
+            elif cmd_upper.startswith("PWD"):
+                log_attack(ip, port, f"Command: {command}")
+                client_socket.send(b'257 "/root" is the current directory\r\n')
+                
+            elif cmd_upper.startswith("TYPE"):
+                log_attack(ip, port, f"Command: {command}")
+                client_socket.send(b"200 Switching to Binary mode.\r\n")
+                
+            elif cmd_upper.startswith("PASV") or cmd_upper.startswith("PORT"):
+                log_attack(ip, port, f"Command: {command}")
+                client_socket.send(b"502 Illegal PORT command.\r\n") # Keep it simple, deny active/passive data channels
+                
+            elif cmd_upper.startswith("LIST") or cmd_upper.startswith("NLST"):
+                log_attack(ip, port, f"Command: {command}")
+                client_socket.send(b"150 Here comes the directory listing.\r\n226 Directory send OK.\r\n")
+                
+            elif cmd_upper.startswith("QUIT"):
                 log_attack(ip, port, f"Command: {command}")
                 client_socket.send(b"221 Goodbye.\r\n")
                 break
+                
             else:
-                # 其他命令，要求先登录，但也记录
                 log_attack(ip, port, f"Command: {command}")
-                client_socket.send(b"530 Please login with USER and PASS.\r\n")
+                client_socket.send(b"500 Unknown command.\r\n")
                 
     except Exception as e:
         print(f"[!] 连接处理异常: {e}")
