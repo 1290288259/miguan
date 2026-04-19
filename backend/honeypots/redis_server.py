@@ -54,13 +54,19 @@ def handle_client(client_socket, addr):
             log_attack(ip, client_port, clean_payload)
             
             # 返回标准的 Redis 错误信息或伪造信息
-            response = b"-ERR unknown command\r\n"
-            if "INFO" in payload.upper():
+            cmd_upper = payload.upper()
+            if "INFO" in cmd_upper:
                 response = b"$111\r\n# Server\r\nredis_version:5.0.14\r\nos:Linux 3.10.0-1127.el7.x86_64 x86_64\r\ntcp_port:6379\r\nrole:master\r\n"
-            elif "PING" in payload.upper():
+            elif "PING" in cmd_upper:
                 response = b"+PONG\r\n"
-            elif "SET" in payload.upper() or "CONFIG" in payload.upper():
+            elif "AUTH" in cmd_upper:
                 response = b"+OK\r\n"
+            elif "COMMAND" in cmd_upper:
+                response = b"+OK\r\n"
+            elif "GET" in cmd_upper or "SET" in cmd_upper or "CONFIG" in cmd_upper:
+                response = b"+OK\r\n"
+            else:
+                response = b"-ERR unknown command\r\n"
                 
             client_socket.send(response)
                 
