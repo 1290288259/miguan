@@ -36,72 +36,62 @@ def log_attack(attacker_ip, attacker_port, payload):
     except Exception as e:
         print(f"日志记录失败: {e}")
 
-def create_mysql_handshake_packet():
-    # 模拟 MySQL 5.7+ 服务端握手包
-    protocol_version = b'\x0a'
-    server_version = b'5.7.35\x00'
-    connection_id = struct.pack('<I', 1337)
-    salt1 = b'12345678\x00'
-    server_capabilities = b'\xff\xff'
-    server_language = b'\x08'
-    server_status = b'\x02\x00'
-    ext_capabilities = b'\xcf\xc1'
-    auth_plugin_length = b'\x15'
-    reserved = b'\x00' * 10
-    salt2 = b'abcdefghi\x00\x00\x00'
-    auth_plugin_name = b'mysql_native_password\x00'
-    
-    payload = protocol_version + server_version + connection_id + salt1 + \
-              server_capabilities + server_language + server_status + \
-              ext_capabilities + auth_plugin_length + reserved + salt2 + auth_plugin_name
-              
-    packet_length = struct.pack('<I', len(payload))[0:3]
-    sequence_id = b'\x00'
-    
-    return packet_length + sequence_id + payload
-
 def handle_client(client_socket, addr):
-    ip, client_port = addr
-    print(f"[{get_beijing_time()}] MySQL 新连接: {ip}:{client_port}")
-    
+    ip, port = addr
+    print(f"[{get_beijing_time()}] MySQL 新连接: {ip}:{port}")
     try:
-        client_socket.sendall(create_mysql_handshake_packet())
-        
-        # 接收客户端登录请求 (Client Authentication Packet)
-        data = client_socket.recv(1024)
-        if not data:
-            client_socket.close()
+        # 发送握手包 (带版本号 5.7.31-0ubuntu0.18.04.1)
+        version = b"5.7.31-0ubuntu0.18.04.1\x00"
+        payload = b'\x0a' + version + b'\x0b\x00\x00\x00\x45\x36\x2a\x24\x46\x24\x6d\x69\x00\xff\xff\x08\x02\x00\x0f\x80\x15\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15\x21\x37\x3a\x1b\x17\x2b\x62\x1d\x07\x02\x32\x00\x6d\x79\x73\x71\x6c\x5f\x6e\x61\x74\x69\x76\x65\x5f\x70\x61\x73\x73\x77\x6f\x72\x64\x00'
+        header = struct.pack('<I', len(payload))[:3] + b'\x00'
+        client_socket.send(header + payload)
+
+        # 接收认证包
+        auth_data = client_socket.recv(1024)
+        if not auth_data:
             return
             
-        # 解析数据包（跳过包头长度序列号，简单的特征匹配）
-        payload_data = data[4:]
-        
-        # 提取用户名（在包的不同偏移位置可能存在 null 结尾字符串）
-        clean_payload = ""
+        # 简单提取 username (通常在第36个字节之后)
         try:
-            # 简化版：通过寻找非空字符块粗略提取 username
-            parts = payload_data.split(b'\x00')
-            username = ""
-            for p in parts:
-                if len(p) > 2 and p.isalnum():
-                    username = p.decode('utf-8', errors='ignore')
+            idx = 36
+            while idx < len(auth_data) and auth_data[idx] != 0:
+                idx += 1
+            username = auth_data[36:idx].decode('utf-8', errors='ignore')
+            log_attack(ip, port, f"Username: {username}, Password: [Hash]")
+        except:
+            log_attack(ip, port, f"Auth Packet Received: {auth_data.hex()[:50]}")
+
+        # False Success: 返回 OK Packet
+        ok_packet = b'\x07\x00\x00\x02\x00\x00\x00\x02\x00\x00\x00'
+        client_socket.send(ok_packet)
+        
+        # Empty Shell: 循环接收 SQL 语句
+        while True:
+            cmd_data = client_socket.recv(4096)
+            if not cmd_data:
+                break
+            
+            # 第一字节是包长度，第四字节是序列号，第五字节是命令类型
+            if len(cmd_data) > 4:
+                cmd_type = cmd_data[4]
+                if cmd_type == 0x03: # COM_QUERY
+                    sql_query = cmd_data[5:].decode('utf-8', errors='ignore')
+                    log_attack(ip, port, f"Command: {sql_query}")
+                    
+                    # 返回空的 Result Set 或 OK Packet 骗过扫描器
+                    # 这里直接返回 OK packet 模拟执行成功但无数据返回
+                    ok_resp = b'\x07\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00'
+                    client_socket.send(ok_resp)
+                elif cmd_type == 0x01: # COM_QUIT
                     break
-            
-            if username:
-                clean_payload = f"Username: {username}"
-            else:
-                clean_payload = f"Raw Data: {data[:100]}"
-        except Exception:
-            clean_payload = f"Raw Data (Err): {data[:100]}"
-            
-        log_attack(ip, client_port, clean_payload)
-        
-        # 返回 Access Denied 或直接断开连接
-        error_packet = b"\x17\x00\x00\x02\xff\x15\x04#28000Access denied for user"
-        client_socket.sendall(error_packet)
-        
+                else:
+                    # 记录未知的包类型
+                    log_attack(ip, port, f"Packet Type: {hex(cmd_type)}, Data: {cmd_data[5:].hex()[:50]}")
+                    ok_resp = b'\x07\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00'
+                    client_socket.send(ok_resp)
+
     except Exception as e:
-        print(f"[!] MySQL 连接处理异常: {e}")
+        print(f"[!] MySQL 异常: {e}")
     finally:
         client_socket.close()
 
