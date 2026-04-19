@@ -76,8 +76,8 @@ def handle_client(client_socket, addr):
                 password = command[5:].strip()
                 payload = f"Username: {username}, Password: {password}"
                 log_attack(ip, port, payload)
-                # False success
-                client_socket.send(b"230 Login successful.\r\n")
+                # Reject login
+                client_socket.send(b"530 Login incorrect.\r\n")
                 
             elif cmd_upper.startswith("SYST"):
                 log_attack(ip, port, f"Command: {command}")

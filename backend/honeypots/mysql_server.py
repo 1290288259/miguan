@@ -61,34 +61,13 @@ def handle_client(client_socket, addr):
         except:
             log_attack(ip, port, f"Auth Packet Received: {auth_data.hex()[:50]}")
 
-        # False Success: 返回 OK Packet
-        ok_packet = b'\x07\x00\x00\x02\x00\x00\x00\x02\x00\x00\x00'
-        client_socket.send(ok_packet)
-        
-        # Empty Shell: 循环接收 SQL 语句
-        while True:
-            cmd_data = client_socket.recv(4096)
-            if not cmd_data:
-                break
-            
-            # 第一字节是包长度，第四字节是序列号，第五字节是命令类型
-            if len(cmd_data) > 4:
-                cmd_type = cmd_data[4]
-                if cmd_type == 0x03: # COM_QUERY
-                    sql_query = cmd_data[5:].decode('utf-8', errors='ignore')
-                    log_attack(ip, port, f"Command: {sql_query}")
-                    
-                    # 返回空的 Result Set 或 OK Packet 骗过扫描器
-                    # 这里直接返回 OK packet 模拟执行成功但无数据返回
-                    ok_resp = b'\x07\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00'
-                    client_socket.send(ok_resp)
-                elif cmd_type == 0x01: # COM_QUIT
-                    break
-                else:
-                    # 记录未知的包类型
-                    log_attack(ip, port, f"Packet Type: {hex(cmd_type)}, Data: {cmd_data[5:].hex()[:50]}")
-                    ok_resp = b'\x07\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00'
-                    client_socket.send(ok_resp)
+        # Reject Login: 发送 Error Packet
+        username_safe = username if 'username' in locals() else 'unknown'
+        error_msg = f"Access denied for user '{username_safe}'@'{ip}' (using password: YES)".encode('utf-8')
+        payload = b'\xff\x15\x04#28000' + error_msg
+        header = struct.pack('<I', len(payload))[:3] + b'\x02'
+        client_socket.send(header + payload)
+        return
 
     except Exception as e:
         print(f"[!] MySQL 异常: {e}")

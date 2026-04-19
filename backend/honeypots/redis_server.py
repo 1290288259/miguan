@@ -53,20 +53,17 @@ def handle_client(client_socket, addr):
             
             log_attack(ip, client_port, clean_payload)
             
-            # 返回标准的 Redis 错误信息或伪造信息
+            # 模拟需要密码认证且拒绝所有尝试
             cmd_upper = payload.upper()
-            if "INFO" in cmd_upper:
-                response = b"$111\r\n# Server\r\nredis_version:5.0.14\r\nos:Linux 3.10.0-1127.el7.x86_64 x86_64\r\ntcp_port:6379\r\nrole:master\r\n"
-            elif "PING" in cmd_upper:
-                response = b"+PONG\r\n"
-            elif "AUTH" in cmd_upper:
+            if "AUTH" in cmd_upper:
+                # 记录在前面的 log_attack 已经完成
+                response = b"-ERR invalid password\r\n"
+            elif "QUIT" in cmd_upper:
                 response = b"+OK\r\n"
-            elif "COMMAND" in cmd_upper:
-                response = b"+OK\r\n"
-            elif "GET" in cmd_upper or "SET" in cmd_upper or "CONFIG" in cmd_upper:
-                response = b"+OK\r\n"
+                client_socket.send(response)
+                break
             else:
-                response = b"-ERR unknown command\r\n"
+                response = b"-NOAUTH Authentication required.\r\n"
                 
             client_socket.send(response)
                 

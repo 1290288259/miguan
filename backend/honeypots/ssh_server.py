@@ -69,7 +69,7 @@ class HoneypotServer(paramiko.ServerInterface):
         """
         payload = f"Username: {username}, Password: {password}"
         log_attack(self.client_ip, self.client_port, payload)
-        return paramiko.AUTH_SUCCESSFUL
+        return paramiko.AUTH_FAILED
 
     def check_auth_publickey(self, username, key):
         """
@@ -78,7 +78,7 @@ class HoneypotServer(paramiko.ServerInterface):
         hex_key = key.get_base64()
         payload = f"Username: {username}, Key: {hex_key[:30]}..."
         log_attack(self.client_ip, self.client_port, payload)
-        return paramiko.AUTH_SUCCESSFUL
+        return paramiko.AUTH_FAILED
 
     def check_channel_pty_request(self, channel, term, width, height, pixelwidth, pixelheight, modes):
         return True
