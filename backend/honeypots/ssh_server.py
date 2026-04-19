@@ -69,8 +69,7 @@ class HoneypotServer(paramiko.ServerInterface):
         """
         payload = f"Username: {username}, Password: {password}"
         log_attack(self.client_ip, self.client_port, payload)
-        # 始终返回验证失败，诱导攻击者尝试更多密码
-        return paramiko.AUTH_FAILED
+        return paramiko.AUTH_SUCCESSFUL
 
     def check_auth_publickey(self, username, key):
         """
@@ -79,7 +78,14 @@ class HoneypotServer(paramiko.ServerInterface):
         hex_key = key.get_base64()
         payload = f"Username: {username}, Key: {hex_key[:30]}..."
         log_attack(self.client_ip, self.client_port, payload)
-        return paramiko.AUTH_FAILED
+        return paramiko.AUTH_SUCCESSFUL
+
+    def check_channel_pty_request(self, channel, term, width, height, pixelwidth, pixelheight, modes):
+        return True
+
+    def check_channel_shell_request(self, channel):
+        self.event.set()
+        return True
 
     def get_allowed_auths(self, username):
         """
@@ -100,6 +106,7 @@ def handle_connection(client_socket, addr):
     try:
         transport = paramiko.Transport(client_socket)
         transport.add_server_key(HOST_KEY)
+        transport.local_version = "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.1"
         
         server = HoneypotServer(ip, port)
         try:
@@ -108,12 +115,29 @@ def handle_connection(client_socket, addr):
             print(f"[*] SSH 协商失败")
             return
 
-        # 等待连接结束（通常会在认证失败多次后断开）
+        # 等待连接结束（通常会在认证失败多次后断开，现在会成功）
         channel = transport.accept(20)
         if channel is None:
-            # 没有建立通道（预期的，因为我们拒绝了所有认证）
             pass
         else:
+            server.event.wait(10)
+            if server.event.is_set():
+                channel.send(b"Welcome to Ubuntu 20.04.1 LTS (GNU/Linux 5.4.0-42-generic x86_64)\r\n\r\nroot@ubuntu:~# ")
+                while True:
+                    try:
+                        command = channel.recv(1024)
+                        if not command:
+                            break
+                        cmd_str = command.decode('utf-8', errors='ignore').strip()
+                        if cmd_str:
+                            log_attack(ip, port, f"Command: {cmd_str}")
+                            if cmd_str in ['exit', 'quit']:
+                                channel.send(b"logout\r\n")
+                                break
+                            channel.send(f"bash: {cmd_str}: command not found\r\n".encode('utf-8'))
+                        channel.send(b"root@ubuntu:~# ")
+                    except socket.timeout:
+                        break
             channel.close()
             
     except Exception as e:
