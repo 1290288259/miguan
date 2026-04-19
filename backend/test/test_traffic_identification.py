@@ -58,7 +58,6 @@ HONEYPOT_PORTS = {
     "HTTP": 8888,
     "REDIS": 6379,
     "MYSQL": 3307,
-    "ELASTICSEARCH": 9200,
 }
 
 # 暴力破解阈值（与 LogService.BRUTE_FORCE_THRESHOLD 一致）
