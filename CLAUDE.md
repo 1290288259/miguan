@@ -310,7 +310,6 @@ const handleLogin = async () => {
 | `hikvision_http_server.py` | HTTP | 可配置（读取 `sys.argv[1]`） | IoT/摄像头设备漏洞探测、Web 攻击 |
 | `redis_server.py` | TCP/Redis | 6379 | Redis 未授权访问、SLAVEOF/CONFIG 命令利用 |
 | `mysql_server.py` | TCP/MySQL | 3306 | 数据库弱口令爆破（捕获用户名、客户端版本） |
-| `elasticsearch_server.py` | HTTP/ES | 9200 | 接口探测、数据查询、节点查询、恶意写入利用 |
 
 **蜜罐进程管理机制**：
 - 所有蜜罐以**独立子进程**方式启动（`subprocess.Popen`），与主 Flask 服务解耦。
