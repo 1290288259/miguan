@@ -16,6 +16,9 @@ logging.Formatter.converter = lambda *args: get_beijing_time().timetuple()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+import werkzeug.serving
+werkzeug.serving.WSGIRequestHandler.version_string = lambda self: 'App-webs/'
+
 app = Flask(__name__)
 
 # 配置参数
@@ -168,12 +171,24 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-    # 始终返回登录失败
+    # 模拟登录成功，跳转到控制台
     return render_template_string("""
         <script>
-            alert('Login failed: Invalid username or password.');
-            window.location.href = '/';
+            window.location.href = '/dashboard';
         </script>
+    """)
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    return render_template_string("""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Hikvision Dashboard</title></head>
+        <body style="background-color: #f0f0f0; font-family: Arial;">
+            <h2>System Dashboard</h2>
+            <p>Loading video streams... Error: Connection to camera lost.</p>
+        </body>
+        </html>
     """)
 
 @app.errorhandler(404)
@@ -187,6 +202,11 @@ def method_not_allowed(e):
 @app.errorhandler(Exception)
 def handle_exception(e):
     return jsonify({"error": "Internal server error", "status": 500}), 500
+
+@app.after_request
+def add_server_header(response):
+    response.headers['Server'] = 'nginx/1.18.0 (Ubuntu)'
+    return response
 
 if __name__ == '__main__':
     # 从命令行参数读取端口，与 ssh_server.py 和 ftp_server.py 保持一致
