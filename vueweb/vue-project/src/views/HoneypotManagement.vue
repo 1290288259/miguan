@@ -27,7 +27,6 @@
             <el-option label="FTP" value="FTP" />
             <el-option label="REDIS" value="REDIS" />
             <el-option label="MYSQL" value="MYSQL" />
-            <el-option label="ELASTICSEARCH" value="ELASTICSEARCH" />
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
