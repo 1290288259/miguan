@@ -126,7 +126,6 @@
           <el-select v-model="form.type" placeholder="请选择类型">
             <el-option label="REDIS" value="REDIS" />
             <el-option label="MYSQL" value="MYSQL" />
-            <el-option label="ELASTICSEARCH" value="ELASTICSEARCH" />
             <el-option label="SSH" value="SSH" />
             <el-option label="HTTP" value="HTTP" />
             <el-option label="FTP" value="FTP" />
