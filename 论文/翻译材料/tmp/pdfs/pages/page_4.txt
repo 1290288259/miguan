@@ -1,0 +1,82 @@
+regarding the attackers ’ methods. The effectiveness of this method will 
+allow it not only to detect the threats but also adapt quickly to the dy -
+namic threat landscapes. Collectively, these hybrid models give proof 
+that combining deep learning with the concept of gamification, among 
+others, into digital twins could give versatile and resilient honeypot 
+systems.
+2.5. Applications in advanced domains
+IoT devices are very susceptible to cyberattacks because of their 
+weak security features and easy availability. IoT network-based hon -
+eypots use deception technologies in analyzing attackers ’ behavior for 
+improving the security of devices. Various works, such as ( Sharma et al., 
+2023 ) and ( Qin et al., 2023 ) present the utilization of IoT-based hon -
+eypots for monitoring traffic and detecting threats that target specific 
+protocols. Decentralized honeypots have been deployed in ( Karpukhin 
+et al., 2020 ), to emulate protocol-specific environments, thereby gaining 
+insights into attack patterns and improving IoT security.
+Cyber-physical systems combine physical processes with computa -
+tional systems and thus are a very significant target for sophisticated 
+cyber-attacks. Honeypots in CPS environments are an essential tool in 
+the study and mitigation of such threats. The research in ( Tian et al., 
+2019 ), puts forth a model that strikes a balance between low- and 
+high-interaction honeypots toward effectively protecting CPS networks. 
+Further, game-theoretic approaches in ( Zhou et al., 2023 ) optimize 
+honeypot deployment in ICS environments toward ensuring efficient use 
+of the honeypot resources while raising detection rates.
+Unmanned aerial vehicles (UAVs) rely on interconnected systems, 
+making them susceptible to cyber threats. Honeypots designed for UAV 
+networks mitigate denial-of-service (DoS) attacks by simulating 
+attacker-defender interactions using game theory ( Miao and Li ve Q. 
+Pan, 2023 ). Cloud-based honeypots, as explored in ( Rashid et al., 2024 ), 
+provide real-time insights into threats targeting UAV systems, enhancing 
+their resilience against cyberattacks.
+The integration of honeypots and AI-driven IDS in IoT blockchain 
+networks enhances their overall security. In ( Commey et al., 2024 ), re -
+searchers employed Bayesian game theory combined with reinforce -
+ment learning to dynamically adapt honeypots to the attacker behavior, 
+thus ensuring robust proactive defenses.
+Very specialized honeypots are needed in protection ICS environ -
+ments, since those complex systems under study must be emulated. The 
+importance of high-interaction honeypots, explained in detail in ( Zhou 
+et al., 2023 ), allows deeper studies on attacks against ICS and shows how 
+the most sophisticated attacks can be realized by advanced adversaries. 
+Honeypots of this nature imitate entire systems, enabling extended in -
+teractions with attackers, which opens up the possibility for researchers 
+to gather large amounts of data regarding the methodologies, strategies, 
+and processes involved in attacks. In addition, as demonstrated in 
+( Rashid et al., 2024 ), the scalability and flexibility of cloud-based hon -
+eypots make them more useful in industrial environments since they can 
+easily be deployed in different environments. The price paid for such 
+effectiveness in the study of cyberattacks against critical infrastructures 
+is a high resource cost. High-interaction honeypots require detailed 
+configuration to emulate real-world ICS environments, hence their 
+deployment is resource-intensive and technically challenging ( Conti 
+et al., 2022 ). While they are technically difficult to deploy and maintain, 
+due to the fact that they can provide detailed intelligence on cyber 
+threats, they are indispensable in securing critical industrial systems.
+3. System design and overview
+The decoy Web API honeypot system uses a Retrieval-Augmented 
+Generation framework paired with a fine-tuned large language model 
+to generate responses that are contextually appropriate and semantically 
+plausible. In this architectural design, the system tries to mimic real API 
+functionality as much as possible in order to mislead potential attackers 
+while harvesting valuable information about their strategies. The system 
+has modular architecture, which improves the automation, scalability, 
+and accuracy of the simulation of the API interactions.
+3.1. Retrieval-augmented generation framework
+RAG is a hybrid model: It combines the precision of retrieval-based 
+systems with the flexibility of generative modeling. Traditional gener -
+ative models, while impressive in terms of generating human-like text, 
+are generally constrained to patterns learned during training and can 
+therefore easily respond with out-of-context or irrelevant answers; RAG 
+overcomes this limitation. Thus, it uses dynamic retrieval of relevant 
+information from an external knowledge source to ground the generated 
+output in verifiable documentation and ensure responses closely align 
+with real API capabilities.
+The RAG framework is operating on two successive phases: 
+1. Retrieval Phase : The system performs a search in a knowledge base 
+of embeddings of API documentation for entries semantically similar 
+to the incoming API request. Embeddings are precomputed via a 
+Fig. 1. System architecture.
+A. Sezgin and A. Boyacı                                                                                                                                                                                                                       Computers & Security 154 (2025) 104458 
+4 

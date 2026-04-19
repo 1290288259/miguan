@@ -1,0 +1,2485 @@
+[
+  {
+    "id": "p1_b1",
+    "page": 0,
+    "bbox": [
+      37.59,
+      143.73,
+      117.55,
+      159.37
+    ],
+    "block_no": 0,
+    "block_type": 0,
+    "text": "Full Length Article"
+  },
+  {
+    "id": "p1_b2",
+    "page": 0,
+    "bbox": [
+      37.59,
+      161.02,
+      479.63,
+      200.25
+    ],
+    "block_no": 1,
+    "block_type": 0,
+    "text": "DecoyPot: A large language model-driven web API honeypot for realistic\nattacker engagement"
+  },
+  {
+    "id": "p1_b3",
+    "page": 0,
+    "bbox": [
+      37.59,
+      206.22,
+      187.29,
+      223.92
+    ],
+    "block_no": 2,
+    "block_type": 0,
+    "text": "Anıl Sezgin a,*\n, Aytu˘g Boyacı b"
+  },
+  {
+    "id": "p1_b4",
+    "page": 0,
+    "bbox": [
+      37.59,
+      225.27,
+      342.83,
+      247.09
+    ],
+    "block_no": 3,
+    "block_type": 0,
+    "text": "a Research and Development, Siemens A.S, Istanbul, 34870, Turkey\nb Department of Computer Engineering National Defence University, Air Force Academy, Istanbul, 34149, Turkey"
+  },
+  {
+    "id": "p1_b5",
+    "page": 0,
+    "bbox": [
+      37.59,
+      268.94,
+      115.69,
+      280.35
+    ],
+    "block_no": 4,
+    "block_type": 0,
+    "text": "A R T I C L E  I N F O"
+  },
+  {
+    "id": "p1_b6",
+    "page": 0,
+    "bbox": [
+      37.59,
+      288.2,
+      100.39,
+      350.04
+    ],
+    "block_no": 5,
+    "block_type": 0,
+    "text": "Keywords:\nArtificial intelligence\nLarge language model\nCyber security\nHoneypot\nDecoy\nDeception"
+  },
+  {
+    "id": "p1_b7",
+    "page": 0,
+    "bbox": [
+      202.0,
+      268.94,
+      258.71,
+      280.35
+    ],
+    "block_no": 6,
+    "block_type": 0,
+    "text": "A B S T R A C T"
+  },
+  {
+    "id": "p1_b8",
+    "page": 0,
+    "bbox": [
+      202.0,
+      288.27,
+      559.79,
+      414.74
+    ],
+    "block_no": 7,
+    "block_type": 0,
+    "text": "As cyberattacks get more sophisticated, security systems must learn to detect and deceive them. DecoyPot, a\nhoneypot Web Application Programming Interface (API) that generates legitimate API responses, is introduced in\nthis paper. DecoyPot’s command extractor module carefully analyzes API requests to create prompt-response\npairs that improve a Retrieval-Augmented Generation based (RAG) large language model (LLM). DecoyPot\ncan instantly adjust its answers to mimic API activity in a contextually correct and convincing manner to at­\ntackers. To assess system efficacy, we used a two-phase similarity analysis. Initial queries were matched with\nprompt-response pairs to ensure contextually suitable responses. Second, similarity measures were used to\ncompare generated responses to reference responses, producing an average score of 0.9780. The high score shows\nthat the system can create API-like responses, boosting its utility. DecoyPot engaged opponents and learned their\nTactics, Techniques and Procedures (TTPs). The study shows that honeypot cybersecurity effectiveness must be\nimproved by merging AI-driven response creation with enhanced deception technologies. DecoyPot effectively\nadapts to incoming queries and generates API-like responses, delivering actionable cyber threat intelligence and\nenhancing proactive defense strategies."
+  },
+  {
+    "id": "p1_b9",
+    "page": 0,
+    "bbox": [
+      37.59,
+      441.74,
+      97.84,
+      454.77
+    ],
+    "block_no": 8,
+    "block_type": 0,
+    "text": "1. Introduction"
+  },
+  {
+    "id": "p1_b10",
+    "page": 0,
+    "bbox": [
+      37.59,
+      462.66,
+      291.03,
+      580.29
+    ],
+    "block_no": 9,
+    "block_type": 0,
+    "text": "Over the last couple of decades, the digital landscape has completely\nchanged, and cyberattacks have increased in all sectors. These range\nfrom small organizations to critical infrastructure, exploiting vulnera­\nbilities brought about by the proliferation of connected devices. This\nrapid growth of attack surfaces automatically demands innovation and\nadaptiveness in cybersecurity measures. One critical tool among these is\nthe honeypot. Honeypots operate by emulating vulnerable systems to\nattract attackers and divert their focus from real targets, thereby\nrevealing their techniques. This type of interaction generates valuable\nintelligence that informs the security strategy, discloses patterns of\nattack, and enables countermeasure development."
+  },
+  {
+    "id": "p1_b11",
+    "page": 0,
+    "bbox": [
+      37.59,
+      577.69,
+      291.02,
+      653.54
+    ],
+    "block_no": 10,
+    "block_type": 0,
+    "text": "Cybersecurity honeypots have evolved significantly from their initial\ndesigns, which were limited to static systems aimed at identifying and\nlogging basic network activity. While these early implementations pro­\nvided valuable insights into basic attacker behaviors, they were insuf­\nficient for addressing sophisticated threats, such as advanced persistent\nthreats (APTs). Modern honeypots have transitioned into dynamic and\ninteractive systems that simulate realistic environments, enabling real-"
+  },
+  {
+    "id": "p1_b12",
+    "page": 0,
+    "bbox": [
+      306.59,
+      441.74,
+      560.02,
+      507.05
+    ],
+    "block_no": 11,
+    "block_type": 0,
+    "text": "time engagement with attackers and capturing detailed information\nabout their tactics, techniques, and procedures. Despite these advance­\nments, high-interaction honeypots present challenges, including\nincreased complexity, resource demands, and the need for strict isola­\ntion to avoid potential risks to production environments (Kristyanto\net al., 2022)."
+  },
+  {
+    "id": "p1_b13",
+    "page": 0,
+    "bbox": [
+      306.59,
+      504.5,
+      560.02,
+      653.54
+    ],
+    "block_no": 12,
+    "block_type": 0,
+    "text": "Despite their advancements, traditional honeypots face significant\nchallenges in adapting to the rapidly evolving tactics of modern at­\ntackers. Static or poorly configured systems are particularly vulnerable\nto detection, causing attackers to disengage or, worse, exploit the hon­\neypot to mislead defenders. High-interaction honeypots, while more\neffective at engaging attackers, generate large volumes of data that\nrequire time-intensive manual analysis, leading to response delays and\nmissed opportunities for threat mitigation. Furthermore, many organi­\nzations struggle to operationalize the intelligence gathered from these\nsystems, limiting their overall utility (Jiang and Zheng, 2020). Tradi­\ntional honeypots often fail to attract sophisticated attackers, such as\nstate-sponsored adversaries, due to their lack of dynamic interaction,\nwhich restricts their ability to gather actionable intelligence on attacker\nmotivations and goals."
+  },
+  {
+    "id": "p1_b14",
+    "page": 0,
+    "bbox": [
+      42.63,
+      669.07,
+      220.7,
+      690.38
+    ],
+    "block_no": 13,
+    "block_type": 0,
+    "text": "* Corresponding author.\nE-mail address: anil.sezgin@siemens.com (A. Sezgin)."
+  },
+  {
+    "id": "p1_b15",
+    "page": 0,
+    "bbox": [
+      228.42,
+      59.29,
+      369.07,
+      72.32
+    ],
+    "block_no": 14,
+    "block_type": 0,
+    "text": "Contents lists available at ScienceDirect"
+  },
+  {
+    "id": "p1_b16",
+    "page": 0,
+    "bbox": [
+      230.23,
+      80.04,
+      367.26,
+      102.84
+    ],
+    "block_no": 15,
+    "block_type": 0,
+    "text": "Computers & Security"
+  },
+  {
+    "id": "p1_b17",
+    "page": 0,
+    "bbox": [
+      204.6,
+      118.18,
+      393.0,
+      126.15
+    ],
+    "block_no": 16,
+    "block_type": 0,
+    "text": "journal homepage: www.elsevier.com/locate/cose"
+  },
+  {
+    "id": "p1_b18",
+    "page": 0,
+    "bbox": [
+      37.59,
+      695.66,
+      356.2,
+      716.91
+    ],
+    "block_no": 17,
+    "block_type": 0,
+    "text": "https://doi.org/10.1016/j.cose.2025.104458\nReceived 29 October 2024; Received in revised form 11 February 2025; Accepted 21 March 2025"
+  },
+  {
+    "id": "p1_b19",
+    "page": 0,
+    "bbox": [
+      230.51,
+      33.45,
+      366.12,
+      45.18
+    ],
+    "block_no": 18,
+    "block_type": 0,
+    "text": "Computers & Security 154 (2025) 104458"
+  },
+  {
+    "id": "p1_b20",
+    "page": 0,
+    "bbox": [
+      37.52,
+      714.7,
+      471.28,
+      734.52
+    ],
+    "block_no": 19,
+    "block_type": 0,
+    "text": "Available online 22 March 2025\n0167-4048/© 2025 Elsevier Ltd. All rights are reserved, including those for text and data mining, AI training, and similar technologies."
+  },
+  {
+    "id": "p2_b1",
+    "page": 1,
+    "bbox": [
+      37.59,
+      51.3,
+      291.03,
+      179.42
+    ],
+    "block_no": 0,
+    "block_type": 0,
+    "text": "Integration of artificial intelligence (AI) and machine learning (ML)\nin honeypot architecture has brought a sea change in the traditional\ndesigns that were usually challenged by many drawbacks. This is ach­\nieved by utilizing AI for network traffic analysis and the identification of\nmalicious behavior, followed by adaptive adjustment of their responses\nto keep the attackers engaged. The capabilities would make honeypots\nmore resilient and increase their efficacy in detecting and countering\ncomplex threats. Machine learning allows honeypots to filter out back­\nground noise and irrelevant data efficiently, thus focusing on real\nthreats. This reduces the workload for analysts, accelerates detection\nand response, and overall reinforces the cybersecurity framework\n(Angeli et al., 2024)."
+  },
+  {
+    "id": "p2_b2",
+    "page": 1,
+    "bbox": [
+      37.59,
+      176.82,
+      291.03,
+      325.85
+    ],
+    "block_no": 1,
+    "block_type": 0,
+    "text": "Recent advancements have enhanced honeypots by integrating large\nlanguage models, including GPT-3. This model allows honeypots to\ninteract with adversaries in a very human-like way, therefore luring\nthem into exposing their tactics, techniques, and procedures. These in­\nteractions are particularly useful for responding to social engineering\nattacks, where the adversary leverages human vulnerabilities to gain\nunauthorized access to systems. In such cases, LLM-enhanced honeypots\ngather valuable intelligence on attacker tactics and motivations by\ngenerating realistic dialogues (Raut et al., 2023). The latest generation\nof honeypots, equipped with retrieval-augmented generation tech­\nniques, offers greater dynamism and adaptability. RAG allows honeypot\nsystems to achieve a far better level of contextual accuracy and\nresponsiveness by leveraging external data sources for real-time adap­\ntation to diversified attack patterns and conditions."
+  },
+  {
+    "id": "p2_b3",
+    "page": 1,
+    "bbox": [
+      37.59,
+      323.31,
+      291.03,
+      472.29
+    ],
+    "block_no": 2,
+    "block_type": 0,
+    "text": "The integration of RAG and LLMs brings substantial novelties to\nhoneypot design: first, RAG frameworks allow the honeypot to fetch\nrelevant external data with which to generate contextually appropriate\nresponses, enhancing the realism in emulating a real-world environment\n(Dang et al., 2024). In a honeypot, it enhances the reality enough to\nmake it credulously sustainable for extended interaction with attackers.\nSimilarly, LLM allows for complex and dynamic responses that keep\npace with adversaries’ expected actions strongly. In the context of web\napplication honeypots, advanced technologies have been utilized in\nemulating API operations in an efficient manner while their outcomes\nare based on contextual information. Therefore, combining RAG and\nLLMs arms honeypots with a capability of high-order deceiving while\nharvesting critical intelligence of attacker’s techniques and strategic\nmindsets (Buzzio-Garcia, 2021)."
+  },
+  {
+    "id": "p2_b4",
+    "page": 1,
+    "bbox": [
+      37.59,
+      469.75,
+      291.02,
+      618.73
+    ],
+    "block_no": 3,
+    "block_type": 0,
+    "text": "This paper presents a new honeypot system using large language\nmodels with retrieval-augmented generation to mimic the conversations\ninvolved in Web APIs. The first part outlines two important components:\nthe command extractor and the response generator. The command\nextractor converts the API requests into structured prompt-response\npairs for enriching the fine-tuning of the large language model. In\ncontrast, a response generator augmented with out-of-the-box knowl­\nedge from retrieval-augmented generation would simulate realistic and\ncontextually relevant responses to engage attackers. The system was\nevaluated using a best-match similarity metric, whereby the inputs from\nattackers were compared with outputs produced by the LLM. The test\nshows that the honeypot is able to realistically emulate a real system and\nattract malicious actors, providing real-world information to improve\nsecurity measures."
+  },
+  {
+    "id": "p2_b5",
+    "page": 1,
+    "bbox": [
+      37.59,
+      616.18,
+      291.03,
+      744.3
+    ],
+    "block_no": 4,
+    "block_type": 0,
+    "text": "This study introduces DecoyPot, a novel honeypot system that le­\nverages state-of-the-art technologies, including Retrieval-Augmented\nGeneration and Large Language Models, to create dynamic and con­\ntextually accurate API interactions. Unlike traditional honeypots,\nDecoyPot combines generative modeling with retrieval mechanisms to\nenhance deception capabilities and adapt to sophisticated attacker\nstrategies. The system’s effectiveness has been demonstrated through\nrigorous evaluations, achieving high-response similarity scores with real\nAPI interactions. This performance highlights DecoyPot’s ability to\ngenerate realistic and semantically aligned responses, ensuring a\nconvincing engagement with attackers while collecting valuable intel­\nligence on their tactics and techniques. DecoyPot’s architecture has been"
+  },
+  {
+    "id": "p2_b6",
+    "page": 1,
+    "bbox": [
+      306.59,
+      51.3,
+      559.99,
+      95.74
+    ],
+    "block_no": 5,
+    "block_type": 0,
+    "text": "validated across diverse API domains, including Internet of Things,\nfinance, healthcare, and e-commerce. This adaptability underscores its\nversatility in addressing various attack vectors, making it a robust tool\nfor proactive cyber defense and deception."
+  },
+  {
+    "id": "p2_b7",
+    "page": 1,
+    "bbox": [
+      306.59,
+      93.14,
+      560.0,
+      200.34
+    ],
+    "block_no": 6,
+    "block_type": 0,
+    "text": "The rest of this manuscript is organized as follows: Section 2 presents\nrelated work on honeypot systems, focusing on the progress of research\nwork at the areas of AI and ML integrations. Section 3 describes the\ndesign and architecture of the proposed system and highlights the\nnovelties in the work. Section 4 outlines data collection and training\nmethods, along with incorporating a variety of API domains. Section 5\nprovides an overview of the experimental setup and the evaluation\nmetrics. Section 6, the concluding section, is a detailed discussion of the\nresults and the analysis that followed while Conclusion Section 7 dis­\ncusses future directions for research."
+  },
+  {
+    "id": "p2_b8",
+    "page": 1,
+    "bbox": [
+      306.59,
+      208.28,
+      369.93,
+      221.31
+    ],
+    "block_no": 7,
+    "block_type": 0,
+    "text": "2. Related work"
+  },
+  {
+    "id": "p2_b9",
+    "page": 1,
+    "bbox": [
+      306.59,
+      229.2,
+      560.02,
+      325.91
+    ],
+    "block_no": 8,
+    "block_type": 0,
+    "text": "From very simple decoy mechanisms to more sophisticated,\ndynamically adapting, intelligent platforms, honeypots have evolved\ninto critical components of modern cybersecurity methodologies.\nEffectively attracting, interacting with, and misleading attackers, hon­\neypots provide the precious intelligence about malicious strategies be­\nsides functioning as an important layer in security. The section is focused\non honeypot technology evolution through detailed application strate­\ngies, optimization techniques, and applications across all main areas of\ncybersecurity."
+  },
+  {
+    "id": "p2_b10",
+    "page": 1,
+    "bbox": [
+      306.59,
+      334.08,
+      410.56,
+      347.11
+    ],
+    "block_no": 9,
+    "block_type": 0,
+    "text": "2.1. Introduction to honeypots"
+  },
+  {
+    "id": "p2_b11",
+    "page": 1,
+    "bbox": [
+      306.59,
+      355.0,
+      560.01,
+      451.71
+    ],
+    "block_no": 10,
+    "block_type": 0,
+    "text": "Honeypots are security mechanisms that mimic a vulnerable system\nwith the intention of attracting an attacker, studying their behavior, and\ngathering relevant intelligence. The first honeypots were very simple\nand static structures that mimicked a common vulnerability, but they\nproved to be no match against the ever-evolving sophistication of cyber\nthreats. While these primitive honeypots were good enough for simple\nreconnaissance, their utility quickly faded as attackers developed tools\nthat could identify and avoid these traps (Kristyanto et al., 2022, Angeli\net al., 2024, Maldonado et al., 2024)."
+  },
+  {
+    "id": "p2_b12",
+    "page": 1,
+    "bbox": [
+      306.59,
+      449.17,
+      560.02,
+      535.44
+    ],
+    "block_no": 11,
+    "block_type": 0,
+    "text": "Such shortcomings were, until recently, countered by new honeypot\ntechnologies based ML, AI, and LLMs. These enhancements further\nallowed the honeypot to dynamically adapt to the new methods of\nattack, simulate real environments, and interact more effectively with\nan attacker. The evolution has so far expanded their use beyond the\ntraditional network security to also involve those on Internet of Things\n(IoT), Industrial Control Systems (ICS), and Cyber-physical systems\n(CPS) applications (Sladi´c et al., 2024, Suhail et al., 2023)."
+  },
+  {
+    "id": "p2_b13",
+    "page": 1,
+    "bbox": [
+      306.59,
+      543.62,
+      426.1,
+      556.65
+    ],
+    "block_no": 12,
+    "block_type": 0,
+    "text": "2.2. Interaction levels in honeypots"
+  },
+  {
+    "id": "p2_b14",
+    "page": 1,
+    "bbox": [
+      306.59,
+      564.54,
+      560.02,
+      682.16
+    ],
+    "block_no": 13,
+    "block_type": 0,
+    "text": "Low-interaction honeypots can mimic very basic functionalities,\nsuch as simple network services, to attract attackers. These systems are\ngenerally lightweight and very easy to deploy, and hence suitable for\ndetecting reconnaissance activities (Kristyanto et al., 2022). However,\ntheir limited interaction capabilities often fail to deceive sophisticated\nattackers who may identify them as decoys. The study in (Lygerou et al.,\n2022) illustrates the use of low-interaction honeypots in IoT networks.\nSuch systems emulate protocol-specific environments to monitor IoT\ntraffic to detect potential threats (Karpukhin et al., 2020). Although\nuseful for the initial detection stage, low-interaction honeypots cannot\nprovide an insight into advanced attack strategies."
+  },
+  {
+    "id": "p2_b15",
+    "page": 1,
+    "bbox": [
+      306.59,
+      679.56,
+      560.02,
+      744.92
+    ],
+    "block_no": 14,
+    "block_type": 0,
+    "text": "Medium-interaction honeypots provide an effective compromise\nbetween functionality and resource efficiency by emulating services\nsuch as databases or web servers. These systems are particularly suitable\nfor environments with moderate security requirements, as they balance\nengagement depth with ease of deployment and maintenance\n(Karpukhin et al., 2020, Lewis et al., 2020). By enabling attackers to"
+  },
+  {
+    "id": "p2_b16",
+    "page": 1,
+    "bbox": [
+      37.59,
+      33.65,
+      560.15,
+      44.08
+    ],
+    "block_no": 15,
+    "block_type": 0,
+    "text": "A. Sezgin and A. Boyacı\nComputers & Security 154 (2025) 104458"
+  },
+  {
+    "id": "p2_b17",
+    "page": 1,
+    "bbox": [
+      296.21,
+      754.45,
+      301.67,
+      764.88
+    ],
+    "block_no": 16,
+    "block_type": 0,
+    "text": "2"
+  },
+  {
+    "id": "p3_b1",
+    "page": 2,
+    "bbox": [
+      37.59,
+      51.3,
+      291.03,
+      179.42
+    ],
+    "block_no": 0,
+    "block_type": 0,
+    "text": "interact with emulated services, medium-interaction honeypots gather\ndetailed intelligence on attacker methods and tools. As an example, a\ndatabase honeypot emulating a MySQL server would reveal very valu­\nable insights into the SQL injection techniques that a hacker may employ\nand yet the resource requirements are manageable. This approach is\nfurther improved by the LLMs integration, and this is illustrated in (Hu\net al., 2024), with training LLMs on SQL queries responses. These hon­\neypots emulate a MySQL database that is vulnerable in order to respond\nappropriately given real-world contexts. This realism not only effec­\ntively fools the attackers but also provides nuanced data about their\ntactics, thus making the medium-interaction honeypot a practical and\ninsightful tool in cybersecurity strategies."
+  },
+  {
+    "id": "p3_b2",
+    "page": 2,
+    "bbox": [
+      37.59,
+      176.82,
+      291.02,
+      294.45
+    ],
+    "block_no": 1,
+    "block_type": 0,
+    "text": "High-interaction honeypots emulate whole systems, allowing the\nattacker free rein to interact with a realistic environment. These are\nresource-intensive systems but very valuable for research into advanced\nthreats in critical infrastructure sectors such as ICS (Lygerou et al., 2022,\nRashid et al., 2024). In high-stakes environments like ICS,\nhigh-interaction honeypots must accurately replicate industrial pro­\ncesses to gather actionable intelligence on attacker behavior. For\nexample, works like (Lygerou et al., 2022) consider using\ngame-theoretic models to optimize the deployment of high-interaction\nhoneypots while ensuring efficient resource allocation for maximizing\nthreat data collection."
+  },
+  {
+    "id": "p3_b3",
+    "page": 2,
+    "bbox": [
+      37.59,
+      302.67,
+      128.04,
+      315.7
+    ],
+    "block_no": 2,
+    "block_type": 0,
+    "text": "2.3. Deployment strategies"
+  },
+  {
+    "id": "p3_b4",
+    "page": 2,
+    "bbox": [
+      37.59,
+      323.59,
+      290.98,
+      357.54
+    ],
+    "block_no": 3,
+    "block_type": 0,
+    "text": "Deployment has significantly changed with honeypots, reflecting the\ngrowing complexity of the threat landscape. Advances in deployment\nstrategies have made them more effective and adaptive."
+  },
+  {
+    "id": "p3_b5",
+    "page": 2,
+    "bbox": [
+      37.59,
+      355.0,
+      291.03,
+      430.79
+    ],
+    "block_no": 4,
+    "block_type": 0,
+    "text": "Traditional honeypots are static deployments that emulate vulnera­\nbilities for the purpose of collecting intelligence. They actually fare quite\nwell in monitoring malicious activity in an effort to improve overall\nnetwork security measures (Kristyanto et al., 2022, Angeli et al., 2024,\nMaldonado et al., 2024). While effective against simple threats, tradi­\ntional honeypots have some limitations due to their inability to\ndynamically react to new attack vectors."
+  },
+  {
+    "id": "p3_b6",
+    "page": 2,
+    "bbox": [
+      37.59,
+      428.19,
+      291.02,
+      535.39
+    ],
+    "block_no": 5,
+    "block_type": 0,
+    "text": "Adaptive honeypots are a giant leap forward, integrating ML and AI\nin analyzing incoming traffic and dynamically adjusting responses. This\nlearning from attacker behavior extends the engagement time and im­\nproves intelligence collection (Gillick et al., 2019). The idea of rein­\nforcement learning, for example, can enable honeypots to adjust their\noperation with respect to the behavior being observed by an attacker.\nThis is useful, especially in complex attack environments such as en­\nterprise networks and IoT ecosystems. There is a need to keep their\npertinence in response to evolving cyber threats by using adaptive\nhoneypots."
+  },
+  {
+    "id": "p3_b7",
+    "page": 2,
+    "bbox": [
+      37.59,
+      532.79,
+      291.02,
+      608.63
+    ],
+    "block_no": 6,
+    "block_type": 0,
+    "text": "Specialized honeypots are thus designed to meet very specific secu­\nrity challenges within certain environments. For example, (Zhou et al.,\n2023) uses game-theoretic methods to optimize the deployment of\nhoneypots within ICS environments. Similarly, honeypots in the\ncloud-as discussed in (Rashid et al., 2024), scalable solutions that\nmonitor industrial networks and further secure Industry 4.0\ninfrastructures."
+  },
+  {
+    "id": "p3_b8",
+    "page": 2,
+    "bbox": [
+      37.59,
+      616.81,
+      180.85,
+      629.84
+    ],
+    "block_no": 7,
+    "block_type": 0,
+    "text": "2.4. Optimization techniques in honeypots"
+  },
+  {
+    "id": "p3_b9",
+    "page": 2,
+    "bbox": [
+      37.59,
+      637.73,
+      291.02,
+      744.92
+    ],
+    "block_no": 8,
+    "block_type": 0,
+    "text": "Machine learning and AI have transformed honeypots into systems\nthat can analyze huge amounts of data, identify patterns, and respond on\na real-time basis. This enhances the detection capability and reduces\nmanual effort in monitoring and analysis. For example, in the web-based\nhoneypot in (Jiang and Zheng, 2020), ensemble ML techniques are\napplied to filter out noise and focus on significant threats for improving\nthe accuracy of detection. Similarly, Generative Adversarial Networks\n(GANs), applied in (Ding, 2024), optimize honeypot responses, giving\nthem greater effectiveness in resource-constrained environments.\nAI-powered honeypots largely improve the level of interaction by"
+  },
+  {
+    "id": "p3_b10",
+    "page": 2,
+    "bbox": [
+      306.59,
+      51.3,
+      560.01,
+      95.74
+    ],
+    "block_no": 9,
+    "block_type": 0,
+    "text": "emulating human-like interactive capabilities that enable effective\ndeception and intelligence gathering. Realistic responses of generative\nAI models in (Raut et al., 2023), let honeypots dynamically learn from\nand adapt their tactics to attackers."
+  },
+  {
+    "id": "p3_b11",
+    "page": 2,
+    "bbox": [
+      306.59,
+      93.14,
+      560.02,
+      263.09
+    ],
+    "block_no": 10,
+    "block_type": 0,
+    "text": "The deployment of honeypots is optimized using behavioral intelli­\ngence from the SOAR engine (Bartwal et al., 2022), analyzing attacker\nbehaviors to guide strategic placement. When deployed in response to\nspecific threats, these honeypots achieved longer engagement times and\ncaptured much more information about attacker tactics. These SOAR\nfindings, in combination with the capabilities of LLMs, make this hon­\neypot especially relevant to modern contexts via the capability of per­\nforming and dynamically updating responses in web API settings. The\napproaches described in (Li et al., 2024) use RAG to increase the realism\nof\nhoneypot interactions. The RAG-based approach retrieves\npre-existing responses from a knowledge base and uses them as\ncontextual inputs during the generation process, enabling the honeypot\nto correctly mimic the behaviors of legitimate APIs. Combining RAG\nwith LLMs ensures that the responses of the honeypot are contextually\naccurate and semantically aligned, making it much more effective in\nengaging and deceiving attackers."
+  },
+  {
+    "id": "p3_b12",
+    "page": 2,
+    "bbox": [
+      306.59,
+      260.49,
+      560.01,
+      420.02
+    ],
+    "block_no": 11,
+    "block_type": 0,
+    "text": "Reinforcement learning is now one of the essential tools in opti­\nmizing honeypot functionality in dynamically adjusting the behaviors of\nan attacker, thereby further extending the durations of engagement.\nThis adaptability enables the honeypot to harvest full intelligence about\ntactics employed by attackers and raises the utility value of use in the\ncontext of cybersecurity dramatically. In this context, (Lopez-Yepez and\nFagette, 2022) in the dynamic scenario, dynamic Secure Shell (SSH)\nhoneypots make use of deep reinforcement learning methods for them to\nbecome sensitive, intelligently reacting to the behavior of detected at­\ntackers. Not only does this customized approach increase the attacker’s\ntime of interaction, but it also improves the honeypot ability of col­\nlecting vital information and learning new attack schemes. Building on\nthat idea, (Gao et al., 2024) presented DShopping, an intelligent\ndeception system to assist in fighting APTs by relying on exploiting static\nsecurity configurations."
+  },
+  {
+    "id": "p3_b13",
+    "page": 2,
+    "bbox": [
+      306.59,
+      417.42,
+      560.02,
+      618.73
+    ],
+    "block_no": 12,
+    "block_type": 0,
+    "text": "By using reinforcement learning, DSHopping is able to dynamically\nchange the scenarios of deception for optimized engagement of attackers\nand real-time detection of APT behaviors. It underlines not only the\nsynergy between machine learning and honeypot systems but also how\nthey grow and react against complex and variable attack vectors.\nThrough dynamic adaptation to adversaries’ strategies, the effectiveness\nof reinforcement learning—powered honeypots is enhanced several\ntimes over, while simultaneously contributing exponentially to cyber­\nsecurity intelligence. Hybrid AI architectures, fusing deep reinforcement\nlearning, rule-based models, and LLMs, enable further evolution in\nreinforcing autonomous cybersecurity defense. These architectures, in\ntheir basic form, deploy agents in simulated environments that learn to\ninteract with the main purpose of critical network protection by\ncontinuously enhancing their capability to predict attacks and response;\nan example of the adaptability of modern AI-driven honeypots. The\nincorporation of LLMs within such a hybrid architecture implies that\nhoneypots can enhance the quality of response by better exploiting\nadaptive learning informed by intricate attack patterns (Loevenich et al.,\n2024)."
+  },
+  {
+    "id": "p3_b14",
+    "page": 2,
+    "bbox": [
+      306.59,
+      616.18,
+      560.01,
+      702.46
+    ],
+    "block_no": 13,
+    "block_type": 0,
+    "text": "Hybrid models represent a big step forward in the design of honey­\npots, which integrate various optimization techniques to make them\nmore adaptable and scalable. For example, dynamic honeypots as in\n(Tang et al., 2023). apply deep learning on encrypted malicious traffic to\noffer better detection and engagement with sophisticated attackers\n(Suhail et al., 2023). introduces gamified digital twin integration with AI\nfor securing CPS environments and at the same time offering a training\nplatform for security analysts."
+  },
+  {
+    "id": "p3_b15",
+    "page": 2,
+    "bbox": [
+      306.59,
+      699.86,
+      559.99,
+      744.3
+    ],
+    "block_no": 14,
+    "block_type": 0,
+    "text": "This allows an expansion in the application of digital twin technol­\nogy for a sophisticated honeypot in driverless vehicles. The research\nwork in (Liatifis et al., 2024), elaborates on a simulated complex\nvehicular system in order to attract an attacker and provide critical data"
+  },
+  {
+    "id": "p3_b16",
+    "page": 2,
+    "bbox": [
+      37.59,
+      33.65,
+      560.15,
+      44.08
+    ],
+    "block_no": 15,
+    "block_type": 0,
+    "text": "A. Sezgin and A. Boyacı\nComputers & Security 154 (2025) 104458"
+  },
+  {
+    "id": "p3_b17",
+    "page": 2,
+    "bbox": [
+      296.21,
+      754.45,
+      301.67,
+      764.88
+    ],
+    "block_no": 16,
+    "block_type": 0,
+    "text": "3"
+  },
+  {
+    "id": "p4_b1",
+    "page": 3,
+    "bbox": [
+      37.59,
+      282.49,
+      291.02,
+      347.85
+    ],
+    "block_no": 0,
+    "block_type": 0,
+    "text": "regarding the attackers’ methods. The effectiveness of this method will\nallow it not only to detect the threats but also adapt quickly to the dy­\nnamic threat landscapes. Collectively, these hybrid models give proof\nthat combining deep learning with the concept of gamification, among\nothers, into digital twins could give versatile and resilient honeypot\nsystems."
+  },
+  {
+    "id": "p4_b2",
+    "page": 3,
+    "bbox": [
+      37.59,
+      365.77,
+      170.44,
+      378.81
+    ],
+    "block_no": 1,
+    "block_type": 0,
+    "text": "2.5. Applications in advanced domains"
+  },
+  {
+    "id": "p4_b3",
+    "page": 3,
+    "bbox": [
+      37.59,
+      386.69,
+      291.03,
+      483.4
+    ],
+    "block_no": 2,
+    "block_type": 0,
+    "text": "IoT devices are very susceptible to cyberattacks because of their\nweak security features and easy availability. IoT network-based hon­\neypots use deception technologies in analyzing attackers’ behavior for\nimproving the security of devices. Various works, such as (Sharma et al.,\n2023) and (Qin et al., 2023) present the utilization of IoT-based hon­\neypots for monitoring traffic and detecting threats that target specific\nprotocols. Decentralized honeypots have been deployed in (Karpukhin\net al., 2020), to emulate protocol-specific environments, thereby gaining\ninsights into attack patterns and improving IoT security."
+  },
+  {
+    "id": "p4_b4",
+    "page": 3,
+    "bbox": [
+      37.59,
+      480.86,
+      291.03,
+      577.57
+    ],
+    "block_no": 3,
+    "block_type": 0,
+    "text": "Cyber-physical systems combine physical processes with computa­\ntional systems and thus are a very significant target for sophisticated\ncyber-attacks. Honeypots in CPS environments are an essential tool in\nthe study and mitigation of such threats. The research in (Tian et al.,\n2019), puts forth a model that strikes a balance between low- and\nhigh-interaction honeypots toward effectively protecting CPS networks.\nFurther, game-theoretic approaches in (Zhou et al., 2023) optimize\nhoneypot deployment in ICS environments toward ensuring efficient use\nof the honeypot resources while raising detection rates."
+  },
+  {
+    "id": "p4_b5",
+    "page": 3,
+    "bbox": [
+      37.59,
+      574.97,
+      291.03,
+      650.76
+    ],
+    "block_no": 4,
+    "block_type": 0,
+    "text": "Unmanned aerial vehicles (UAVs) rely on interconnected systems,\nmaking them susceptible to cyber threats. Honeypots designed for UAV\nnetworks mitigate denial-of-service (DoS) attacks by simulating\nattacker-defender interactions using game theory (Miao and Li ve Q.\nPan, 2023). Cloud-based honeypots, as explored in (Rashid et al., 2024),\nprovide real-time insights into threats targeting UAV systems, enhancing\ntheir resilience against cyberattacks."
+  },
+  {
+    "id": "p4_b6",
+    "page": 3,
+    "bbox": [
+      37.59,
+      648.22,
+      291.01,
+      703.09
+    ],
+    "block_no": 5,
+    "block_type": 0,
+    "text": "The integration of honeypots and AI-driven IDS in IoT blockchain\nnetworks enhances their overall security. In (Commey et al., 2024), re­\nsearchers employed Bayesian game theory combined with reinforce­\nment learning to dynamically adapt honeypots to the attacker behavior,\nthus ensuring robust proactive defenses."
+  },
+  {
+    "id": "p4_b7",
+    "page": 3,
+    "bbox": [
+      37.59,
+      700.49,
+      291.03,
+      744.93
+    ],
+    "block_no": 6,
+    "block_type": 0,
+    "text": "Very specialized honeypots are needed in protection ICS environ­\nments, since those complex systems under study must be emulated. The\nimportance of high-interaction honeypots, explained in detail in (Zhou\net al., 2023), allows deeper studies on attacks against ICS and shows how"
+  },
+  {
+    "id": "p4_b8",
+    "page": 3,
+    "bbox": [
+      306.59,
+      282.49,
+      560.02,
+      441.96
+    ],
+    "block_no": 7,
+    "block_type": 0,
+    "text": "the most sophisticated attacks can be realized by advanced adversaries.\nHoneypots of this nature imitate entire systems, enabling extended in­\nteractions with attackers, which opens up the possibility for researchers\nto gather large amounts of data regarding the methodologies, strategies,\nand processes involved in attacks. In addition, as demonstrated in\n(Rashid et al., 2024), the scalability and flexibility of cloud-based hon­\neypots make them more useful in industrial environments since they can\neasily be deployed in different environments. The price paid for such\neffectiveness in the study of cyberattacks against critical infrastructures\nis a high resource cost. High-interaction honeypots require detailed\nconfiguration to emulate real-world ICS environments, hence their\ndeployment is resource-intensive and technically challenging (Conti\net al., 2022). While they are technically difficult to deploy and maintain,\ndue to the fact that they can provide detailed intelligence on cyber\nthreats, they are indispensable in securing critical industrial systems."
+  },
+  {
+    "id": "p4_b9",
+    "page": 3,
+    "bbox": [
+      306.59,
+      451.78,
+      427.33,
+      464.81
+    ],
+    "block_no": 8,
+    "block_type": 0,
+    "text": "3. System design and overview"
+  },
+  {
+    "id": "p4_b10",
+    "page": 3,
+    "bbox": [
+      306.59,
+      472.7,
+      560.02,
+      558.97
+    ],
+    "block_no": 9,
+    "block_type": 0,
+    "text": "The decoy Web API honeypot system uses a Retrieval-Augmented\nGeneration framework paired with a fine-tuned large language model\nto generate responses that are contextually appropriate and semantically\nplausible. In this architectural design, the system tries to mimic real API\nfunctionality as much as possible in order to mislead potential attackers\nwhile harvesting valuable information about their strategies. The system\nhas modular architecture, which improves the automation, scalability,\nand accuracy of the simulation of the API interactions."
+  },
+  {
+    "id": "p4_b11",
+    "page": 3,
+    "bbox": [
+      306.59,
+      574.97,
+      468.57,
+      588.0
+    ],
+    "block_no": 10,
+    "block_type": 0,
+    "text": "3.1. Retrieval-augmented generation framework"
+  },
+  {
+    "id": "p4_b12",
+    "page": 3,
+    "bbox": [
+      306.59,
+      595.89,
+      560.01,
+      692.6
+    ],
+    "block_no": 11,
+    "block_type": 0,
+    "text": "RAG is a hybrid model: It combines the precision of retrieval-based\nsystems with the flexibility of generative modeling. Traditional gener­\native models, while impressive in terms of generating human-like text,\nare generally constrained to patterns learned during training and can\ntherefore easily respond with out-of-context or irrelevant answers; RAG\novercomes this limitation. Thus, it uses dynamic retrieval of relevant\ninformation from an external knowledge source to ground the generated\noutput in verifiable documentation and ensure responses closely align\nwith real API capabilities."
+  },
+  {
+    "id": "p4_b13",
+    "page": 3,
+    "bbox": [
+      318.55,
+      690.06,
+      530.65,
+      703.09
+    ],
+    "block_no": 12,
+    "block_type": 0,
+    "text": "The RAG framework is operating on two successive phases:"
+  },
+  {
+    "id": "p4_b14",
+    "page": 3,
+    "bbox": [
+      308.18,
+      710.97,
+      560.01,
+      744.93
+    ],
+    "block_no": 13,
+    "block_type": 0,
+    "text": "1. Retrieval Phase: The system performs a search in a knowledge base\nof embeddings of API documentation for entries semantically similar\nto the incoming API request. Embeddings are precomputed via a"
+  },
+  {
+    "id": "p4_b15",
+    "page": 3,
+    "bbox": [
+      252.57,
+      261.0,
+      342.75,
+      272.72
+    ],
+    "block_no": 14,
+    "block_type": 0,
+    "text": "Fig. 1. System architecture."
+  },
+  {
+    "id": "p4_b16",
+    "page": 3,
+    "bbox": [
+      37.59,
+      33.65,
+      560.15,
+      44.08
+    ],
+    "block_no": 15,
+    "block_type": 0,
+    "text": "A. Sezgin and A. Boyacı\nComputers & Security 154 (2025) 104458"
+  },
+  {
+    "id": "p4_b17",
+    "page": 3,
+    "bbox": [
+      296.21,
+      754.45,
+      301.67,
+      764.88
+    ],
+    "block_no": 16,
+    "block_type": 0,
+    "text": "4"
+  },
+  {
+    "id": "p5_b1",
+    "page": 4,
+    "bbox": [
+      39.23,
+      51.3,
+      291.01,
+      116.66
+    ],
+    "block_no": 0,
+    "block_type": 0,
+    "text": "sentence transformer model capturing the semantic nature of every\ninteraction with the API from the documentation.\n2. Generation Phase: The retrieved entries, along with the incoming\nrequest context, are fed into the LLM. This dual input ensures that the\ngenerated responses maintain coherence with the documented API\nbehavior, producing outputs that align with attackers’ expectations."
+  },
+  {
+    "id": "p5_b2",
+    "page": 4,
+    "bbox": [
+      37.59,
+      124.55,
+      290.99,
+      158.5
+    ],
+    "block_no": 1,
+    "block_type": 0,
+    "text": "This mechanism would allow the honeypot to adapt to different API\nendpoints, thus increasing its effectiveness in deceiving attackers and\nlogging their interaction methods."
+  },
+  {
+    "id": "p5_b3",
+    "page": 4,
+    "bbox": [
+      37.59,
+      166.67,
+      120.94,
+      179.7
+    ],
+    "block_no": 2,
+    "block_type": 0,
+    "text": "3.2. System architecture"
+  },
+  {
+    "id": "p5_b4",
+    "page": 4,
+    "bbox": [
+      37.59,
+      187.59,
+      291.01,
+      242.46
+    ],
+    "block_no": 3,
+    "block_type": 0,
+    "text": "The architecture of this system encompasses several interdependent\nmodules, each contributing something unique to the fidelity of the decoy\nsystem. The design ensures automation of prompt-response generation,\noptimization in retrieval, and realistic API emulation. The system ar­\nchitecture is presented in Fig. 1."
+  },
+  {
+    "id": "p5_b5",
+    "page": 4,
+    "bbox": [
+      37.59,
+      239.86,
+      291.03,
+      284.3
+    ],
+    "block_no": 4,
+    "block_type": 0,
+    "text": "Command Extractor module processes API documentation to extract\ncritical details such as HTTP methods, paths, parameters, and expected\nresponses. For instance, a request for a smart home automation platform\nmight include:"
+  },
+  {
+    "id": "p5_b6",
+    "page": 4,
+    "bbox": [
+      37.59,
+      281.75,
+      291.03,
+      305.22
+    ],
+    "block_no": 5,
+    "block_type": 0,
+    "text": "Request:\nMethod:POST;Path:/api/light-control;Data={’deviceId’:\n’LIGHT001′, ’action’: ’turn_on’, ’brightness’: 75}"
+  },
+  {
+    "id": "p5_b7",
+    "page": 4,
+    "bbox": [
+      37.59,
+      302.68,
+      290.98,
+      326.14
+    ],
+    "block_no": 6,
+    "block_type": 0,
+    "text": "Response: 200 OK; {’deviceId’: ’LIGHT001′, ’status’: ’on’, ’brightness’:\n75}"
+  },
+  {
+    "id": "p5_b8",
+    "page": 4,
+    "bbox": [
+      37.59,
+      323.59,
+      290.98,
+      347.06
+    ],
+    "block_no": 7,
+    "block_type": 0,
+    "text": "The extracted details are converted into structured prompt-response\npairs, which are used to fine-tune the LLM."
+  },
+  {
+    "id": "p5_b9",
+    "page": 4,
+    "bbox": [
+      37.59,
+      344.51,
+      291.03,
+      514.41
+    ],
+    "block_no": 8,
+    "block_type": 0,
+    "text": "The system’s retrieval component performs semantic searches on the\nknowledge base to find contextually relevant entries through pre­\ncomputed embeddings of the API documentation to enable fast and ac­\ncurate similarity searches. Once a related entry has been retrieved, the\nfine-tuned language model incorporates information from that with\nthe request received to generate responses compliant with the specifi­\ncations of the API. This ensures that the generated responses are in the\ncorrect formats and are succinct, thereby maintaining the appearance of\nreal API interactions. To validate these responses, a BERT-based simi­\nlarity model compares them against real API outputs, gauging corre­\nspondence through similarity scores. Those that meet the set thresholds\nwill be deployed, while those that do not will be flagged for retraining or\nrefinement to guarantee high fidelity. Finally, API response formatter\nenhances the outputs by removing unnecessary metadata in order to\nensure a homogeneous structure and improve the capacity of the hon­\neypot to convincingly mimic the real API."
+  },
+  {
+    "id": "p5_b10",
+    "page": 4,
+    "bbox": [
+      37.59,
+      511.87,
+      291.03,
+      577.17
+    ],
+    "block_no": 9,
+    "block_type": 0,
+    "text": "The system automatically generates prompt-response pairs for\nvarious APIs by continuously updating the knowledge base with newly\ndocumented interactions, thus supporting scalability. Hence, the hon­\neypot can handle diverse API endpoints while maintaining high response\nquality, and its architecture is flexible enough to adapt to these evolving\nattack vectors with very good long-term relevance."
+  },
+  {
+    "id": "p5_b11",
+    "page": 4,
+    "bbox": [
+      37.59,
+      585.17,
+      157.58,
+      598.2
+    ],
+    "block_no": 10,
+    "block_type": 0,
+    "text": "4. Data collection and training"
+  },
+  {
+    "id": "p5_b12",
+    "page": 4,
+    "bbox": [
+      37.59,
+      606.09,
+      291.03,
+      671.39
+    ],
+    "block_no": 11,
+    "block_type": 0,
+    "text": "The quality, diversity, and representativeness of the data used to\ntrain a honeypot system largely determine its effectiveness. The training\ndataset is based on API documentation, complemented with methods to\nguarantee the observation of privacy standards and preserve structural\nintegrity. This careful calibration further enhances the capability of the\nLLM to produce realistic API responses."
+  },
+  {
+    "id": "p5_b13",
+    "page": 4,
+    "bbox": [
+      37.59,
+      679.57,
+      175.67,
+      692.6
+    ],
+    "block_no": 12,
+    "block_type": 0,
+    "text": "4.1. API documentation as training data"
+  },
+  {
+    "id": "p5_b14",
+    "page": 4,
+    "bbox": [
+      37.59,
+      700.49,
+      291.01,
+      744.92
+    ],
+    "block_no": 13,
+    "block_type": 0,
+    "text": "API documentation, often automatically generated by tools like\nSwagger or OpenAPI, contains the detailed description of what each\nendpoint does, including HTTP methods, parameters, and expected re­\nsponses. This information is then transformed into structured prompt-"
+  },
+  {
+    "id": "p5_b15",
+    "page": 4,
+    "bbox": [
+      306.59,
+      51.3,
+      486.75,
+      64.33
+    ],
+    "block_no": 14,
+    "block_type": 0,
+    "text": "response pairs, which become the knowledge base."
+  },
+  {
+    "id": "p5_b16",
+    "page": 4,
+    "bbox": [
+      306.59,
+      61.79,
+      560.02,
+      242.18
+    ],
+    "block_no": 15,
+    "block_type": 0,
+    "text": "The dataset used in this study was created from Swagger JSON files\noriginating from various internal projects. These files provided\ncomprehensive API documentation, including HTTP methods, end­\npoints, parameters, and expected responses. This dataset reflects real-\nworld API interactions and was carefully curated to ensure representa­\ntiveness across diverse domains, such as IoT, healthcare, finance, and e-\ncommerce. To maintain data integrity and security, sensitive informa­\ntion within the Swagger files was anonymized. This involved replacing\nidentifiable information with placeholder tokens while preserving the\nstructural patterns necessary for accurate model training. The use of\ninternally generated Swagger files ensures the dataset’s relevance to\nreal-world applications while adhering to data privacy standards. This\ndataset is unavailable for public use due to privacy and proprietary\nconstraints but can be accessed upon reasonable request. This carefully\ndesigned dataset allows DecoyPot to emulate realistic API behaviors,\nensuring its ability to adapt to various domains and effectively deceive\nattackers targeting specific systems."
+  },
+  {
+    "id": "p5_b17",
+    "page": 4,
+    "bbox": [
+      306.59,
+      239.58,
+      560.02,
+      294.45
+    ],
+    "block_no": 16,
+    "block_type": 0,
+    "text": "This dataset contains an overview of API documentation from\nvarious fields, including a large number of application cases to ensure a\nbroad training and robustness. This diversity, in this sense, will enhance\nthe generalizability of the honeypot across different API designs, and it\nthus becomes highly adaptable to a great variety of attack schemes."
+  },
+  {
+    "id": "p5_b18",
+    "page": 4,
+    "bbox": [
+      306.59,
+      291.9,
+      560.01,
+      367.69
+    ],
+    "block_no": 17,
+    "block_type": 0,
+    "text": "Another big domain covered in this dataset is e-commerce APIs;\nthese would describe critical tasks involving order processing, product\ncatalog management, and payment flows. Many of these APIs often\nrelate to each other or have a hierarchical structure of data, making for a\ncomplex setup that the honeypot has to emulate in sets of interactions\nrealistically. Emulating such workflows effectively means emulating\ncommon vulnerabilities in online retail platforms."
+  },
+  {
+    "id": "p5_b19",
+    "page": 4,
+    "bbox": [
+      306.59,
+      365.15,
+      560.01,
+      440.94
+    ],
+    "block_no": 18,
+    "block_type": 0,
+    "text": "Another critical domain is APIs for home automation, which is a core\nin commanding IoT devices within smart home settings. These APIs\nhandle operations such as device control (e.g., adjusting thermostat\nsettings or turning lights on/off) and managing user access to ensure\nsecurity. Their inclusion in the dataset would have the honeypot simu­\nlate complex interactions typical of IoT systems and hence make sense to\nthe attackers targeting smart home infrastructures."
+  },
+  {
+    "id": "p5_b20",
+    "page": 4,
+    "bbox": [
+      306.59,
+      438.34,
+      560.01,
+      514.13
+    ],
+    "block_no": 19,
+    "block_type": 0,
+    "text": "The dataset also involves health care APIs that are responsible for\nvery sensitive operations like handling patient records, prescription, and\nscheduling. Such APIs are subject to strict regulatory requirements\nregarding the security of data privacy and integrity. Training the hon­\neypot on such APIs thus helps the latter mimic systems which handle\nsensitive personal and medical information and are hence targeted for\nexploitation."
+  },
+  {
+    "id": "p5_b21",
+    "page": 4,
+    "bbox": [
+      306.59,
+      511.59,
+      560.02,
+      587.38
+    ],
+    "block_no": 20,
+    "block_type": 0,
+    "text": "The Financial systems are of high-value area, and the Finance APIs\nare part of Training data, which support account management, fund\ntransfers, running of fraud detection, among other countless functions,\nallowing the honeypot to emulate secure financial workflows and\nreproduce vulnerabilities in the transactions validation, user authenti­\ncation, or fraud prevention systems exposed in other commonly attacked\noperations."
+  },
+  {
+    "id": "p5_b22",
+    "page": 4,
+    "bbox": [
+      306.59,
+      584.78,
+      560.01,
+      660.57
+    ],
+    "block_no": 21,
+    "block_type": 0,
+    "text": "Lastly, this dataset includes APIs for student management: these are\nactually widely used in educational institutions to store student records,\ncourse registrations, and academic performance. The honeypot can be\ntrained on these, increasing its capability in mimicking educational\nadministrative systems in detecting and neutralizing various forms of\nattacks against sensitive educational data or disruption of institutional\nprocesses."
+  },
+  {
+    "id": "p5_b23",
+    "page": 4,
+    "bbox": [
+      306.59,
+      658.02,
+      560.01,
+      744.3
+    ],
+    "block_no": 22,
+    "block_type": 0,
+    "text": "The training data set will allow knowledge extraction over different\nAPI domains, allowing exploration of different workflows, data archi­\ntectures, and interaction modalities common in different application\nscenarios. This will ensure that the honeypot is always effective at\ndynamically adapting to changing attack vectors, no matter which\ndomain they may target. Diversity within the training data thus leads to\ngreater flexibility, which enhances the system’s reliability as a tool for\ncybersecurity."
+  },
+  {
+    "id": "p5_b24",
+    "page": 4,
+    "bbox": [
+      37.59,
+      33.65,
+      560.15,
+      44.08
+    ],
+    "block_no": 23,
+    "block_type": 0,
+    "text": "A. Sezgin and A. Boyacı\nComputers & Security 154 (2025) 104458"
+  },
+  {
+    "id": "p5_b25",
+    "page": 4,
+    "bbox": [
+      296.21,
+      754.45,
+      301.67,
+      764.88
+    ],
+    "block_no": 24,
+    "block_type": 0,
+    "text": "5"
+  },
+  {
+    "id": "p6_b1",
+    "page": 5,
+    "bbox": [
+      37.59,
+      51.3,
+      291.02,
+      95.74
+    ],
+    "block_no": 0,
+    "block_type": 0,
+    "text": "Sensitive data in API documentation is masked to meet data privacy\nand security regulations. Masking replaces sensitive information with\ngeneric placeholders, preserving structural patterns while protecting\nuser data. For instance:"
+  },
+  {
+    "id": "p6_b2",
+    "page": 5,
+    "bbox": [
+      37.59,
+      93.14,
+      290.99,
+      116.66
+    ],
+    "block_no": 1,
+    "block_type": 0,
+    "text": "Original Data: {’deviceId’: ’LIGHT001′, ’location’: ’Living Room’,\n’brightness’: 75, ’userId’: ’USER001′}"
+  },
+  {
+    "id": "p6_b3",
+    "page": 5,
+    "bbox": [
+      37.59,
+      114.06,
+      291.01,
+      137.58
+    ],
+    "block_no": 2,
+    "block_type": 0,
+    "text": "Masked Data: {’deviceId’: ’<DEVICE>’, ’location’: ’<LOCATION>’,\n’brightness’: 〈BRIGHTNESS〉, ’userId’: ’<USER>’}"
+  },
+  {
+    "id": "p6_b4",
+    "page": 5,
+    "bbox": [
+      37.59,
+      134.98,
+      290.99,
+      158.5
+    ],
+    "block_no": 3,
+    "block_type": 0,
+    "text": "This process ensures that the LLM learns only generalized patterns,\nmitigating the risk of data leakage."
+  },
+  {
+    "id": "p6_b5",
+    "page": 5,
+    "bbox": [
+      37.59,
+      166.67,
+      123.47,
+      179.7
+    ],
+    "block_no": 4,
+    "block_type": 0,
+    "text": "4.2. Fine-tuning the LLM"
+  },
+  {
+    "id": "p6_b6",
+    "page": 5,
+    "bbox": [
+      37.59,
+      187.59,
+      291.03,
+      263.43
+    ],
+    "block_no": 5,
+    "block_type": 0,
+    "text": "The fine-tuning process exploits the RAG framework to fine-tune the\nLLM for API-compliant response generation. The process basically in­\nvolves the creation of a knowledge base with pairs of prompts and re­\nsponses collected from API documentation. Every knowledge base entry\nhas a single prompt that captures a pattern in API requests, along with its\ncorresponding response that encodes the expected output, to form the\nbase for contextual grounding during the generation process."
+  },
+  {
+    "id": "p6_b7",
+    "page": 5,
+    "bbox": [
+      37.59,
+      260.83,
+      291.04,
+      357.54
+    ],
+    "block_no": 6,
+    "block_type": 0,
+    "text": "It will encode incoming API requests into embeddings and compare\nthem with the preprocessed and indexed embeddings within the\nknowledge base. In this way, the system chooses the most contextually\nrelevant entries with the use of cosine similarity and always shows that\ninformation which is much closer to the incoming request. These entries\nform the input context for the LLM, synthesizing responses with the\nsame contextual behaviors that would be documented in API behavior.\nIn this way, it grounds coherently and minimizes mismatched responses\nthat would hint at the honeypot being artificial to attackers."
+  },
+  {
+    "id": "p6_b8",
+    "page": 5,
+    "bbox": [
+      37.59,
+      355.0,
+      291.03,
+      441.22
+    ],
+    "block_no": 7,
+    "block_type": 0,
+    "text": "A similarity validation module, which makes use of a BERT-based\nmodel to check on semantic alignment, verifies the generated re­\nsponses against the documented API outputs. Responses scoring at or\nabove the threshold for similarity are regarded as credible and are\ndeployed, whereas those scoring beneath the threshold are flagged for\nrefinement or excluded from use. The system uses this rigorous approach\nto validation, ensuring that its honeypot interacts realistically and\ncontextually every time."
+  },
+  {
+    "id": "p6_b9",
+    "page": 5,
+    "bbox": [
+      37.59,
+      449.45,
+      126.22,
+      462.48
+    ],
+    "block_no": 8,
+    "block_type": 0,
+    "text": "4.3. Tools and techniques"
+  },
+  {
+    "id": "p6_b10",
+    "page": 5,
+    "bbox": [
+      37.59,
+      470.37,
+      291.02,
+      567.08
+    ],
+    "block_no": 9,
+    "block_type": 0,
+    "text": "The similarity validation module for the honeypot system, spanning\ndiverse fields such as IoT home automation, finance, health, and student\nmanagement, leverages a robust computational framework. This\nframework integrates pre-trained transformer-based embeddings with\nadvanced similarity metrics to ensure semantic coherence between the\ngenerated responses and authentic API behaviors. By maintaining this\nhigh degree of alignment, the system enhances its credibility in accu­\nrately emulating real-world API interactions across multiple domains,\nreinforcing its effectiveness in deception and intelligence gathering."
+  },
+  {
+    "id": "p6_b11",
+    "page": 5,
+    "bbox": [
+      37.59,
+      564.54,
+      291.03,
+      650.76
+    ],
+    "block_no": 10,
+    "block_type": 0,
+    "text": "System uses a BERT model by default, namely bert-base-uncased, as\na core component for generating dense semantic embeddings of textual\ndata. With contextual relationships of API requests and responses easily\nobtainable, the system can encode both the incoming request and the\nknowledge base entries into meaningful vector representations. This\nmodel works by taking embeddings from the last hidden layer and\naveraging them out to get a single sentence-level embedding; this bal­\nances efficiency and semantic richness quite nicely."
+  },
+  {
+    "id": "p6_b12",
+    "page": 5,
+    "bbox": [
+      37.59,
+      648.21,
+      291.03,
+      713.51
+    ],
+    "block_no": 11,
+    "block_type": 0,
+    "text": "For any input text, API request, or knowledge base entry, the system\ncomputes its embeddings by passing it into the transformer model: with\nattention-based encoding over a tokenized input, a comprehensive se­\nmantic representation is produced. These embeddings form the basis of\ngenerating output and comparing the similarities documented in API\nbehaviors."
+  },
+  {
+    "id": "p6_b13",
+    "page": 5,
+    "bbox": [
+      37.59,
+      710.97,
+      291.03,
+      744.92
+    ],
+    "block_no": 12,
+    "block_type": 0,
+    "text": "The degree of similarity between the generated and documented API\nresponses is measured using cosine similarity. Cosine similarity refers to\nthe angular distance between two high-dimensional vectors that"
+  },
+  {
+    "id": "p6_b14",
+    "page": 5,
+    "bbox": [
+      306.59,
+      51.3,
+      560.0,
+      74.82
+    ],
+    "block_no": 13,
+    "block_type": 0,
+    "text": "calculates a normalized score ranging from −1 to 1. Higher scores mean\nhigher semantic overlap and alignment."
+  },
+  {
+    "id": "p6_b15",
+    "page": 5,
+    "bbox": [
+      306.59,
+      72.22,
+      560.01,
+      106.17
+    ],
+    "block_no": 14,
+    "block_type": 0,
+    "text": "The system’s knowledge base is a structured repository containing\nprompt-response pairs derived from API documentation. Each entry\nincludes:"
+  },
+  {
+    "id": "p6_b16",
+    "page": 5,
+    "bbox": [
+      310.96,
+      114.06,
+      559.99,
+      148.01
+    ],
+    "block_no": 15,
+    "block_type": 0,
+    "text": "• Prompt: A textual description of an API request.\n• Response: The expected output as documented in the API\nspecifications."
+  },
+  {
+    "id": "p6_b17",
+    "page": 5,
+    "bbox": [
+      306.59,
+      155.9,
+      560.02,
+      210.77
+    ],
+    "block_no": 16,
+    "block_type": 0,
+    "text": "The system iteratively searches the knowledge base for the most\nsemantically relevant entry with respect to the given API request.\nComparing the entry embeddings, the system chooses the entry whose\nsimilarity is the highest, thus making a response contextually\nappropriate."
+  },
+  {
+    "id": "p6_b18",
+    "page": 5,
+    "bbox": [
+      306.59,
+      208.22,
+      559.98,
+      242.17
+    ],
+    "block_no": 17,
+    "block_type": 0,
+    "text": "The textual input provided undergoes extensive preprocessing in\norder to be compatible with the transformer model. This text pre­\nprocessing includes:"
+  },
+  {
+    "id": "p6_b19",
+    "page": 5,
+    "bbox": [
+      310.96,
+      250.06,
+      545.49,
+      284.01
+    ],
+    "block_no": 18,
+    "block_type": 0,
+    "text": "• Tokenization of the input text into subword units.\n• Padding and truncation to maintain uniformity in input lengths.\n• Inclusion of special tokens for marking sequence boundaries."
+  },
+  {
+    "id": "p6_b20",
+    "page": 5,
+    "bbox": [
+      306.59,
+      291.9,
+      559.96,
+      315.36
+    ],
+    "block_no": 19,
+    "block_type": 0,
+    "text": "This preprocessing pipeline guarantees the consistency of embedding\ngeneration, ensuring appropriate semantic comparisons."
+  },
+  {
+    "id": "p6_b21",
+    "page": 5,
+    "bbox": [
+      306.59,
+      312.82,
+      560.0,
+      388.61
+    ],
+    "block_no": 20,
+    "block_type": 0,
+    "text": "The architecture scale the system is designed for would accommo­\ndate growth of knowledge bases without any performance degradation.\nIts embedding-based retrieval mechanism makes rapid calculations over\nsimilarity easily enabled, which helps the honeypot effectively scale up\nas new API endpoints and interactions are included with this setup. This\nwill ensure the adaptability of the system toward evolving attack\nvectors."
+  },
+  {
+    "id": "p6_b22",
+    "page": 5,
+    "bbox": [
+      306.59,
+      397.12,
+      425.93,
+      410.15
+    ],
+    "block_no": 21,
+    "block_type": 0,
+    "text": "4.4. Evaluation of similarity scores"
+  },
+  {
+    "id": "p6_b23",
+    "page": 5,
+    "bbox": [
+      306.59,
+      418.04,
+      560.01,
+      504.32
+    ],
+    "block_no": 22,
+    "block_type": 0,
+    "text": "Similarity score evaluation plays a critical role in ensuring semantic\nalignment between the honeypot-generated responses and the legiti­\nmate API behaviors. This process measures the fidelity of the generated\noutputs by quantifying their alignment with documented responses,\nhence validating the system’s capability to produce realistic in­\nteractions. The similarity scores are computed using cosine similarity, a\nmathematical approach that determines angular closeness between two\nhigh-dimensional vector representations of text."
+  },
+  {
+    "id": "p6_b24",
+    "page": 5,
+    "bbox": [
+      306.59,
+      501.78,
+      560.02,
+      598.49
+    ],
+    "block_no": 23,
+    "block_type": 0,
+    "text": "To calculate these scores, the generated response and the docu­\nmented API response are first passed through the transformer-based\nembedding model to obtain their dense vector representations, which\ncapture the semantic relationships between words and phrases. The\nembeddings for each text are extracted by averaging the token embed­\ndings from the last hidden layer of the transformer, yielding one vector\nthat represents the meaning of the whole text. This embedding step\nhelps the system capture subtle context that is important for evaluating\nAPI behavior."
+  },
+  {
+    "id": "p6_b25",
+    "page": 5,
+    "bbox": [
+      306.59,
+      595.89,
+      560.02,
+      713.51
+    ],
+    "block_no": 24,
+    "block_type": 0,
+    "text": "Once embeddings have been generated, the next step is to calculate\ncosine similarity. This metric calculates the cosine of the angle between\ntwo vectors, returning a scalar value within the range of −1 to 1. The\ncloser the value is to 1, the higher the semantic similarity. A value close\nto 0 means there is no significant relation. In this application, negative\nsimilarity scores are few and generally represent contrasting meanings,\nwhich are unlikely in API response generation. The formula for this\ncalculation will involve the dot product of the two vectors in the\nnumerator, divided by the magnitude of the two vectors multiplied\ntogether in the denominator. This normalizes and ensures that the\nsimilarity is scale-independent of the absolute embeddings."
+  },
+  {
+    "id": "p6_b26",
+    "page": 5,
+    "bbox": [
+      306.59,
+      710.97,
+      559.98,
+      744.92
+    ],
+    "block_no": 25,
+    "block_type": 0,
+    "text": "Similarity test includes the comparison between the embeddings of\nthe generated response and pre-computed embedding of all entries in\nthe knowledge base. Comparisons give a similarity score, and the one"
+  },
+  {
+    "id": "p6_b27",
+    "page": 5,
+    "bbox": [
+      37.59,
+      33.65,
+      560.15,
+      44.08
+    ],
+    "block_no": 26,
+    "block_type": 0,
+    "text": "A. Sezgin and A. Boyacı\nComputers & Security 154 (2025) 104458"
+  },
+  {
+    "id": "p6_b28",
+    "page": 5,
+    "bbox": [
+      296.21,
+      754.45,
+      301.67,
+      764.88
+    ],
+    "block_no": 27,
+    "block_type": 0,
+    "text": "6"
+  },
+  {
+    "id": "p7_b1",
+    "page": 6,
+    "bbox": [
+      37.59,
+      51.3,
+      291.0,
+      116.66
+    ],
+    "block_no": 0,
+    "block_type": 0,
+    "text": "with the best score among all entries will be most relevant match. There\nis a filtering via a certain threshold for quality. The threshold usually\nranges between 0.85 and 0.95, depending on the complexity of the API\nand the domain-specific requirements. Responses scoring below the\nthreshold are always flagged for further analysis, which may include\nmanual changes or retraining of the model with more data."
+  },
+  {
+    "id": "p7_b2",
+    "page": 6,
+    "bbox": [
+      37.59,
+      114.06,
+      291.02,
+      221.25
+    ],
+    "block_no": 1,
+    "block_type": 0,
+    "text": "It is also designed to handle edge cases that would come up during\nthe analysis of similarity. Ambiguous API requests with incomplete pa­\nrameters, for example, may lead to embeddings with low specificity,\nwhich could impact the similarity scores. If there is no strictly correct\nanswer, it selects a semantically most plausible match based on the\ncontext. When more than one entry in the knowledge base gives a high\nscore, the system utilizes auxiliary criteria to select an entry: either the\nresponse length or structural congruence is used to pick out the best\nmatch. Such auxiliary assessments increase the reliability of the system\nwhen confronted with difficult cases."
+  },
+  {
+    "id": "p7_b3",
+    "page": 6,
+    "bbox": [
+      37.59,
+      218.66,
+      291.02,
+      357.26
+    ],
+    "block_no": 2,
+    "block_type": 0,
+    "text": "All the entries in the knowledge base are pre-computed and indexed\nsystematically in this model to reduce the computational load at runtime\nwhile comparing similarities. It exploits vector operations like the dot\nproduct and computation of vector norms for batch processing to reduce\nlatency in handling large knowledge bases. The corresponding optimi­\nzation here is through dynamic normalization—that is, the threshold\nvalues are dynamically set according to the score distribution of each\nAPI type. This makes response validation consistent for a large number\nof different interactions, as seen in IoT smart home scenarios. Taken\ntogether, these technical methods help to reach the required levels of\naccuracy and reliability necessary to generate API responses within the\nhoneypot environment that are misleading but still convincingly real­\nistic in appearance."
+  },
+  {
+    "id": "p7_b4",
+    "page": 6,
+    "bbox": [
+      37.59,
+      365.77,
+      175.33,
+      378.8
+    ],
+    "block_no": 3,
+    "block_type": 0,
+    "text": "5. Implementation and deployment"
+  },
+  {
+    "id": "p7_b5",
+    "page": 6,
+    "bbox": [
+      37.59,
+      386.69,
+      119.65,
+      399.72
+    ],
+    "block_no": 4,
+    "block_type": 0,
+    "text": "5.1. System deployment"
+  },
+  {
+    "id": "p7_b6",
+    "page": 6,
+    "bbox": [
+      37.59,
+      407.61,
+      291.02,
+      472.97
+    ],
+    "block_no": 5,
+    "block_type": 0,
+    "text": "The honeypot’s web API endpoint mimics real web APIs and works\nwith multiple network infrastructures and API management systems.\nMany endpoint architectures and API versions are used to impersonate\nlegitimate honeypot API services for different request types and protocol\nstandards. JSON and XML data formats, rate limits, authentication, and\nHTTP response codes are supported by the endpoints."
+  },
+  {
+    "id": "p7_b7",
+    "page": 6,
+    "bbox": [
+      37.59,
+      470.37,
+      291.03,
+      546.16
+    ],
+    "block_no": 6,
+    "block_type": 0,
+    "text": "The honeypot API mimics public API functionality and follows\nendpoint naming rules to increase its credibility. Due to its ability to\nflexibly adapt to numerous API versions, attackers have trouble identi­\nfying the honeypot from real APIs. LLM examines each request and\ngenerates a synthetic answer based on the knowledge base’s real API\ndocumentation prompt-response pairs. A well-crafted decoy ensures an\nAPI-expected answer."
+  },
+  {
+    "id": "p7_b8",
+    "page": 6,
+    "bbox": [
+      37.59,
+      543.62,
+      291.02,
+      692.6
+    ],
+    "block_no": 7,
+    "block_type": 0,
+    "text": "The containerization and orchestration solution scales and manages\nmany honeypot instances across cloud and on-premises networks.\nHoneypots can be segregated and replicated in containers for quick\ndeployment across networks with minimal configuration. Kubernetes\norchestrates honeypot instance scaling based on traffic and demand. The\nsystem’s flexibility and modularity allow quick API and endpoint\nconfiguration adjustments to comply with new attack methods and\nactual service changes. The honeypot and other online API endpoints are\ndesigned to integrate seamlessly with network infrastructures and API\nmanagement systems to look like real APIs. This deployment method\nmimics honeypot API services by using numerous endpoint architectures\nand API versions to handle different request types and protocol stan­\ndards. These endpoints support JSON and XML data and have rate-\nlimiting, authentication, and HTTP response codes."
+  },
+  {
+    "id": "p7_b9",
+    "page": 6,
+    "bbox": [
+      37.59,
+      690.05,
+      291.03,
+      744.92
+    ],
+    "block_no": 8,
+    "block_type": 0,
+    "text": "The honeypot API mimics public API functionality and follows\nendpoint naming rules to increase its credibility. Due to its ability to\nflexibly adapt to numerous API versions, attackers have trouble identi­\nfying the honeypot from real APIs. The LLM examines each request and\nsimulates a response using the knowledge base’s API documentation’s"
+  },
+  {
+    "id": "p7_b10",
+    "page": 6,
+    "bbox": [
+      306.59,
+      51.3,
+      560.01,
+      148.01
+    ],
+    "block_no": 9,
+    "block_type": 0,
+    "text": "prompt-response pairings. A well-crafted decoy matches API behavior.\nThe methodology scales and manages many honeypot instances across\ncloud and on-premises networks using containerization and orchestra­\ntion. Containers provide for isolated and reproducible honeypots,\nenabling rapid network deployment with little configuration. Kuber­\nnetes orchestrates honeypot instance scaling based on traffic and de­\nmand. The system’s flexibility and modularity allow quick API and\nendpoint configuration adjustments to comply with changing attack\ntechniques and legal service changes."
+  },
+  {
+    "id": "p7_b11",
+    "page": 6,
+    "bbox": [
+      306.59,
+      156.41,
+      403.64,
+      169.44
+    ],
+    "block_no": 10,
+    "block_type": 0,
+    "text": "5.2. Logging and monitoring"
+  },
+  {
+    "id": "p7_b12",
+    "page": 6,
+    "bbox": [
+      306.59,
+      177.33,
+      560.01,
+      242.68
+    ],
+    "block_no": 11,
+    "block_type": 0,
+    "text": "Honeypots require extensive logging and monitoring to respond\nquickly and analyze data over time. For future research, all honeypot\ninteractions—questions and responses—are recorded. The originating IP\naddress, request timestamp, user-agent details, and API endpoint are the\nmost relevant metadata in these logs. This metadata provides a complete\ndataset for attack pathway and activity analysis."
+  },
+  {
+    "id": "p7_b13",
+    "page": 6,
+    "bbox": [
+      306.59,
+      240.14,
+      560.01,
+      326.36
+    ],
+    "block_no": 12,
+    "block_type": 0,
+    "text": "The required data helps the system recognize strange trends that\nindicate automated probing or brute-force attacks. Frequency, kind, and\nsource are metrics. Logs highlight patterns and trends related to pro­\nspective attacks, such as targeted endpoint exploitation and API probing.\nThe honeypot system alerts for unusual activity in real time by identi­\nfying and classifying repetitive or atypical access patterns. These\nwarnings can educate security teams, prompt automatic replies, and\nimprove IP address and user agent recording and monitoring."
+  },
+  {
+    "id": "p7_b14",
+    "page": 6,
+    "bbox": [
+      306.59,
+      323.82,
+      560.02,
+      462.37
+    ],
+    "block_no": 13,
+    "block_type": 0,
+    "text": "Logs are regularly evaluated to improve knowledge base and answer\ncorrectness and coherence. As attackers become more sophisticated, this\nrecurrent function creates answers that match authentic API activity,\nmaintaining the honeypot’s deception method. Historical data can also\nimprove prompt-response pairings and LLM API compliance. Security\nInformation and Event Management (SIEM) technologies employ the\nexisting logging architecture to aggregate and analyze log data with\nother security monitoring data. Honeypot installations integrate with\nSIEM platforms to detect and respond to network events and threat in­\ntelligence feeds in real time. Logged data can be utilized to build threat\nanalysis machine learning models. This automates attack pattern\nrecognition and strengthens the honeypot’s defenses against increas­\ningly advanced adversaries."
+  },
+  {
+    "id": "p7_b15",
+    "page": 6,
+    "bbox": [
+      306.59,
+      459.77,
+      559.99,
+      514.64
+    ],
+    "block_no": 14,
+    "block_type": 0,
+    "text": "This extensive logging and monitoring architecture improves the\nhoneypot by revealing danger environments, enabling proactive secu­\nrity, and improving response generation. This honeypot can fool and\nprovide insights for threat assessment and defensive strategy improve­\nment due to its thorough documentation of all essential information."
+  },
+  {
+    "id": "p7_b16",
+    "page": 6,
+    "bbox": [
+      306.59,
+      522.7,
+      404.67,
+      535.73
+    ],
+    "block_no": 15,
+    "block_type": 0,
+    "text": "6. Evaluation and results"
+  },
+  {
+    "id": "p7_b17",
+    "page": 6,
+    "bbox": [
+      306.59,
+      543.62,
+      394.41,
+      556.65
+    ],
+    "block_no": 16,
+    "block_type": 0,
+    "text": "6.1. Similarity evaluation"
+  },
+  {
+    "id": "p7_b18",
+    "page": 6,
+    "bbox": [
+      306.59,
+      564.54,
+      560.02,
+      744.92
+    ],
+    "block_no": 17,
+    "block_type": 0,
+    "text": "In order to validate the accuracy and authenticity of the outputs\ngenerated by the decoy web API honeypot, a two-level similarity anal­\nysis approach has been followed. This process ensures that the outputs so\ngenerated are very similar to real API interactions using known prompt-\nresponse pairs as baselines. Request Similarity Matching is the first step\nin this approach, whose goal is to identify the most relevant prompt-\nresponse pair from a dataset, based on the similarity between the\nincoming request and the stored prompts. When the system receives a\nrequest, it calculates a measure of its similarity relative to all prompts\nstored in the prompt-response dataset. The evaluation can be performed\nwith various measures of similarity, such as cosine similarity or semantic\nsimilarity based on embeddings, which represent contextual corre­\nspondence between the incoming request and the archived prompts very\neffectively. The trigger with the highest value of similarity is selected\nfrom them, and its corresponding response is used as the reference for\nboth the response production and evaluation. It then assures the decoy\nsystem obtains a reference response that optimally matches the intent"
+  },
+  {
+    "id": "p7_b19",
+    "page": 6,
+    "bbox": [
+      37.59,
+      33.65,
+      560.15,
+      44.08
+    ],
+    "block_no": 18,
+    "block_type": 0,
+    "text": "A. Sezgin and A. Boyacı\nComputers & Security 154 (2025) 104458"
+  },
+  {
+    "id": "p7_b20",
+    "page": 6,
+    "bbox": [
+      296.21,
+      754.45,
+      301.67,
+      764.88
+    ],
+    "block_no": 19,
+    "block_type": 0,
+    "text": "7"
+  },
+  {
+    "id": "p8_b1",
+    "page": 7,
+    "bbox": [
+      37.59,
+      208.74,
+      171.78,
+      221.77
+    ],
+    "block_no": 0,
+    "block_type": 0,
+    "text": "and context of the incoming question."
+  },
+  {
+    "id": "p8_b2",
+    "page": 7,
+    "bbox": [
+      37.59,
+      219.17,
+      291.03,
+      347.28
+    ],
+    "block_no": 1,
+    "block_type": 0,
+    "text": "During the second stage, Response Similarity Evaluation, the quality\nof the generated response is checked against the real response in the\nselected prompt-response pair. The goal of this verification is to check\nhow the generated response matches the expected behavior of the API as\nrecorded in the reference dataset. Through the similarity calculation of\nthe generated and real response to the prompt-response pair, the system\nensures that the generated output truly reflects valid API behavior. High\nscores in similarity represent more exact congruence, implying that the\ndecoy API is indeed mimicking the real responses. The process grows\ncredibility for the honeypot, which is effective in logging realistic in­\nteractions with attackers and deriving valuable information on potential\nthreats."
+  },
+  {
+    "id": "p8_b3",
+    "page": 7,
+    "bbox": [
+      37.59,
+      355.29,
+      79.07,
+      368.32
+    ],
+    "block_no": 2,
+    "block_type": 0,
+    "text": "6.2. Results"
+  },
+  {
+    "id": "p8_b4",
+    "page": 7,
+    "bbox": [
+      37.59,
+      376.2,
+      291.02,
+      472.97
+    ],
+    "block_no": 3,
+    "block_type": 0,
+    "text": "We evaluate the performance of the decoy web API honeypot in\ngenerating realistic and contextually accurate responses. The evaluation\nis based on a two-step similarity analysis, involving (1) the identification\nof the most similar prompt-response pair for each incoming request and\n(2) the comparison between the generated response and the actual\nresponse associated with the matched prompt-response pair. Table 1\nprovides a summary of sample requests, detailing the request similarity\nscores, reference responses, generated responses, and response similar­\nity scores."
+  },
+  {
+    "id": "p8_b5",
+    "page": 7,
+    "bbox": [
+      37.59,
+      470.37,
+      291.04,
+      661.25
+    ],
+    "block_no": 4,
+    "block_type": 0,
+    "text": "For every incoming request, the system calculates a Request Simi­\nlarity score, matching it against previously stored ones in the dataset, to\nselect the prompt-response pair having the highest degree of match. This\nselection shows the systems’ ability to correctly single out contextually\nrelevant prompts. As a case in point, the GET request with a similarity\nscore of 0.9887 was matched with a saved request that fetches trans­\naction details, demonstrating that the system was able to recognize and\nalign the context of the request in the dataset accurately. The Response\nSimilarity score quantifies how much the generated response corre­\nsponds to the reference response from the relevant prompt-response\npair, ensuring that the simulated API functionality in the context of\nIoT home automation is accurate. The system correctly emulates ex­\npected API outputs, as evidenced by the similarity scores of 1.0000 for\nPOST adding a new smart device and 0.9992 for DELETE removing a\nuser’s profile. These results confirm this system in its capability of\ncreating realistic yet contextually exact decoy responses to impersonate\nreal API interactions aimed at deceiving attackers and gathering\nmeaningful intelligence."
+  },
+  {
+    "id": "p8_b6",
+    "page": 7,
+    "bbox": [
+      37.59,
+      658.65,
+      291.0,
+      744.92
+    ],
+    "block_no": 5,
+    "block_type": 0,
+    "text": "An even better illustration of the honeypot’s efficacy in response\ngeneration is demonstrated by the average response similarity score of\n0.9780. Such a high average score indicates a system with a reliable\nability to generate responses that closely match the expected results,\nwhich would help it serve more effectively as a powerful deception\nmechanism in cybersecurity. By generating replies that are plausible and\ncontextually relevant, the decoy web API can go much deeper in its\nability to interact with potential attackers, thus revealing a great deal"
+  },
+  {
+    "id": "p8_b7",
+    "page": 7,
+    "bbox": [
+      306.59,
+      208.74,
+      432.4,
+      221.77
+    ],
+    "block_no": 6,
+    "block_type": 0,
+    "text": "about their tactics and motivations."
+  },
+  {
+    "id": "p8_b8",
+    "page": 7,
+    "bbox": [
+      306.59,
+      229.65,
+      360.92,
+      242.69
+    ],
+    "block_no": 7,
+    "block_type": 0,
+    "text": "7. Conclusion"
+  },
+  {
+    "id": "p8_b9",
+    "page": 7,
+    "bbox": [
+      306.59,
+      250.57,
+      560.01,
+      336.85
+    ],
+    "block_no": 8,
+    "block_type": 0,
+    "text": "This work describes the design and evaluation of a decoy Web API\nhoneypot based on state-of-the-art language models with Retrieval-\nAugmented Generation, for Deriving believable answers and enlarging\nits potential of being an effective decoy in the context of cybersecurity.\nThe architecture is able to obtain contextually appropriate and plausible\nresponses by adaptively matching incoming requests to the established\nprompt-response pairs and evaluating response accuracy by applying\nsimilarity metrics."
+  },
+  {
+    "id": "p8_b10",
+    "page": 7,
+    "bbox": [
+      306.59,
+      334.25,
+      560.02,
+      535.56
+    ],
+    "block_no": 9,
+    "block_type": 0,
+    "text": "These results show that the honeypot is capable of actively inter­\nacting with potential attackers, as indicated by the high request and\nresponse similarity scores. With a mean response similarity value of\n0.9780, the system proves capable of closely mimicking expected API\nbehaviors, thereby rendering an authentic user experience that en­\ncourages a longer stay by users. It has a high level of realism, which not\nonly deceives the adversaries but also allows gathering important in­\nsights about their strategies and methodologies for improving defensive\ncapabilities. This research delineates the potential benefits of using LLM-\nbased honeypots in the cybersecurity domain to protect critical systems\nby redirecting aggressors away from actual resources and monitoring\ntheir actions in a controlled environment. Future work will continue to\ndiversify the dataset of prompt-response pairs, allowing for a larger\nrange of API interactions. Another promising avenue is increasing the\nmodel’s real-time adaptability in order to detect even more complex\nforms of malicious behavior. Therefore, integrating state-of-the-art\nartificial intelligence into honeypot systems is considered a very prom­\nising direction forward, shaping the future of advanced and proactive\ncyber defense solutions."
+  },
+  {
+    "id": "p8_b11",
+    "page": 7,
+    "bbox": [
+      306.59,
+      543.5,
+      468.53,
+      556.54
+    ],
+    "block_no": 10,
+    "block_type": 0,
+    "text": "CRediT authorship contribution statement"
+  },
+  {
+    "id": "p8_b12",
+    "page": 7,
+    "bbox": [
+      306.59,
+      564.42,
+      560.01,
+      608.81
+    ],
+    "block_no": 11,
+    "block_type": 0,
+    "text": "Anıl Sezgin: Writing – review & editing, Writing – original draft,\nVisualization, Validation, Supervision, Software, Resources, Methodol­\nogy, Conceptualization. Aytu˘g Boyacı: Writing – original draft, Vali­\ndation, Supervision, Methodology."
+  },
+  {
+    "id": "p8_b13",
+    "page": 7,
+    "bbox": [
+      306.59,
+      616.81,
+      435.18,
+      629.84
+    ],
+    "block_no": 12,
+    "block_type": 0,
+    "text": "Declaration of competing interest"
+  },
+  {
+    "id": "p8_b14",
+    "page": 7,
+    "bbox": [
+      306.59,
+      637.73,
+      557.67,
+      661.19
+    ],
+    "block_no": 13,
+    "block_type": 0,
+    "text": "The authors declare the following financial interests/personal re­\nlationships which may be considered as potential competing interests:"
+  },
+  {
+    "id": "p8_b15",
+    "page": 7,
+    "bbox": [
+      306.59,
+      658.65,
+      560.01,
+      703.09
+    ],
+    "block_no": 14,
+    "block_type": 0,
+    "text": "Anil Sezgin reports article publishing charges was provided by\nSiemens Turkey. If there are other authors, they declare that they have\nno known competing financial interests or personal relationships that\ncould have appeared to influence the work reported in this paper."
+  },
+  {
+    "id": "p8_b16",
+    "page": 7,
+    "bbox": [
+      306.59,
+      710.97,
+      376.89,
+      724.0
+    ],
+    "block_no": 15,
+    "block_type": 0,
+    "text": "Acknowledgement"
+  },
+  {
+    "id": "p8_b17",
+    "page": 7,
+    "bbox": [
+      318.55,
+      731.89,
+      559.98,
+      744.92
+    ],
+    "block_no": 16,
+    "block_type": 0,
+    "text": "We would like to thank Siemens Turkey for their support in the"
+  },
+  {
+    "id": "p8_b18",
+    "page": 7,
+    "bbox": [
+      37.59,
+      52.54,
+      130.85,
+      73.84
+    ],
+    "block_no": 17,
+    "block_type": 0,
+    "text": "Table 1\nSummary of sample requests."
+  },
+  {
+    "id": "p8_b19",
+    "page": 7,
+    "bbox": [
+      43.6,
+      76.22,
+      67.68,
+      95.21
+    ],
+    "block_no": 18,
+    "block_type": 0,
+    "text": "Request\nMethod"
+  },
+  {
+    "id": "p8_b20",
+    "page": 7,
+    "bbox": [
+      86.06,
+      76.22,
+      113.78,
+      95.21
+    ],
+    "block_no": 19,
+    "block_type": 0,
+    "text": "Request\nSimilarity"
+  },
+  {
+    "id": "p8_b21",
+    "page": 7,
+    "bbox": [
+      132.94,
+      76.22,
+      162.6,
+      95.21
+    ],
+    "block_no": 20,
+    "block_type": 0,
+    "text": "Reference\nMethod"
+  },
+  {
+    "id": "p8_b22",
+    "page": 7,
+    "bbox": [
+      181.02,
+      76.22,
+      542.63,
+      95.21
+    ],
+    "block_no": 21,
+    "block_type": 0,
+    "text": "Reference Response\nGenerated Response\nResponse\nSimilarity"
+  },
+  {
+    "id": "p8_b23",
+    "page": 7,
+    "bbox": [
+      43.6,
+      97.94,
+      337.01,
+      116.92
+    ],
+    "block_no": 22,
+    "block_type": 0,
+    "text": "GET\n0.9887\nGET\n200 OK; {’transactions’: {’transactionId’: ’TRANS001′,\n’amount’: 240,000}}"
+  },
+  {
+    "id": "p8_b24",
+    "page": 7,
+    "bbox": [
+      346.45,
+      97.94,
+      499.19,
+      116.92
+    ],
+    "block_no": 23,
+    "block_type": 0,
+    "text": "200 OK; {’transactionId’: ’TXN003′, ’amount’: 25.00,\n’type’: ’transfer’, ’recipientId’: ’USER002′}"
+  },
+  {
+    "id": "p8_b25",
+    "page": 7,
+    "bbox": [
+      514.66,
+      97.94,
+      534.39,
+      108.36
+    ],
+    "block_no": 24,
+    "block_type": 0,
+    "text": "0.9440"
+  },
+  {
+    "id": "p8_b26",
+    "page": 7,
+    "bbox": [
+      43.6,
+      115.06,
+      333.31,
+      134.04
+    ],
+    "block_no": 25,
+    "block_type": 0,
+    "text": "POST\n0.9937\nPOST\n201 Created; {’patientId’: ’PAT031′, ’status’: ’Patient\nadded successfully’}"
+  },
+  {
+    "id": "p8_b27",
+    "page": 7,
+    "bbox": [
+      346.45,
+      115.06,
+      498.79,
+      134.04
+    ],
+    "block_no": 26,
+    "block_type": 0,
+    "text": "201 Created; {’patientId’: ’PAT031′, ’status’: ’Patient\nadded successfully’}"
+  },
+  {
+    "id": "p8_b28",
+    "page": 7,
+    "bbox": [
+      514.66,
+      115.06,
+      534.39,
+      125.48
+    ],
+    "block_no": 27,
+    "block_type": 0,
+    "text": "1.0000"
+  },
+  {
+    "id": "p8_b29",
+    "page": 7,
+    "bbox": [
+      43.6,
+      132.18,
+      322.85,
+      151.22
+    ],
+    "block_no": 28,
+    "block_type": 0,
+    "text": "DELETE\n0.9989\nDELETE\n200 OK; {’studentId’: ’STU043′, ’status’: ’Student\ndeleted successfully’}"
+  },
+  {
+    "id": "p8_b30",
+    "page": 7,
+    "bbox": [
+      346.45,
+      132.18,
+      488.34,
+      151.22
+    ],
+    "block_no": 29,
+    "block_type": 0,
+    "text": "200 OK; {’studentId’: ’STU041′, ’status’: ’Student\ndeleted successfully’}"
+  },
+  {
+    "id": "p8_b31",
+    "page": 7,
+    "bbox": [
+      514.66,
+      132.18,
+      534.39,
+      142.6
+    ],
+    "block_no": 30,
+    "block_type": 0,
+    "text": "0.9992"
+  },
+  {
+    "id": "p8_b32",
+    "page": 7,
+    "bbox": [
+      43.6,
+      149.36,
+      337.01,
+      176.9
+    ],
+    "block_no": 31,
+    "block_type": 0,
+    "text": "GET\n0.9987\nGET\n200 OK; {’studentId’: ’STU007′, ’name’: ’George Blue’,\n’age’: 20, ’gender’: ’male’, ’contact’: ’555–0101′,\n’enrollmentYear’: 2023}"
+  },
+  {
+    "id": "p8_b33",
+    "page": 7,
+    "bbox": [
+      346.45,
+      149.36,
+      505.18,
+      176.9
+    ],
+    "block_no": 32,
+    "block_type": 0,
+    "text": "200 OK; {’studentId’: ’STU008′, ’name’: ’Hannah Gray’,\n’age’: 21, ’gender’: ’female’, ’contact’: ’555–3030′,\n’enrollmentYear’: 2022}"
+  },
+  {
+    "id": "p8_b34",
+    "page": 7,
+    "bbox": [
+      514.66,
+      149.36,
+      534.39,
+      159.78
+    ],
+    "block_no": 33,
+    "block_type": 0,
+    "text": "0.9932"
+  },
+  {
+    "id": "p8_b35",
+    "page": 7,
+    "bbox": [
+      43.6,
+      175.04,
+      322.85,
+      194.02
+    ],
+    "block_no": 34,
+    "block_type": 0,
+    "text": "DELETE\n0.9990\nDELETE\n200 OK; {’studentId’: ’STU030′, ’status’: ’Student\ndeleted successfully’}"
+  },
+  {
+    "id": "p8_b36",
+    "page": 7,
+    "bbox": [
+      346.45,
+      175.04,
+      488.34,
+      194.02
+    ],
+    "block_no": 35,
+    "block_type": 0,
+    "text": "200 OK; {’studentId’: ’STU022′, ’status’: ’Student\ndeleted successfully’}"
+  },
+  {
+    "id": "p8_b37",
+    "page": 7,
+    "bbox": [
+      514.66,
+      175.04,
+      534.39,
+      185.46
+    ],
+    "block_no": 36,
+    "block_type": 0,
+    "text": "0.9983"
+  },
+  {
+    "id": "p8_b38",
+    "page": 7,
+    "bbox": [
+      37.59,
+      33.65,
+      560.15,
+      44.08
+    ],
+    "block_no": 37,
+    "block_type": 0,
+    "text": "A. Sezgin and A. Boyacı\nComputers & Security 154 (2025) 104458"
+  },
+  {
+    "id": "p8_b39",
+    "page": 7,
+    "bbox": [
+      296.21,
+      754.45,
+      301.67,
+      764.88
+    ],
+    "block_no": 38,
+    "block_type": 0,
+    "text": "8"
+  },
+  {
+    "id": "p9_b1",
+    "page": 8,
+    "bbox": [
+      37.59,
+      51.3,
+      123.81,
+      64.33
+    ],
+    "block_no": 0,
+    "block_type": 0,
+    "text": "completion of the study."
+  },
+  {
+    "id": "p9_b2",
+    "page": 8,
+    "bbox": [
+      37.59,
+      72.22,
+      101.1,
+      85.25
+    ],
+    "block_no": 1,
+    "block_type": 0,
+    "text": "Data availability"
+  },
+  {
+    "id": "p9_b3",
+    "page": 8,
+    "bbox": [
+      49.55,
+      93.14,
+      227.31,
+      106.17
+    ],
+    "block_no": 2,
+    "block_type": 0,
+    "text": "The authors do not have permission to share data."
+  },
+  {
+    "id": "p9_b4",
+    "page": 8,
+    "bbox": [
+      37.59,
+      114.06,
+      78.8,
+      127.09
+    ],
+    "block_no": 3,
+    "block_type": 0,
+    "text": "References"
+  },
+  {
+    "id": "p9_b5",
+    "page": 8,
+    "bbox": [
+      37.59,
+      134.33,
+      288.57,
+      479.53
+    ],
+    "block_no": 4,
+    "block_type": 0,
+    "text": "Angeli, T., Reti, D., Schneider, D., Schotten, H., 2024. False flavor honeypot: deceiving\nvulnerability scanning tools. In: IEEE European Symposium on Security and Privacy\nWorkshops (EuroS&PW). Vienna, Austria.\nBartwal, U., Mukhopadhyay, S., Negi, R., Shukla, S., 2022. Security orchestration,\nautomation, and response engine for deployment of behavioural honeypots. In: IEEE\nConference on Dependable and Secure Computing (DSC). Edinburgh, United\nKingdom.\nBuzzio-Garcia, J., 2021. Creation of a high-interaction honeypot system based-on docker\ncontainers. In: Fifth World Conference on Smart Trends in Systems Security and\nSustainability (WorldS4). London, United Kingdom.\nCommey, D., Hounsinou, S., Crosby, G.V., 2024. Strategic deployment of honeypots in\nblockchain-based IoT systems. In: IEEE International Conference on AI Circuits and\nSystems (AICAS). Abu Dhabi, United Arab Emirates.\nConti, M., Trolese, F., Turrin, F., 2022. ICSpot: a high-interaction honeypot for industrial\ncontrol systems. In: International Symposium on Networks, Computers and\nCommunications (ISNCC). Shenzhen, China.\nDang, F., Yan, L., Yang, Y., Li, S., Han, L., 2024. Research on network intrusion detection\ntechnology based on honeypot. In: International Conference on Information Science,\nParallel and Distributed Systems (ISPDS). Guangzhou, China.\nDing, W., 2024. A GAN-based security strategy for WSN networks based on honeypot\nalgorithm. Phys. Commun. 1–9 cilt 62.\nGao, Y., Yang, L., Zhu, R., Yang, F., Cao, Y., Zhang, L., 2024. Intelligent hopping\nmechanism for deception defense scenarios based on reinforcement learning. In:\nConference on Local Computer Networks (LCN). Normandy, France.\nGillick, D., Kulkarni, S., Lansing, L., Presta, A., Baldridge, J., Ie, E., Garcia-Olano, D.,\n2019. Learning dense representations for entity retrieval. In: Proceedings of the 23rd\nConference on Computational Natural Language Learning (CoNLL), pp. 528–537.\nHu, Y., Cheng, S., Ma, Y., Chen, S., Xiao, F., Zheng, Q., 2024. MySQL-pot: a LLM-based\nhoneypot for MySQL threat protection. In: International Conference on Big Data\nAnalytics (ICBDA). Tokyo, Japan.\nJiang, K., Zheng, H., 2020. Design and implementation of a machine learning enhanced\nweb honeypot system. In: International Congress on Image and Signal Processing,\nBioMedical Engineering and Informatics (CISP-BMEI). Chengdu, China.\nKarpukhin, V., O˘guz, B., Min, S., Lewis, P., Wu, L., Chen, D., Yih, W., 2020. Dense\npassage retrieval for open-domain question answering. In: Proceedings of the 2020\nConference on Empirical Methods in Natural Language Processing (EMNLP),\npp. 6769–6781.\nKristyanto, M.A., Studiawan, H., Pratomo, B.A., 2022. Evaluation of reinforcement\nlearning algorithm on SSH honeypot. In: International Conference on Information\nTechnology, Information Systems and Electrical Engineering (ICITISEE). Yogyakarta,\nIndonesia.\nLewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., Küttler, H.,\nLewis, M., Yih, W., Rockt¨aschel, T., Riedel, S., Kiela, D., 2020. Retrieval-augmented"
+  },
+  {
+    "id": "p9_b6",
+    "page": 8,
+    "bbox": [
+      306.59,
+      52.13,
+      557.56,
+      469.04
+    ],
+    "block_no": 5,
+    "block_type": 0,
+    "text": "generation for knowledge-intensive NLP tasks. In: NIPS’20: Proceedings of the 34th\nInternational Conference on Neural Information Processing Systems, pp. 9459–9474.\nLi, J., Tang, T., Zhao, W.X., Nie, J., Wen, J., 2024. Pre-trained language models for text\ngeneration: a survey. ACM. Comput. Surv. 56 (9), 1–39.\nLiatifis, A., Eleftheriadis, C., Mpatzos, Z., Nanos, I., Lagkas, T., Goudos, S., Argyriou, V.,\nPsannis, K.E., Moscholios, I.D., Sarigiannidis, P., 2024. SiHoneypot: a digital twin-\nbased honeypot for autonomous vehicles. In: International Conference on Modern\nCircuits and Systems Technologies (MOCAST). Sofia, Bulgaria.\nLoevenich, J.F., Adler, E., Mercier, R., Velazquez, A., Lopes, R.R.F., 2024. Design of an\nautonomous cyber defence agent using hybrid AI models. In: International\nConference on Military Communication and Information Systems (ICMCIS). Koblenz,\nGermany.\nLopez-Yepez, J.S., Fagette, A., 2022. Increasing attacker engagement on SSH honeypots\nusing semantic embeddings of cyber-attack patterns and deep reinforcement\nlearning. In: IEEE Symposium Series on Computational Intelligence (SSCI).\nSingapore, Singapore.\nLygerou, I., Srinivasa, S., Vasilomanolakis, E., Stergiopoulos ve, G., Gritzalis, D., 2022.\nA decentralized honeypot for IoT protocols based on Android devices. Int. J. Inf.\nSecur. 1211–1222 cilt 21.\nMaldonado, M., Johnson, C., Gulati, M., Jaspers, T., Roysdon, P.F., 2024. Advanced\nCyber Deception Framework (ACDF): a comprehensive study. In: International\nConference on Computing, Networking and Communications (ICNC). Big Island, HI,\nUSA.\nMiao, S., Li ve Q. Pan, Y., 2023. Honeypot game theory against DoS attack in UAV cyber.\nComput., Mater. Continua (CMC) (3), 2745–2762 cilt 76.\nQin, X., Jiang, F., Cen ve, M., Doss, R., 2023. Hybrid cyber defense strategies using\nHoney-X: a survey. Comput. Netw. 1–17 cilt 230.\nRashid, Z.U., Haq, A., Hasan, S.T., Furhad, H., Ahmed ve, M., Ullah, A.B., 2024. Faking\nsmart industry: exploring cyber-threat landscape deploying cloud-based honeypot.\nWireless Networks 4527–4541 cilt 30.\nRaut, U., Nagarkar, A., Talnikar, C., Mokashi, M., Sharma, R., 2023. Engaging attackers\nwith a highly interactive honeypot system using ChatGPT. In: International\nConference On Computing, Communication, Control And Automation (ICCUBEA).\nPune, India.\nSharma, D., Singh, A., Chitkara, S., Sharma, T., 2023. Honeypot networks in deception\ntechnology for IOT devices. In: International Conference on Advances in\nComputation, Communication and Information Technology (ICAICCIT). Faridabad,\nIndia.\nSladi´c, M., Valeros, V., Catania, C., Garcia, S., 2024. LLM in the shell: generative\nhoneypots. In: IEEE European Symposium on Security and Privacy Workshops\n(EuroS&PW). Vienna, Austria.\nSuhail, S., Iqbal, M., Hussain ve, R., Jurdak, R., 2023. ENIGMA: an explainable digital\ntwin security solution for cyber–physical systems. Comput. Ind. 1–16 cilt 151.\nTang, J., Chen, M., Chen, H., Zhao ve, S., Huang, Y., 2023. A new dynamic security\ndefense system based on TCP_REPAIR and deep learning. J. Cloud Comput. 1–21 cilt\n12.\nTian, W., Ji, X., Liu, W., Liu, G., Lin, R., Zhai ve, J., Dai, Y., 2019. Defense strategies\nagainst network attacks in cyber-physical systems with analysis cost constraint based\non honeypot game model. Comput., Mater. Continua (CMC) (1), 193–211 cilt 60.\nZhou, X., Almutairi, L., Alsenani ve, T.R., Ahmad, M.N., 2023. Honeypot based industrial\nthreat detection using game theory in cyber-physical system. J. Grid. Comput. (59),\n1–11 cilt 21."
+  },
+  {
+    "id": "p9_b7",
+    "page": 8,
+    "bbox": [
+      37.59,
+      33.65,
+      560.15,
+      44.08
+    ],
+    "block_no": 6,
+    "block_type": 0,
+    "text": "A. Sezgin and A. Boyacı\nComputers & Security 154 (2025) 104458"
+  },
+  {
+    "id": "p9_b8",
+    "page": 8,
+    "bbox": [
+      296.21,
+      754.45,
+      301.67,
+      764.88
+    ],
+    "block_no": 7,
+    "block_type": 0,
+    "text": "9"
+  }
+]

@@ -1,0 +1,130 @@
+interact with emulated services, medium-interaction honeypots gather 
+detailed intelligence on attacker methods and tools. As an example, a 
+database honeypot emulating a MySQL server would reveal very valu -
+able insights into the SQL injection techniques that a hacker may employ 
+and yet the resource requirements are manageable. This approach is 
+further improved by the LLMs integration, and this is illustrated in ( Hu 
+et al., 2024 ), with training LLMs on SQL queries responses. These hon -
+eypots emulate a MySQL database that is vulnerable in order to respond 
+appropriately given real-world contexts. This realism not only effec -
+tively fools the attackers but also provides nuanced data about their 
+tactics, thus making the medium-interaction honeypot a practical and 
+insightful tool in cybersecurity strategies.
+High-interaction honeypots emulate whole systems, allowing the 
+attacker free rein to interact with a realistic environment. These are 
+resource-intensive systems but very valuable for research into advanced 
+threats in critical infrastructure sectors such as ICS ( Lygerou et al., 2022 , 
+Rashid et al., 2024 ). In high-stakes environments like ICS, 
+high-interaction honeypots must accurately replicate industrial pro -
+cesses to gather actionable intelligence on attacker behavior. For 
+example, works like ( Lygerou et al., 2022 ) consider using 
+game-theoretic models to optimize the deployment of high-interaction 
+honeypots while ensuring efficient resource allocation for maximizing 
+threat data collection.
+2.3. Deployment strategies
+Deployment has significantly changed with honeypots, reflecting the 
+growing complexity of the threat landscape. Advances in deployment 
+strategies have made them more effective and adaptive.
+Traditional honeypots are static deployments that emulate vulnera -
+bilities for the purpose of collecting intelligence. They actually fare quite 
+well in monitoring malicious activity in an effort to improve overall 
+network security measures ( Kristyanto et al., 2022 , Angeli et al., 2024 , 
+Maldonado et al., 2024 ). While effective against simple threats, tradi -
+tional honeypots have some limitations due to their inability to 
+dynamically react to new attack vectors.
+Adaptive honeypots are a giant leap forward, integrating ML and AI 
+in analyzing incoming traffic and dynamically adjusting responses. This 
+learning from attacker behavior extends the engagement time and im -
+proves intelligence collection ( Gillick et al., 2019 ). The idea of rein -
+forcement learning, for example, can enable honeypots to adjust their 
+operation with respect to the behavior being observed by an attacker. 
+This is useful, especially in complex attack environments such as en -
+terprise networks and IoT ecosystems. There is a need to keep their 
+pertinence in response to evolving cyber threats by using adaptive 
+honeypots.
+Specialized honeypots are thus designed to meet very specific secu -
+rity challenges within certain environments. For example, ( Zhou et al., 
+2023 ) uses game-theoretic methods to optimize the deployment of 
+honeypots within ICS environments. Similarly, honeypots in the 
+cloud-as discussed in ( Rashid et al., 2024 ), scalable solutions that 
+monitor industrial networks and further secure Industry 4.0 
+infrastructures.
+2.4. Optimization techniques in honeypots
+Machine learning and AI have transformed honeypots into systems 
+that can analyze huge amounts of data, identify patterns, and respond on 
+a real-time basis. This enhances the detection capability and reduces 
+manual effort in monitoring and analysis. For example, in the web-based 
+honeypot in ( Jiang and Zheng, 2020 ), ensemble ML techniques are 
+applied to filter out noise and focus on significant threats for improving 
+the accuracy of detection. Similarly, Generative Adversarial Networks 
+(GANs), applied in ( Ding, 2024 ), optimize honeypot responses, giving 
+them greater effectiveness in resource-constrained environments. 
+AI-powered honeypots largely improve the level of interaction by 
+emulating human-like interactive capabilities that enable effective 
+deception and intelligence gathering. Realistic responses of generative 
+AI models in ( Raut et al., 2023 ), let honeypots dynamically learn from 
+and adapt their tactics to attackers.
+The deployment of honeypots is optimized using behavioral intelli -
+gence from the SOAR engine ( Bartwal et al., 2022 ), analyzing attacker 
+behaviors to guide strategic placement. When deployed in response to 
+specific threats, these honeypots achieved longer engagement times and 
+captured much more information about attacker tactics. These SOAR 
+findings, in combination with the capabilities of LLMs, make this hon -
+eypot especially relevant to modern contexts via the capability of per -
+forming and dynamically updating responses in web API settings. The 
+approaches described in ( Li et al., 2024 ) use RAG to increase the realism 
+of honeypot interactions. The RAG-based approach retrieves 
+pre-existing responses from a knowledge base and uses them as 
+contextual inputs during the generation process, enabling the honeypot 
+to correctly mimic the behaviors of legitimate APIs. Combining RAG 
+with LLMs ensures that the responses of the honeypot are contextually 
+accurate and semantically aligned, making it much more effective in 
+engaging and deceiving attackers.
+Reinforcement learning is now one of the essential tools in opti -
+mizing honeypot functionality in dynamically adjusting the behaviors of 
+an attacker, thereby further extending the durations of engagement. 
+This adaptability enables the honeypot to harvest full intelligence about 
+tactics employed by attackers and raises the utility value of use in the 
+context of cybersecurity dramatically. In this context, ( Lopez-Yepez and 
+Fagette, 2022 ) in the dynamic scenario, dynamic Secure Shell (SSH) 
+honeypots make use of deep reinforcement learning methods for them to 
+become sensitive, intelligently reacting to the behavior of detected at -
+tackers. Not only does this customized approach increase the attacker’s 
+time of interaction, but it also improves the honeypot ability of col -
+lecting vital information and learning new attack schemes. Building on 
+that idea, ( Gao et al., 2024 ) presented DShopping, an intelligent 
+deception system to assist in fighting APTs by relying on exploiting static 
+security configurations.
+By using reinforcement learning, DSHopping is able to dynamically 
+change the scenarios of deception for optimized engagement of attackers 
+and real-time detection of APT behaviors. It underlines not only the 
+synergy between machine learning and honeypot systems but also how 
+they grow and react against complex and variable attack vectors. 
+Through dynamic adaptation to adversaries’ strategies, the effectiveness 
+of reinforcement learning—powered honeypots is enhanced several 
+times over, while simultaneously contributing exponentially to cyber -
+security intelligence. Hybrid AI architectures, fusing deep reinforcement 
+learning, rule-based models, and LLMs, enable further evolution in 
+reinforcing autonomous cybersecurity defense. These architectures, in 
+their basic form, deploy agents in simulated environments that learn to 
+interact with the main purpose of critical network protection by 
+continuously enhancing their capability to predict attacks and response; 
+an example of the adaptability of modern AI-driven honeypots. The 
+incorporation of LLMs within such a hybrid architecture implies that 
+honeypots can enhance the quality of response by better exploiting 
+adaptive learning informed by intricate attack patterns ( Loevenich et al., 
+2024 ).
+Hybrid models represent a big step forward in the design of honey -
+pots, which integrate various optimization techniques to make them 
+more adaptable and scalable. For example, dynamic honeypots as in 
+( Tang et al., 2023 ). apply deep learning on encrypted malicious traffic to 
+offer better detection and engagement with sophisticated attackers 
+( Suhail et al., 2023 ). introduces gamified digital twin integration with AI 
+for securing CPS environments and at the same time offering a training 
+platform for security analysts.
+This allows an expansion in the application of digital twin technol -
+ogy for a sophisticated honeypot in driverless vehicles. The research 
+work in ( Liatifis et al., 2024 ), elaborates on a simulated complex 
+vehicular system in order to attract an attacker and provide critical data 
+A. Sezgin and A. Boyacı                                                                                                                                                                                                                       Computers & Security 154 (2025) 104458 
+3 
