@@ -156,3 +156,40 @@ def update_brute_force_config():
         return ApiResponse.success(message="更新配置成功")
     except Exception as e:
         return ApiResponse.error(f"更新配置失败: {str(e)}")
+
+@malicious_ip_bp.route('/add', methods=['POST'])
+@token_required
+def add_malicious_ip():
+    """
+    手动新增恶意IP
+    """
+    try:
+        data = request.get_json()
+        ip_address = data.get('ip_address')
+        threat_level = data.get('threat_level')
+        notes = data.get('notes')
+        block_immediately = data.get('block_immediately', True)
+        reason = data.get('reason')
+        block_until = data.get('block_until')
+        
+        if not ip_address:
+            return ApiResponse.error("IP地址不能为空")
+        if not threat_level:
+            return ApiResponse.error("威胁等级不能为空")
+            
+        result = MaliciousIPService.add_manual_ip(
+            ip_address=ip_address,
+            threat_level=threat_level,
+            notes=notes,
+            block_immediately=block_immediately,
+            reason=reason,
+            block_until=block_until
+        )
+        
+        if result['success']:
+            return ApiResponse.success(message=result['message'])
+        else:
+            return ApiResponse.error(result['message'])
+            
+    except Exception as e:
+        return ApiResponse.error(f"新增操作失败: {str(e)}")

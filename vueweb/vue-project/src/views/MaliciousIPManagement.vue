@@ -57,6 +57,10 @@
         </el-form-item>
         
         <el-form-item>
+          <el-button type="success" @click="handleAdd">
+            <el-icon><Plus /></el-icon>
+            新增恶意IP
+          </el-button>
           <el-button type="primary" @click="handleQuery" :loading="loading">
             <el-icon><Search /></el-icon>
             查询
@@ -158,12 +162,53 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 新增恶意IP弹窗 -->
+    <el-dialog v-model="addDialogVisible" title="新增恶意IP" width="40%">
+      <el-form :model="addForm" :rules="addRules" ref="addFormRef" label-width="100px">
+        <el-form-item label="IP地址" prop="ip_address">
+          <el-input v-model="addForm.ip_address" placeholder="请输入恶意的IPv4地址" />
+        </el-form-item>
+        <el-form-item label="威胁等级" prop="threat_level">
+          <el-select v-model="addForm.threat_level" placeholder="请选择威胁等级" style="width: 100%">
+            <el-option label="低" value="low"></el-option>
+            <el-option label="中" value="medium"></el-option>
+            <el-option label="高" value="high"></el-option>
+            <el-option label="严重" value="critical"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注" prop="notes">
+          <el-input type="textarea" v-model="addForm.notes" placeholder="请输入备注信息（可选）" />
+        </el-form-item>
+        <el-form-item label="立即封禁" prop="block_immediately">
+          <el-switch v-model="addForm.block_immediately" />
+        </el-form-item>
+        <el-form-item label="封禁原因" prop="reason" v-if="addForm.block_immediately">
+          <el-input v-model="addForm.reason" placeholder="请输入封禁原因（可选）" />
+        </el-form-item>
+        <el-form-item label="解封时间" prop="block_until" v-if="addForm.block_immediately">
+          <el-date-picker
+            v-model="addForm.block_until"
+            type="datetime"
+            placeholder="选择解封时间（可选）"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 100%"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="addDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmAdd" :loading="addLoading">确定</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { Search, Refresh, QuestionFilled } from '@element-plus/icons-vue'
+import { Search, Refresh, QuestionFilled, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from '../utils/axios'
 
@@ -192,6 +237,28 @@ const blockForm = reactive({
   reason: '',
   block_until: ''
 })
+
+const addDialogVisible = ref(false)
+const addLoading = ref(false)
+const addFormRef = ref()
+const addForm = reactive({
+  ip_address: '',
+  threat_level: 'high',
+  notes: '',
+  block_immediately: true,
+  reason: '',
+  block_until: ''
+})
+
+const addRules = {
+  ip_address: [
+    { required: true, message: '请输入IP地址', trigger: 'blur' },
+    { pattern: /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/, message: '请输入有效的IPv4地址', trigger: 'blur' }
+  ],
+  threat_level: [
+    { required: true, message: '请选择威胁等级', trigger: 'change' }
+  ]
+}
 
 // 获取数据
 const fetchData = async () => {
@@ -350,6 +417,50 @@ const handleUnblock = (row: any) => {
       }
     })
     .catch(() => {})
+}
+
+// 新增恶意IP
+const handleAdd = () => {
+  addForm.ip_address = ''
+  addForm.threat_level = 'high'
+  addForm.notes = ''
+  addForm.block_immediately = true
+  addForm.reason = ''
+  addForm.block_until = ''
+  addDialogVisible.value = true
+  if (addFormRef.value) {
+    addFormRef.value.clearValidate()
+  }
+}
+
+const confirmAdd = async () => {
+  if (!addFormRef.value) return
+  await addFormRef.value.validate(async (valid: boolean) => {
+    if (valid) {
+      addLoading.value = true
+      try {
+        const res: any = await axios.post('/malicious-ips/add', {
+          ip_address: addForm.ip_address,
+          threat_level: addForm.threat_level,
+          notes: addForm.notes,
+          block_immediately: addForm.block_immediately,
+          reason: addForm.reason,
+          block_until: addForm.block_until
+        })
+        if (res.code === 200 || res.success || !res.msg?.includes('失败')) {
+          ElMessage.success('新增成功')
+          addDialogVisible.value = false
+          fetchData()
+        } else {
+          ElMessage.error(res.msg || '新增失败')
+        }
+      } catch (error) {
+        console.error('新增恶意IP失败', error)
+      } finally {
+        addLoading.value = false
+      }
+    }
+  })
 }
 
 onMounted(() => {

@@ -401,3 +401,36 @@ class MaliciousIPService:
         except Exception as e:
             print(f"查询恶意IP列表出错: {str(e)}")
             return [], {'error': str(e)}
+
+    @staticmethod
+    def add_manual_ip(ip_address: str, threat_level: str, notes: str = None, 
+                      block_immediately: bool = True, reason: str = None, 
+                      block_until: str = None) -> dict:
+        """
+        手动新增恶意IP
+        """
+        try:
+            # 记录恶意IP
+            malicious_ip = MaliciousIPService.record_malicious_ip(
+                ip_address=ip_address,
+                attack_type="手动新增",
+                threat_level=threat_level,
+                notes=notes
+            )
+            
+            if not malicious_ip:
+                return {'success': False, 'message': '记录IP失败'}
+                
+            # 如果需要立即封禁
+            if block_immediately:
+                block_reason = reason if reason else "手动新增并封禁"
+                block_result = MaliciousIPService.block_ip(
+                    ip_address=ip_address,
+                    reason=block_reason,
+                    block_until=block_until
+                )
+                return block_result
+                
+            return {'success': True, 'message': '新增成功，IP已记录'}
+        except Exception as e:
+            return {'success': False, 'message': f'新增手动IP异常: {str(e)}'}
