@@ -516,11 +516,10 @@ WebSocket 需要使用 `socketio.run()` 替代 `app.run()`，已在 `app.py` 中
 
 #### 第三级：AI 深度分析
 - **触发条件**：所有日志均入 AI 分析队列（`Queue + Threading` 异步执行）
-- **AI 回写机制**（`ai_analysis_service.py` · `_process_single_log()`）：
-  - 当 AI 置信度 >= 0.7 且判定为恶意时，自动回写主记录的 `attack_type`、`threat_level`、`is_malicious`
-  - AI 分析摘要追加到 `attack_description` 字段（带 `[AI分析]` 前缀）
-  - AI 发现新恶意流量时同步调用 `MaliciousIPService.record_malicious_ip()`
-  - 威胁等级映射：置信度 >= 0.9 → `high`，>= 0.7 → `medium`
+- **AI 辅助判断机制**（i_analysis_service.py · _process_single_log()）：
+  - AI 仅独立提取和存入自己的分析结果字段（如 i_attack_type、i_confidence、i_analysis_result）。
+  - **不修改、不覆写** 前置规则匹配引擎和暴力破解识别引擎的主判断结论（如 ttack_type、is_malicious、	hreat_level 和 ttack_description）。
+  - AI 判定后，将 AI 判断结论与主记录判断进行比较，记录在 i_rule_match_consistency 字段（一致 / 不一致），用作辅助审计依据。
 
 ### 4. 匹配规则优先级说明
 
