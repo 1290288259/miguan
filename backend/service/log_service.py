@@ -416,8 +416,30 @@ class LogService:
             
             attack_type = analysis_result["attack_type"]
             threat_level = analysis_result["threat_level"]
-            is_malicious = analysis_result["is_malicious"]
+            behavior_is_malicious = analysis_result["is_malicious"]
             attack_description = analysis_result["attack_description"]
+
+            # 检查是否已经在恶意IP表中
+            is_known_malicious_ip = False
+            try:
+                from model.malicious_ip_model import MaliciousIP
+                attacker_ip = log_data.get("attacker_ip")
+                if attacker_ip:
+                    existing_malicious = MaliciousIP.query.filter_by(ip_address=attacker_ip).first()
+                    if existing_malicious:
+                        is_known_malicious_ip = True
+            except Exception as e:
+                print(f"查询恶意IP表失败: {str(e)}")
+
+            # 两个判断：1是查询是否在恶意ip表中，2是这次行为是否构成恶意攻击
+            final_is_malicious = behavior_is_malicious or is_known_malicious_ip
+            
+            if is_known_malicious_ip and not behavior_is_malicious:
+                threat_level = "medium" if threat_level == "low" else threat_level
+                if attack_description:
+                    attack_description += " | 命中历史恶意IP"
+                else:
+                    attack_description = "命中历史恶意IP"
 
             log = Log(
                 honeypot_id=honeypot.id,
@@ -435,7 +457,7 @@ class LogService:
                 attack_description=attack_description,
                 payload=log_data.get("payload"),
                 threat_level=threat_level,
-                is_malicious=is_malicious,
+                is_malicious=final_is_malicious,
                 notes=log_data.get("notes"),
             )
 
@@ -456,7 +478,8 @@ class LogService:
             except Exception as e:
                 print(f"添加 AI 分析任务失败: {str(e)}")
 
-            if is_malicious:
+            # 构成攻击的行为会让其IP进入恶意IP表
+            if behavior_is_malicious:
                 try:
                     from service.malicious_ip_service import MaliciousIPService
 
@@ -470,6 +493,8 @@ class LogService:
                 except Exception as e:
                     print(f"自动记录恶意 IP 失败: {str(e)}")
 
+            # 满足其中一个就算是恶意IP，触发WebSocket推送
+            if final_is_malicious:
                 # WebSocket 实时推送
                 try:
                     from extensions import socketio

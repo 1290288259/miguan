@@ -415,7 +415,7 @@ def test_normal_traffic_http():
     log_id = upload_log(
         {
             "honeypot_port": get_port("HTTP"),
-            "attacker_ip": "192.168.1.102",
+            "attacker_ip": "192.168.2.102",
             "attacker_port": 54323,
             "protocol": "HTTP",
             "raw_log": "HTTP REQUEST: GET /dashboard HTTP/1.1 Host: 192.168.1.1",
