@@ -58,4 +58,5 @@ if __name__ == '__main__':
     test_ftp() 
     test_mysql()
     test_redis()
+        
     print("测试完毕。请在后端日志查看结果。")
