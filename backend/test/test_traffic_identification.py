@@ -367,17 +367,18 @@ def test_normal_traffic_ssh():
             "attacker_ip": "192.168.1.100",
             "attacker_port": 54321,
             "protocol": "SSH",
-            "raw_log": "SSH VERSION: SSH-2.0-OpenSSH_8.9",
-            "payload": "SSH-2.0-OpenSSH_8.9",
+            "raw_log": "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.1",
+            "payload": "",  # 空载荷（仅banner）
+            "request_path": "",
+            "user_agent": "",
         }
     )
-    assert log_id, "日志上传失败"
-    time.sleep(0.3)
+    time.sleep(3)  # 等待 AI 处理
     detail = get_log_detail(log_id)
     assert detail, f"获取日志详情失败 log_id={log_id}"
 
-    assert_log_field(detail, "attack_type", "正常流量", "SSH正常流量-attack_type")
-    assert_log_field(detail, "is_malicious", False, "SSH正常流量-is_malicious")
+    assert_log_field(detail, "attack_type", "SSH尝试登录", "SSH正常流量-attack_type")
+    assert_log_field(detail, "is_malicious", True, "SSH正常流量-is_malicious")
     assert_log_field(detail, "threat_level", "low", "SSH正常流量-threat_level")
     print(
         f"  log_id={log_id}, attack_type={detail.get('attack_type')}, is_malicious={detail.get('is_malicious')}"
@@ -393,17 +394,18 @@ def test_normal_traffic_ftp():
             "attacker_ip": "192.168.1.101",
             "attacker_port": 54322,
             "protocol": "FTP",
-            "raw_log": "FTP LOGIN: anonymous / guest_email_addr",
-            "payload": "Username: anonymous, Password: guest_email_addr",
+            "raw_log": "USER anonymous\nPASS anonymous@example.com",
+            "payload": "Username: anonymous, Password: anonymous@example.com",
+            "request_path": "",
+            "user_agent": "",
         }
     )
-    assert log_id, "日志上传失败"
-    time.sleep(0.3)
+    time.sleep(3)  # 等待 AI 处理
     detail = get_log_detail(log_id)
-    assert detail, f"获取日志详情失败"
+    assert detail, f"获取日志详情失败 log_id={log_id}"
 
-    assert_log_field(detail, "attack_type", "正常流量", "FTP正常流量-attack_type")
-    assert_log_field(detail, "is_malicious", False, "FTP正常流量-is_malicious")
+    assert_log_field(detail, "attack_type", "FTP尝试登录", "FTP正常流量-attack_type")
+    assert_log_field(detail, "is_malicious", True, "FTP正常流量-is_malicious")
     print(f"  log_id={log_id}, attack_type={detail.get('attack_type')}")
 
 
@@ -416,9 +418,9 @@ def test_normal_traffic_http():
             "attacker_ip": "192.168.1.102",
             "attacker_port": 54323,
             "protocol": "HTTP",
-            "raw_log": "HTTP REQUEST: GET /index.html HTTP/1.1 Host: 192.168.1.1",
+            "raw_log": "HTTP REQUEST: GET /dashboard HTTP/1.1 Host: 192.168.1.1",
             "payload": "",
-            "request_path": "/index.html",
+            "request_path": "/dashboard",
             "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
         }
     )
@@ -812,9 +814,9 @@ def test_low_frequency_brute_force_ssh():
         last_detail = get_log_detail(log_ids[-1])
         assert last_detail, "获取日志详情失败"
         assert_log_field(
-            last_detail, "attack_type", "正常流量", "SSH低频爆破-attack_type"
+            last_detail, "attack_type", "SSH尝试登录", "SSH低频爆破-attack_type"
         )
-        assert_log_field(last_detail, "is_malicious", False, "SSH低频爆破-is_malicious")
+        assert_log_field(last_detail, "is_malicious", True, "SSH低频爆破-is_malicious")
         print(
             f"  最后log_id={log_ids[-1]}, attack_type={last_detail.get('attack_type')}"
         )
@@ -893,10 +895,10 @@ def test_http_get_not_brute_force():
         last_detail = get_log_detail(log_ids[-1])
         assert last_detail, "获取日志详情失败"
         assert_log_field(
-            last_detail, "attack_type", "正常流量", "HTTP纯GET不爆破-attack_type"
+            last_detail, "attack_type", "HTTP尝试登录", "HTTP纯GET不爆破-attack_type"
         )
         assert_log_field(
-            last_detail, "is_malicious", False, "HTTP纯GET不爆破-is_malicious"
+            last_detail, "is_malicious", True, "HTTP纯GET不爆破-is_malicious"
         )
         print(
             f"  最后log_id={log_ids[-1]}, attack_type={last_detail.get('attack_type')}"
@@ -1061,8 +1063,8 @@ def test_mixed_http_get_then_credential():
     if log_ids:
         last_detail = get_log_detail(log_ids[-1])
         assert last_detail, "获取日志详情失败"
-        assert_log_field(last_detail, "attack_type", "正常流量", "HTTP混合-attack_type")
-        assert_log_field(last_detail, "is_malicious", False, "HTTP混合-is_malicious")
+        assert_log_field(last_detail, "attack_type", "HTTP尝试登录", "HTTP混合-attack_type")
+        assert_log_field(last_detail, "is_malicious", True, "HTTP混合-is_malicious")
         print(
             f"  最后log_id={log_ids[-1]}, attack_type={last_detail.get('attack_type')}"
         )

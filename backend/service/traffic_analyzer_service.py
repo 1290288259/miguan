@@ -15,8 +15,7 @@ from utils.time_utils import get_beijing_time
 class TrafficAnalyzerService:
     SAFE_ATTACK_TYPES = {
         "normal", "page visit", "web visit", "safe", "unknown", 
-        "正常", "正常流量", "ftp登录", "web登录", "mysql登录", "ssh登录",
-        "ssh尝试登录", "ftp尝试登录", "mysql尝试登录", "redis尝试登录",
+        "正常", "正常流量"
     }
     MALICIOUS_THREAT_LEVELS = {"medium", "high", "critical"}
 
@@ -61,10 +60,21 @@ class TrafficAnalyzerService:
             Log.payload != "",
         ]
 
+        # 匹配相同的协议
+        if protocol:
+            base_filter.append(Log.protocol == protocol)
+
         if protocol and protocol.upper() == "HTTP":
             base_filter.append(
                 Log.payload.like("%Username:%") & Log.payload.like("%Password:%")
             )
+
+        # 仅统计已被识别为正常/尝试登录，或者已经判定为暴力破解的历史流量
+        valid_types = list(cls.SAFE_ATTACK_TYPES) + [
+            "SSH尝试登录", "FTP尝试登录", "MySQL尝试登录", "Redis尝试登录", 
+            "HTTP尝试登录", "暴力破解"
+        ]
+        base_filter.append(Log.attack_type.in_(valid_types))
 
         count = db.session.query(db.func.count(Log.id)).filter(*base_filter).scalar()
         return (count + 1) >= cls.BRUTE_FORCE_THRESHOLD
@@ -84,6 +94,12 @@ class TrafficAnalyzerService:
         返回: 判定后的 attack_type, threat_level, is_malicious, attack_description
         """
         protocol_val = log_data.get("protocol", "").upper()
+        request_path = log_data.get("request_path", "")
+
+        threat_level = "low"
+        attack_description = None
+        is_malicious = True
+
         if protocol_val == "SSH":
             attack_type = "SSH尝试登录"
         elif protocol_val == "FTP":
@@ -92,12 +108,15 @@ class TrafficAnalyzerService:
             attack_type = "MySQL尝试登录"
         elif protocol_val == "REDIS":
             attack_type = "Redis尝试登录"
+        elif protocol_val == "HTTP":
+            if request_path in ["/", "/dashboard"]:
+                attack_type = "正常流量"
+                is_malicious = False
+            else:
+                attack_type = "HTTP尝试登录"
         else:
             attack_type = "正常流量"
-
-        threat_level = "low"
-        attack_description = None
-        is_malicious = False
+            is_malicious = False
 
         # ============================================================
         # 第一级：规则引擎匹配（正则识别）
@@ -169,7 +188,7 @@ class TrafficAnalyzerService:
         # ============================================================
         # 第二级：暴力破解分析（行为频次识别）
         # ============================================================
-        if not is_malicious:
+        if matched_priority is None:
             payload = log_data.get("payload")
             protocol = log_data.get("protocol")
             if payload:

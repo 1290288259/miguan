@@ -506,7 +506,8 @@ WebSocket 需要使用 `socketio.run()` 替代 `app.run()`，已在 `app.py` 中
 - **首条命中即停止**，不会继续匹配后续规则
 
 #### 第二级：暴力破解频次分析
-- **触发条件**：第一级未命中任何规则（`attack_type` 仍为 `'正常流量'`）
+- **默认恶意判定规则**：对于蜜罐流量，除 HTTP 访问 `/` 和 `/dashboard` 外，所有的 `SSH尝试登录`、`FTP尝试登录`、`MySQL尝试登录`、`Redis尝试登录` 以及其他路径的 `HTTP尝试登录` 均默认判定为**恶意流量** (`is_malicious=True`)，并自动加入恶意 IP 列表。
+- **触发条件**：第一级未命中任何高危规则，且属于尝试登录类行为（包括上述尝试登录以及正常流量）。
 - **检测方法**：`_check_brute_force(source_ip, protocol, current_payload)`
   - 查询同一 IP + 同一协议在最近 **1 分钟** 内的日志数量
   - HTTP 协议特殊处理：只有包含认证凭证（`Username:...Password:...`）的请求才计入暴力破解计数
