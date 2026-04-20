@@ -16,6 +16,7 @@ class TrafficAnalyzerService:
     SAFE_ATTACK_TYPES = {
         "normal", "page visit", "web visit", "safe", "unknown", 
         "正常", "正常流量", "ftp登录", "web登录", "mysql登录", "ssh登录",
+        "ssh尝试登录", "ftp尝试登录", "mysql尝试登录", "redis尝试登录",
     }
     MALICIOUS_THREAT_LEVELS = {"medium", "high", "critical"}
 
@@ -82,7 +83,18 @@ class TrafficAnalyzerService:
         对单条流量日志进行恶意判定
         返回: 判定后的 attack_type, threat_level, is_malicious, attack_description
         """
-        attack_type = "正常流量"
+        protocol_val = log_data.get("protocol", "").upper()
+        if protocol_val == "SSH":
+            attack_type = "SSH尝试登录"
+        elif protocol_val == "FTP":
+            attack_type = "FTP尝试登录"
+        elif protocol_val == "MYSQL":
+            attack_type = "MySQL尝试登录"
+        elif protocol_val == "REDIS":
+            attack_type = "Redis尝试登录"
+        else:
+            attack_type = "正常流量"
+
         threat_level = "low"
         attack_description = None
         is_malicious = False
