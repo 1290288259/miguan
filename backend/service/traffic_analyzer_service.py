@@ -99,6 +99,8 @@ class TrafficAnalyzerService:
         threat_level = "low"
         attack_description = None
         is_malicious = True
+        auto_block = False
+        block_duration = 0
 
         if protocol_val == "SSH":
             attack_type = "SSH尝试登录"
@@ -169,6 +171,8 @@ class TrafficAnalyzerService:
                                 threat_level = rule.threat_level
                                 is_malicious = cls._infer_is_malicious(attack_type, threat_level)
                                 matched_priority = rule.priority
+                                auto_block = getattr(rule, 'auto_block', False)
+                                block_duration = getattr(rule, 'block_duration', 0)
 
                             rule_msg = f"触发规则: {rule.name}"
                             if not attack_description:
@@ -202,6 +206,12 @@ class TrafficAnalyzerService:
                     threat_level = "high"
                     is_malicious = True
                     rule_msg = "触发系统引擎: 暴力破解检测"
+                    from service.system_config_service import SystemConfigService
+                    bf_config = SystemConfigService.get_brute_force_config()
+                    if bf_config.get("auto_block"):
+                        auto_block = True
+                        block_duration = bf_config.get("block_duration", 24)
+                    
                     if not attack_description:
                         attack_description = rule_msg
                     elif rule_msg not in attack_description:
@@ -211,5 +221,7 @@ class TrafficAnalyzerService:
             "attack_type": attack_type,
             "threat_level": threat_level,
             "is_malicious": is_malicious,
-            "attack_description": attack_description
+            "attack_description": attack_description,
+            "auto_block": auto_block,
+            "block_duration": block_duration
         }

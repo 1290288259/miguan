@@ -5,6 +5,30 @@
       <template #header>
         <div class="card-header">
           <span>恶意IP管理</span>
+          <div class="brute-force-config">
+            <span style="margin-right: 10px; font-size: 14px;">暴力破解自动封禁:</span>
+            <el-switch
+              v-model="bruteForceConfig.auto_block"
+              inline-prompt
+              active-text="已开启"
+              inactive-text="已关闭"
+              @change="handleBruteForceConfigChange"
+            />
+            <span v-if="bruteForceConfig.auto_block" style="margin-left: 15px; font-size: 14px;">
+              封禁时长(小时):
+              <el-input-number 
+                v-model="bruteForceConfig.block_duration" 
+                :min="0" 
+                :step="1" 
+                size="small" 
+                style="width: 100px"
+                @change="handleBruteForceConfigChange"
+              />
+            </span>
+            <el-tooltip content="检测到暴力破解行为时自动将IP加入系统防火墙黑名单" placement="top">
+              <el-icon style="margin-left: 10px; cursor: pointer; color: #909399;"><QuestionFilled /></el-icon>
+            </el-tooltip>
+          </div>
         </div>
       </template>
       
@@ -139,7 +163,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { Search, Refresh } from '@element-plus/icons-vue'
+import { Search, Refresh, QuestionFilled } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from '../utils/axios'
 
@@ -150,6 +174,11 @@ const ipList = ref([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(20)
+
+const bruteForceConfig = reactive({
+  auto_block: false,
+  block_duration: 24
+})
 
 const queryForm = reactive({
   keyword: '',
@@ -184,6 +213,37 @@ const fetchData = async () => {
     ElMessage.error('获取数据失败')
   } finally {
     loading.value = false
+  }
+}
+
+// 获取暴力破解配置
+const fetchBruteForceConfig = async () => {
+  try {
+    const res: any = await axios.get('/malicious-ips/brute-force-config')
+    if (res.code === 200 && res.data) {
+      bruteForceConfig.auto_block = res.data.auto_block
+      bruteForceConfig.block_duration = res.data.block_duration
+    }
+  } catch (error) {
+    console.error('获取暴力破解配置失败', error)
+  }
+}
+
+// 更改暴力破解配置
+const handleBruteForceConfigChange = async () => {
+  try {
+    const res: any = await axios.put('/malicious-ips/brute-force-config', {
+      auto_block: bruteForceConfig.auto_block,
+      block_duration: bruteForceConfig.block_duration
+    })
+    if (res.code === 200) {
+      ElMessage.success('配置已更新')
+    } else {
+      ElMessage.error(res.msg || '更新配置失败')
+    }
+  } catch (error) {
+    console.error('更新暴力破解配置失败', error)
+    ElMessage.error('更新配置失败')
   }
 }
 
@@ -294,6 +354,7 @@ const handleUnblock = (row: any) => {
 
 onMounted(() => {
   fetchData()
+  fetchBruteForceConfig()
 })
 </script>
 
@@ -309,6 +370,11 @@ onMounted(() => {
 .card-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+}
+
+.brute-force-config {
+  display: flex;
   align-items: center;
 }
 

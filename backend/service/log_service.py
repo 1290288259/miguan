@@ -418,6 +418,8 @@ class LogService:
             threat_level = analysis_result["threat_level"]
             behavior_is_malicious = analysis_result["is_malicious"]
             attack_description = analysis_result["attack_description"]
+            auto_block = analysis_result.get("auto_block", False)
+            block_duration = analysis_result.get("block_duration", 0)
 
             # 检查是否已经在恶意IP表中
             is_known_malicious_ip = False
@@ -490,8 +492,24 @@ class LogService:
                         source_honeypot_id=log.honeypot_id,
                         notes=f"触发日志 ID: {log.id}",
                     )
+                    
+                    if auto_block:
+                        # 获取封禁时长（秒）
+                        duration_seconds = block_duration * 3600 if block_duration > 0 else None
+                        
+                        # 调用封禁逻辑
+                        block_res = MaliciousIPService.block_ip(
+                            ip_address=log.attacker_ip,
+                            reason=f"自动封禁触发: {log.attack_description}",
+                            duration=duration_seconds
+                        )
+                        if block_res.get('success'):
+                            log.is_blocked = True
+                            log.blocked_time = get_beijing_time()
+                            db.session.commit()
+                            
                 except Exception as e:
-                    print(f"自动记录恶意 IP 失败: {str(e)}")
+                    print(f"自动记录或封禁恶意 IP 失败: {str(e)}")
 
             # 满足其中一个就算是恶意IP，触发WebSocket推送
             if final_is_malicious:

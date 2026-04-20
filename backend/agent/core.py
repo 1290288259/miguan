@@ -89,7 +89,7 @@ class TrafficAnalysisAgent:
                     block_result = block_skill.execute({
                         "ip_address": source_ip,
                         "reason": f"AI自动封禁: {attack_type} (置信度 {confidence})",
-                        "duration": 24
+                        "duration": 24 * 3600
                     })
                     
                     if block_result and block_result.get('success'):

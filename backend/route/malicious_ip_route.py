@@ -127,3 +127,32 @@ def unblock_ip():
             
     except Exception as e:
         return ApiResponse.error(f"解封操作失败: {str(e)}")
+
+@malicious_ip_bp.route('/brute-force-config', methods=['GET'])
+@token_required
+def get_brute_force_config():
+    """
+    获取暴力破解自动封禁配置
+    """
+    try:
+        from service.system_config_service import SystemConfigService
+        config = SystemConfigService.get_brute_force_config()
+        return ApiResponse.success(data=config)
+    except Exception as e:
+        return ApiResponse.error(f"获取配置失败: {str(e)}")
+
+@malicious_ip_bp.route('/brute-force-config', methods=['PUT'])
+@token_required
+def update_brute_force_config():
+    """
+    更新暴力破解自动封禁配置
+    """
+    try:
+        data = request.get_json()
+        auto_block = data.get('auto_block', False)
+        block_duration = data.get('block_duration', 24)
+        from service.system_config_service import SystemConfigService
+        SystemConfigService.set_brute_force_config(auto_block, block_duration)
+        return ApiResponse.success(message="更新配置成功")
+    except Exception as e:
+        return ApiResponse.error(f"更新配置失败: {str(e)}")
