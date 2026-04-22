@@ -73,6 +73,7 @@
             <el-button 
               type="primary" 
               class="submit-btn" 
+              native-type="submit"
               :loading="loading"
               @click="handleLogin"
             >

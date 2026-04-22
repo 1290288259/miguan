@@ -40,8 +40,8 @@ import { ref } from 'vue'
 import { registerUser, loginUser } from '../services/auth'
 
 const loading = ref(false)
-const registerResult = ref(null)
-const loginResult = ref(null)
+const registerResult = ref<any>(null)
+const loginResult = ref<any>(null)
 
 // 测试注册功能
 const testRegister = async () => {

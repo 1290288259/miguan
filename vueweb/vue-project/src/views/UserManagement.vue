@@ -215,11 +215,11 @@ import axios from '../utils/axios'
 import useUserStore from '../stores/user'
 
 const userStore = useUserStore()
-const currentUserId = computed(() => userStore.user?.id)
+const currentUserId = computed(() => userStore.user.value?.id)
 
 // 列表数据
-const userList = ref([])
-const moduleList = ref([]) // 所有可用模块
+const userList = ref<any[]>([])
+const moduleList = ref<any[]>([]) // 所有可用模块
 const loading = ref(false)
 const queryForm = reactive({
   keyword: '',

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouterView } from 'vue-router'
 import useUserStore from '../stores/user'
 import DashboardLayout from '../views/dashboard/DashboardLayout.vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -127,6 +128,7 @@ router.beforeEach(async (to, from, next) => {
   // 检查路由是否需要身份验证
   if (to.meta.requiresAuth && !isTokenPresent) {
     // 如果需要身份验证但用户未登录，则重定向到登录页面
+    ElMessage.warning('未登录无法访问，请先登录')
     next('/login')
     return
   }
@@ -146,6 +148,7 @@ router.beforeEach(async (to, from, next) => {
     const result = await userStore.fetchCurrentUser()
     if (!result.success) {
       // 获取用户信息失败（token已过期），清除状态并跳转登录
+      ElMessage.warning('未登录无法访问，请先登录')
       next('/login')
       return
     }
@@ -172,8 +175,12 @@ router.beforeEach(async (to, from, next) => {
       
       // 注意：to.meta.permission 是我们在路由定义中添加的自定义属性
       if (!allowedPaths.includes(to.meta.permission as string)) {
-          // 无权限，重定向到首页
-          next('/')
+          // 无权限，弹窗并重定向到个人信息页面
+          ElMessageBox.alert('未授权该模块，无法访问', '提示', {
+            confirmButtonText: '确定',
+            type: 'warning'
+          })
+          next('/profile')
           return
       }
   }
