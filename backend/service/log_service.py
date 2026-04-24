@@ -52,7 +52,7 @@ class LogService:
             query = Log.query
 
             if attack_type:
-                query = query.filter(Log.attack_type == attack_type)
+                query = query.filter(Log.attack_type.like(f"%{attack_type}%"))
 
             if threat_level:
                 query = query.filter(Log.threat_level == threat_level)
@@ -149,7 +149,7 @@ class LogService:
             query = Log.query
 
             if attack_type:
-                query = query.filter(Log.attack_type == attack_type)
+                query = query.filter(Log.attack_type.like(f"%{attack_type}%"))
 
             if threat_level:
                 query = query.filter(Log.threat_level == threat_level)

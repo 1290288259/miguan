@@ -503,10 +503,10 @@ WebSocket 需要使用 `socketio.run()` 替代 `app.run()`，已在 `app.py` 中
 - 从 `match_rules` 表读取所有 `is_enabled=True` 的规则，按 `priority ASC` 排序（数字越小优先级越高）
 - 匹配字段由规则的 `match_field` 决定（目前全部为 `raw_log`）
 - 命中规则后立即设置 `attack_type`、`threat_level`、`attack_description`、`is_malicious`
-- **首条命中即停止**，不会继续匹配后续规则
+- **匹配所有启用的规则**，如果触发多个规则，则威胁等级取最高的一个，并在详细页面中同时展示多个攻击类型（简略展示在表格中，悬停查看全部）
 
 #### 第二级：暴力破解频次分析
-- **默认恶意判定规则**：对于蜜罐流量，除 HTTP 访问 `/` 和 `/dashboard` 外，所有的 `SSH尝试登录`、`FTP尝试登录`、`MySQL尝试登录`、`Redis尝试登录` 以及其他路径的 `HTTP尝试登录` 均默认判定为**恶意流量** (`is_malicious=True`)，并自动加入恶意 IP 列表。
+- **默认恶意判定规则**：对于蜜罐流量，所有的 `SSH尝试登录`、`FTP尝试登录`、`MySQL尝试登录`、`Redis尝试登录` 以及限定在 `/login` 目录的 `HTTP尝试登录` 均默认判定为**恶意流量** (`is_malicious=True`)，并自动加入恶意 IP 列表（对于非`/login`的HTTP请求，除非触发其他规则，否则默认为正常流量）。
 - **触发条件**：第一级未命中任何高危规则，且属于尝试登录类行为（包括上述尝试登录以及正常流量）。
 - **检测方法**：`_check_brute_force(source_ip, protocol, current_payload)`
   - 查询同一 IP + 同一协议在最近 **1 分钟** 内的日志数量

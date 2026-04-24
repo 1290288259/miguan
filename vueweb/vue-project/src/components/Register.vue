@@ -101,7 +101,6 @@
             <el-button 
               type="primary" 
               class="submit-btn" 
-              native-type="submit"
               :loading="loading"
               @click="handleRegister"
             >
@@ -406,13 +405,9 @@ const goToLogin = () => {
   width: 100%;
   padding: 22px 0;
   font-size: 16px;
-  font-weight: 600; /* 加粗文字 */
-  color: #ffffff !important; /* 强制白色，防止主题干扰 */
   letter-spacing: 2px;
-  margin-top: 10px;
-  background: linear-gradient(90deg, #409eff 0%, #3a8ee6 100%);
+  background: linear-gradient(90deg, #116bc5 0%, #3a8ee6 100%);
   border: none;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 添加微弱阴影增强对比度 */
 }
 
 .submit-btn:hover {

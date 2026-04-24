@@ -28,6 +28,14 @@ class TrafficAnalyzerService:
     # 编译后正则表达式缓存
     _compiled_rules_cache = {}
 
+    THREAT_LEVEL_WEIGHTS = {
+        "critical": 50,
+        "high": 40,
+        "medium": 30,
+        "low": 20,
+        "info": 10
+    }
+
     @classmethod
     def _is_safe_attack_type(cls, attack_type: str) -> bool:
         if not attack_type:
@@ -111,11 +119,11 @@ class TrafficAnalyzerService:
         elif protocol_val == "REDIS":
             attack_type = "Redis尝试登录"
         elif protocol_val == "HTTP":
-            if request_path in ["/", "/dashboard"]:
+            if request_path == "/login":
+                attack_type = "HTTP尝试登录"
+            else:
                 attack_type = "正常流量"
                 is_malicious = False
-            else:
-                attack_type = "HTTP尝试登录"
         else:
             attack_type = "正常流量"
             is_malicious = False
@@ -138,6 +146,9 @@ class TrafficAnalyzerService:
             ]))
 
             matched_priority = None
+            matched_attack_types = []
+            max_threat_weight = -1
+            final_threat_level = threat_level
 
             for rule in rules:
                 try:
@@ -167,12 +178,20 @@ class TrafficAnalyzerService:
 
                         if compiled_pattern.search(content_str):
                             if matched_priority is None:
-                                attack_type = rule.attack_type
-                                threat_level = rule.threat_level
-                                is_malicious = cls._infer_is_malicious(attack_type, threat_level)
+                                is_malicious = cls._infer_is_malicious(rule.attack_type, rule.threat_level)
                                 matched_priority = rule.priority
                                 auto_block = getattr(rule, 'auto_block', False)
                                 block_duration = getattr(rule, 'block_duration', 0)
+                            
+                            # Collect attack_type
+                            if rule.attack_type not in matched_attack_types:
+                                matched_attack_types.append(rule.attack_type)
+                            
+                            # Determine max threat level
+                            current_weight = cls.THREAT_LEVEL_WEIGHTS.get(rule.threat_level.lower(), 0)
+                            if current_weight > max_threat_weight:
+                                max_threat_weight = current_weight
+                                final_threat_level = rule.threat_level
 
                             rule_msg = f"触发规则: {rule.name}"
                             if not attack_description:
@@ -185,6 +204,10 @@ class TrafficAnalyzerService:
                 except Exception as e:
                     print(f"应用规则 {rule.name} 时出错: {str(e)}")
                     continue
+            
+            if matched_priority is not None:
+                attack_type = " | ".join(matched_attack_types)
+                threat_level = final_threat_level
 
         except Exception as e:
             print(f"规则匹配过程中出错: {str(e)}")

@@ -106,7 +106,16 @@
             </div>
           </template>
           <template #default="scope">
-            <el-tag :type="getAttackTypeTagType(scope.row.attack_type)">
+            <el-tooltip
+              v-if="scope.row.attack_type && scope.row.attack_type.includes('|')"
+              :content="scope.row.attack_type"
+              placement="top"
+            >
+              <el-tag :type="getAttackTypeTagType(scope.row.attack_type.split('|')[0].trim())">
+                {{ scope.row.attack_type.split('|')[0].trim() }} <span style="font-size: 10px; margin-left: 2px;">(多选)</span>
+              </el-tag>
+            </el-tooltip>
+            <el-tag v-else :type="getAttackTypeTagType(scope.row.attack_type)">
               {{ scope.row.attack_type }}
             </el-tag>
           </template>

@@ -74,7 +74,7 @@
               >
                 {{ item.threat_level?.toUpperCase() }}
               </el-tag>
-              <span class="alert-type">{{ item.attack_type }}</span>
+              <span class="alert-type" :title="item.attack_type">{{ item.attack_type.split('|')[0].trim() }}<span v-if="item.attack_type.includes('|')">等</span></span>
             </div>
             <div class="alert-center">
               <span class="alert-ip">{{ item.source_ip }}</span>
